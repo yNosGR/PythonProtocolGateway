@@ -30,7 +30,7 @@ __properties = None             # mqtt properties handle for publishing data
 def init():
     print("Initialize growatt2mqtt")
     __settings = RawConfigParser()
-    __settings.read(os.path.dirname(os.path.realpath(__file__)) + '/solarmon.cfg')
+    __settings.read(os.path.dirname(os.path.realpath(__file__)) + '/growatt2mqtt.cfg')
     __interval = __settings.getint('query', 'interval', fallback=1)
     __offline_interval = __settings.getint('query', 'offline_interval', fallback=60)
     __error_interval = __settings.getint('query', 'error_interval', fallback=60)
