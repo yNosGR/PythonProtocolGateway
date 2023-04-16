@@ -25,6 +25,14 @@ __mqtt_client = None            # mqtt client handle
 __mqtt_port = -1                # mqtt port
 __mqtt_topic = ""               # mqtt topic the inverter data will be published
 __properties = None             # mqtt properties handle for publishing data
+__logo = """
+   ____                        _   _   ____  __  __  ___ _____ _____ 
+  / ___|_ __ _____      ____ _| |_| |_|___ \|  \/  |/ _ \_   _|_   _|
+ | |  _| '__/ _ \ \ /\ / / _` | __| __| __) | |\/| | | | || |   | |  
+ | |_| | | | (_) \ V  V / (_| | |_| |_ / __/| |  | | |_| || |   | |  
+  \____|_|  \___/ \_/\_/ \__,_|\__|\__|_____|_|  |_|\__\_\|_|   |_|  
+                                                                     
+"""
 
 
 def init():
@@ -131,7 +139,7 @@ def run():
             time.sleep(__offline_interval)
 
 def main():
-    print("Start growatt2mqtt")
+    print(__logo)
     init()
     run()
 
