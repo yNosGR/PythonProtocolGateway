@@ -74,7 +74,7 @@ class Growatt:
         row = self.client.read_input_registers(0, 33, unit=self.unit)
         if type(row) is ModbusIOException:
             return None
-        
+        #TODO add MAX series protocol page 25 from max series pdf
         # http://www.growatt.pl/dokumenty/Inne/Growatt%20PV%20Inverter%20Modbus%20RS485%20RTU%20Protocol%20V3.04.pdf
         #                                           # Unit,     Variable Name,      Description
         info = {                                    # ==================================================================
