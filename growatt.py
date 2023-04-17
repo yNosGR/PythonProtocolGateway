@@ -104,7 +104,7 @@ class Growatt:
             'Vac3': read_single(row, 22),           # 0.1V,     Vac3,               Three phase grid voltage
             'Iac3': read_single(row, 23),           # 0.1A,     Iac3,               Three phase grid output current
             'Pac3': read_double(row, 24),           # 0.1VA,    Pac3 H,             Three phase grid output power (high)
-                                                    # 0.1VA,    Pac3 L,             Three phase grid output power (low)
+            #TODO only 0 values are delivered                                        # 0.1VA,    Pac3 L,             Three phase grid output power (low)
             'EnergyToday': read_double(row, 26),    # 0.1kWh,   Energy today H,     Today generate energy (high)
                                                     # 0.1kWh,   Energy today L,     Today generate energy today (low)
             'EnergyTotal': read_double(row, 28),    # 0.1kWh,   Energy total H,     Total generate energy (high)
