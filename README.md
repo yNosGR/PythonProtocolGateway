@@ -11,13 +11,14 @@ interval = 10
 offline_interval = 60  
 error_interval = 60
 
-[solarmon]  
+[serial]  
 port = /dev/ttyACM0  
 baudrate = 9600  
 
 [inverters.main]  
 unit = 1  
-measurement = inverter  
+measurement = inverter 
+protocol_version = MAXSeries | 3.04 | 3.15
 
 [mqtt]  
 host = YOUR MQTT BROKER IP  
