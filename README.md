@@ -1,8 +1,4 @@
-   ____                        _   _   ____  __  __  ___ _____ _____ 
-  / ___|_ __ _____      ____ _| |_| |_|___ \|  \/  |/ _ \_   _|_   _|
- | |  _| '__/ _ \ \ /\ / / _` | __| __| __) | |\/| | | | || |   | |  
- | |_| | | | (_) \ V  V / (_| | |_| |_ / __/| |  | | |_| || |   | |  
-  \____|_|  \___/ \_/\_/ \__,_|\__|\__|_____|_|  |_|\__\_\|_|   |_|  
+# growatt2mqtt
 
 Growatt2MQTT is a small python-based service which connects via usb to the Modbus interface of Growatt inverters and published the collected data on MQTT.
 The python service can be configured via a small config file.
