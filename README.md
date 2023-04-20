@@ -30,9 +30,13 @@ error_topic = inverter/growatt/MIC-600TL-X/error
 - Growatt MIC-600TL-X  
 - more to come ...  
 
-### Install growatt2mqtt service
+### Install growatt2mqtt service on Linux
 - ```cp growatt2mqtt.service file to /etc/systemc/system/```
 - ```sudo systemctl daemon-reload```
 - ```sudo systemctl enable growatt2mqtt.service```
 - ```sudo systemctl start growatt2mqtt.service```
 - ```systemctl status growatt2mqtt.service```
+
+### Use Docker
+- ```docker build -t growatt2mqtt ```
+- ```docker run --device=/dev/ttyUSB0 growatt2mqtt```
