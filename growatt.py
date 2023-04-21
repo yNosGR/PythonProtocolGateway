@@ -88,7 +88,7 @@ class Growatt:
         """ this function reads based on the given ModBus RTU protocol version the ModBus data from growatt inverters"""
         if (self.protocol_version == 'MAXSeries'):
             print('MAX Series Protocol\n')
-            row = self.client.read_input_registers(0, 59, unit=self.unit)
+            row = self.client.read_input_registers(0, 117, unit=self.unit)
             if type(row) is ModbusIOException:
                 return None
             info = {                                    # ==================================================================
@@ -193,50 +193,64 @@ class Growatt:
                 'PVPowerTotal': read_double(row, 55),
                 # 0.1kWH        Eac total L       Total generate energy (low)
                 # ,      # 0.5s   Time total H         Work time total (high)
-                'TimeTotal': read_double(row, 57)
+                'TimeTotal': read_double(row, 57),
                 # 0.5s   Time total L       Work time total (low)
-                # 'Epv1Today': read_double(row, 59),      # 0.1kWH   Epv1_today H         PV1 Energy today (high)
+                 'Epv1Today': read_double(row, 59),      # 0.1kWH   Epv1_today H         PV1 Energy today (high)
                 # 0.1kWH        Epv1_today L       PV1 Energy today (low)
-                # 'Epv1Total': read_double(row, 61),      # 0.1kWH   Epv1_total H         PV1 Energy total (high)
+                 'Epv1Total': read_double(row, 61),    # 0.1kWH   Epv1_total H         PV1 Energy total (high)
                 # 0.1kWH        Epv1_total L       PV1 Energy total (low)
-                # 'Epv2Today': read_double(row, 63),      # 0.1kWH   Epv2_today H         PV2 Energy today (high)
+                 'Epv2Today': read_double(row, 63),      # 0.1kWH   Epv2_today H         PV2 Energy today (high)
                 # 0.1kWH        Epv2_today L       PV2 Energy today (low)
-                # 'Epv2Total': read_double(row, 65),      # 0.1kWH   Epv2_total H         PV2 Energy total (high)
+                 'Epv2Total': read_double(row, 65),      # 0.1kWH   Epv2_total H         PV2 Energy total (high)
                 # 0.1kWH        Epv2_total L       PV2 Energy total (low)
-                # 'Epv3Today': read_double(row, 67),      # 0.1kWH   Epv3_today H         PV3 Energy today (high)
+                 'Epv3Today': read_double(row, 67),      # 0.1kWH   Epv3_today H         PV3 Energy today (high)
                 # 0.1kWH        Epv3_today L       PV3 Energy today (low)
-                # 'Epv3Total': read_double(row, 69),      # 0.1kWH   Epv3_total H         PV3 Energy total (high)
+                 'Epv3Total': read_double(row, 69),      # 0.1kWH   Epv3_total H         PV3 Energy total (high)
                 # 0.1kWH        Epv3_total L       PV3 Energy total (low)
-                # 'Epv4Today': read_double(row, 71),      # 0.1kWH   Epv4_today H         PV4 Energy today (high)
+                 'Epv4Today': read_double(row, 71),      # 0.1kWH   Epv4_today H         PV4 Energy today (high)
                 # 0.1kWH        Epv4_today L       PV4 Energy today (low)
-                # 'Epv4Total': read_double(row, 73),      # 0.1kWH   Epv4_total H         PV4 Energy total (high)
+                 'Epv4Total': read_double(row, 73),     # 0.1kWH   Epv4_total H         PV4 Energy total (high)
                 # 0.1kWH        Epv4_total L       PV4 Energy total (low)
-                # 'Epv5Today': read_double(row, 75),      # 0.1kWH   Epv5_today H         PV5 Energy today (high)
+                 'Epv5Today': read_double(row, 75),      # 0.1kWH   Epv5_today H         PV5 Energy today (high)
                 # 0.1kWH        Epv5_today L       PV5 Energy today (low)
-                # 'Epv5Total': read_double(row, 77),      # 0.1kWH   Epv5_total H         PV5 Energy total (high)
+                 'Epv5Total': read_double(row, 77),      # 0.1kWH   Epv5_total H         PV5 Energy total (high)
                 # 0.1kWH        Epv5_total L       PV5 Energy total (low)
-                # 'Epv6Today': read_double(row, 79),      # 0.1kWH   Epv6_today H         PV6 Energy today (high)
+                 'Epv6Today': read_double(row, 79),      # 0.1kWH   Epv6_today H         PV6 Energy today (high)
                 # 0.1kWH        Epv6_today L       PV6 Energy today (low)
-                # 'Epv6Total': read_double(row, 81),      # 0.1kWH   Epv6_total H         PV6 Energy total (high)
+                 'Epv6Total': read_double(row, 81),      # 0.1kWH   Epv6_total H         PV6 Energy total (high)
                 # 0.1kWH        Epv6_total L       PV6 Energy total (low)
-                # 'Epv7Today': read_double(row, 83),      # 0.1kWH   Epv7_today H         PV7 Energy today (high)
+                 'Epv7Today': read_double(row, 83),      # 0.1kWH   Epv7_today H         PV7 Energy today (high)
                 # 0.1kWH        Epv7_today L       PV7 Energy today (low)
-                # 'Epv7Total': read_double(row, 85),      # 0.1kWH   Epv7_total H         PV7 Energy total (high)
+                 'Epv7Total': read_double(row, 85),      # 0.1kWH   Epv7_total H         PV7 Energy total (high)
                 # 0.1kWH        Epv7_total L       PV7 Energy total (low)
-                # 'Epv8Today': read_double(row, 87),      # 0.1kWH   Epv8_today H         PV8 Energy today (high)
+                 'Epv8Today': read_double(row, 87),      # 0.1kWH   Epv8_today H         PV8 Energy today (high)
                 # 0.1kWH        Epv8_today L       PV8 Energy today (low)
-                # 'Epv8Total': read_double(row, 89),      # 0.1kWH   Epv8_total H         PV8 Energy total (high)
+                 'Epv8Total': read_double(row, 89),      # 0.1kWH   Epv8_total H         PV8 Energy total (high)
                 # 0.1kWH        Epv8_total L       PV8 Energy total (low)
-                # 'EpvTotal': read_double(row, 91),      # 0.1kWH   Epv_total H        PV Energy total (high)
+                 'EpvTotal': read_double(row, 91),      # 0.1kWH   Epv_total H        PV Energy total (high)
                 # 0.1kWH        Epv_total L       PV Energy total (low)
-                # 'Temp1': read_single(row, 93),           # 0.1C   Temp1                  Inverter temperature
-                # 'Temp2': read_single(row, 94),           # 0.1C   Temp2                  The inside IPM in inverter Temperature
-                # 'Temp3': read_single(row, 95),           # 0.1C   Temp3                  Boost temperature
-                # 'Temp4': read_single(row, 96),           # 0.1C   Temp4
-                # 'Temp5': read_single(row, 97),           # 0.1C   Temp5
-                # 'PBusV': read_single(row, 98),           # 0.1V   P Bus Voltage         P Bus inside Voltage
-                # 'NBusV': read_single(row, 99)           # 0.1V   N Bus Voltage         N Bus inside Voltage
+                 'Temp1': read_single(row, 93),           # 0.1C   Temp1                  Inverter temperature
+                 'Temp2': read_single(row, 94),           # 0.1C   Temp2                  The inside IPM in inverter Temperature
+                 'Temp3': read_single(row, 95),           # 0.1C   Temp3                  Boost temperature
+                 'Temp4': read_single(row, 96),           # 0.1C   Temp4
+                 'Temp5': read_single(row, 97),           # 0.1C   Temp5
+                 'PBusV': read_single(row, 98),           # 0.1V   P Bus Voltage         P Bus inside Voltage
+                 'NBusV': read_single(row, 99),           # 0.1V   N Bus Voltage         N Bus inside Voltage
+                 'IPF': read_single(row, 100),             # 0.1W   IPF          Inverter output PF now
+                 'RealOPPercent': read_single(row, 101), #1% RealOPPercent Real Output power Percent 
+                 'OPFullwatt': read_double(row, 102),      # 0.1W OPFullwatt H  Output Maxpower Limited high
+                 'DeratingModeRaw': read_single(row, 104),        # 104. DeratingMode DeratingMode 0:no derate
+                 'DeratingMode': DeratingMode[read_single(row, 104)],
+                 'Fault code': read_single(row, 105),     # Fault code Inverter fault code &*1
+                 'Fault Bitcode': read_double(row, 106),     # 106. Fault Bitcode H Inverter fault code high
+                 'Fault Bit_II': read_double(row, 108),   # Fault Bit_II H Inverter fault code_II high
+                 'Warning bit': read_double(row, 110),    #Warning bit H Warning bit H
+                 'bINVWarnCode': read_single(row, 112), #bINVWarnCode bINVWarnCode
+                 'realPowerPercent': read_single(row, 113), #real Power Percent real Power Percent 0-100%
+                 'InvStartDelay': read_single(row, 114), #inv start delay time inv start delay time
+                 'bINVAllFaultCode': read_single(row, 115) #bINVAllFaultCode bINVAllFaultCode
             }
+            row = self.client.read_input_registers(125, 61, unit=self.unit)#TODO add third group
             return info
 
         elif (self.protocol_version == '3.04' or self.protocol_version == '3.14'):
@@ -291,7 +305,7 @@ class Growatt:
                 'Iac3': read_single(row, 23),
                 # 0.1VA,    Pac3 H,             Three phase grid output power (high)
                 'Pac3': read_double(row, 24),
-                # TODO only 0 values are delivered                                        # 0.1VA,    Pac3 L,             Three phase grid output power (low)
+                # 0.1VA,    Pac3 L,             Three phase grid output power (low)
                 # 0.1kWh,   Energy today H,     Today generate energy (high)
                 'EnergyToday': read_double(row, 26),
                 # 0.1kWh,   Energy today L,     Today generate energy today (low)
