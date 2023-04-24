@@ -2,6 +2,7 @@
 """
 Python Module to implement ModBus RTU connection to Growatt Inverters
 """
+import logging
 from pymodbus.exceptions import ModbusIOException
 
 # Codes
@@ -40,6 +41,12 @@ DeratingMode = {
     9: '*OverBackByTime',
 }
 
+PIDStatus = {
+    1:'Wait Status',
+    2:'Normal Status',
+    3:'Fault Status'
+}
+
 
 def read_single(row, index, unit=10):
     """ reads a value from 1 ModBus register """
@@ -62,34 +69,40 @@ def merge(*dict_args):
 class Growatt:
     """ Class Growatt implements ModBus RTU protocol for growatt inverters """
 
-    def __init__(self, client, name, unit, protocol_version):
+    def __init__(self, client, name, unit, protocol_version, log = None):
         self.client = client
         self.name = name
         self.unit = unit
         self.protocol_version = protocol_version
+        if (log is None):
+            self.__log = log
+        else:
+            self.__log = logging.getLogger('growatt2mqqt_log')
+            self.__log.setLevel(logging.DEBUG)
         self.read_info()
 
     def read_info(self):
         """ reads holding registers from Growatt inverters """
         row = self.client.read_holding_registers(73, unit=self.unit)
-        if type(row) is ModbusIOException:
+        if row.isinstance(ModbusIOException):
             raise row
 
         self.modbus_version = row.registers[0]
 
     def print_info(self):
         """ prints basic information about the current Growatt inverter """
-        print('Growatt:')
-        print('\tName: ' + str(self.name))
-        print('\tUnit: ' + str(self.unit))
-        print('\tModbus Version: ' + str(self.modbus_version))
+        self.__log.info('Growatt:')
+        self.__log.info('\tName: %s\n', str(self.name))
+        self.__log.info('\tUnit: %s\n', str(self.unit))
+        self.__log.info('\tModbus Version: %s\n', str(self.modbus_version))
 
     def read(self):
         """ this function reads based on the given ModBus RTU protocol version the ModBus data from growatt inverters"""
         if (self.protocol_version == 'MAXSeries'):
-            print('MAX Series Protocol\n')
+            self.__log.info('MAX Series Protocol\n')
             row = self.client.read_input_registers(0, 117, unit=self.unit)
-            if type(row) is ModbusIOException:
+            if row.isinstance(ModbusIOException):
+                self.__log.error(row.__str__)
                 return None
             info = {                                    # ==================================================================
                 # N/A,      Inverter Status,    Inverter run state
@@ -250,12 +263,65 @@ class Growatt:
                  'InvStartDelay': read_single(row, 114), #inv start delay time inv start delay time
                  'bINVAllFaultCode': read_single(row, 115) #bINVAllFaultCode bINVAllFaultCode
             }
-            row = self.client.read_input_registers(125, 61, unit=self.unit)#TODO add third group
+            # row = self.client.read_input_registers(125, 48, unit=self.unit)#TODO add third group
+            # info = merge(info, { 
+            #     'PIDPV1V': read_single(row, 0),  #ID PV1+ Voltage PID PV1PE Volt 0~1000V 0.1V
+            #     'PIDPV1C': read_single(row, 1),  # PID PV1+ Current PID PV1PE Curr -10~10mA 0.1mA
+            #     'PIDPV2V': read_single(row, 2),  # PID PV2+ Voltage PID PV2PE Volt 0~1000V 0.1V
+            #     'PIDPV2C': read_single(row, 3),  # PID PV2+ Current PID PV1PE Curr -10~10mA 0.1mA
+            #     'PIDPV3V': read_single(row, 4),  # PID PV3+ Voltage PID PV2PE Volt 0~1000V 0.1V
+            #     'PIDPV3C': read_single(row, 5),  # PID PV3+ Current PID PV1PE Curr -10~10mA 0.1mA
+            #     'PIDPV4V': read_single(row, 6),  # PID PV4+ Voltage PID PV2PE Volt 0~1000V 0.1V
+            #     'PIDPV4C': read_single(row, 7),  # PID PV4+ Current PID PV1PE Curr -10~10mA 0.1mA
+            #     'PIDPV5V': read_single(row, 8),  # PID PV5+ Voltage PID PV2PE Volt 0~1000V 0.1V
+            #     'PIDPV5C': read_single(row, 9),  # PID PV5+ Current PID PV1PE Curr -10~10mA 0.1mA
+            #     'PIDPV6V': read_single(row, 10),  # PID PV4+ Voltage PID PV2PE Volt 0~1000V 0.1V
+            #     'PIDPV6C': read_single(row, 11),  # PID PV4+ Current PID PV1PE Curr -10~10mA 0.1mA
+            #     'PIDPV7V': read_single(row, 12),  # PID PV4+ Voltage PID PV2PE Volt 0~1000V 0.1V
+            #     'PIDPV7C': read_single(row, 13),  # PID PV4+ Current PID PV1PE Curr -10~10mA 0.1mA
+            #     'PIDPV8V': read_single(row, 14),  # PID PV4+ Voltage PID PV2PE Volt 0~1000V 0.1V
+            #     'PIDPV8C': read_single(row, 15),  # PID PV4+ Current PID PV1PE Curr -10~10mA 0.1mA
+            #     'PID Status Raw': read_single(row, 16), #Bit0~7:PID Working Status 1:Wait Status 2:Normal Status 3:Fault Status Bit8~15:Reversed
+            #     'PID Status': PIDStatus[read_single(row, 17)],
+            #     'V_String1': read_single(row, 18), #V _String1 PV String1 voltage 0.1V
+            #     'Curr_String1': read_single(row, 19), # Curr _String1 PV String1 current -15~15A 0.1A
+            #     'V_String2': read_single(row, 20), #V _String2 PV String1 voltage 0.1V
+            #     'Curr_String2': read_single(row, 21), # Curr _String2 PV String1 current -15~15A 0.1A
+            #     'V_String3': read_single(row, 22), #V _String3 PV String1 voltage 0.1V
+            #     'Curr_String3': read_single(row, 23), # Curr _String3 PV String1 current -15~15A 0.1A
+            #     'V_String4': read_single(row, 24), #V _String4 PV String1 voltage 0.1V
+            #     'Curr_String4': read_single(row, 25), # Curr _String4 PV String1 current -15~15A 0.1A
+            #     'V_String5': read_single(row, 26), #V _String5 PV String1 voltage 0.1V
+            #     'Curr_String5': read_single(row, 27), # Curr _String5 PV String1 current -15~15A 0.1A
+            #     'V_String6': read_single(row, 28), #V _String6 PV String1 voltage 0.1V
+            #     'Curr_String6': read_single(row, 29), # Curr _String6 PV String1 current -15~15A 0.1A
+            #     'V_String7': read_single(row, 30), #V _String7 PV String1 voltage 0.1V
+            #     'Curr_String7': read_single(row, 31), # Curr _String7 PV String1 current -15~15A 0.1A
+            #     'V_String8': read_single(row, 32), #V _String8 PV String1 voltage 0.1V
+            #     'Curr_String8': read_single(row, 33), # Curr _String8 PV String1 current -15~15A 0.1A
+            #     'V_String9': read_single(row, 34), #V _String9 PV String1 voltage 0.1V
+            #     'Curr_String9': read_single(row, 35), # Curr _String9 PV String1 current -15~15A 0.1A
+            #     'V_String10': read_single(row, 36), #V _String10 PV String1 voltage 0.1V
+            #     'Curr_String10': read_single(row, 37), # Curr _String10 PV String1 current -15~15A 0.1A
+            #     'V_String11': read_single(row, 38), #V _String11 PV String1 voltage 0.1V
+            #     'Curr_String11': read_single(row, 39), # Curr _String11 PV String1 current -15~15A 0.1A
+            #     'V_String12': read_single(row, 40), #V _String12 PV String1 voltage 0.1V
+            #     'Curr_String12': read_single(row, 41), # Curr _String12 PV String1 current -15~15A 0.1A
+            #     'V_String13': read_single(row, 42), #V _String13 PV String1 voltage 0.1V
+            #     'Curr_String13': read_single(row, 43), # Curr _String13 PV String1 current -15~15A 0.1A
+            #     'V_String14': read_single(row, 44), #V _String14 PV String1 voltage 0.1V
+            #     'Curr_String14': read_single(row, 45), # Curr _String14 PV String1 current -15~15A 0.1A
+            #     'V_String15': read_single(row, 46), #V _String15 PV String1 voltage 0.1V
+            #     'Curr_String15': read_single(row, 47), # Curr _String15 PV String1 current -15~15A 0.1A
+            #     'V_String16': read_single(row, 48), #V _String16 PV String1 voltage 0.1V
+            #     'Curr_String16': read_single(row, 49) # Curr _String16 PV String1 current -15~15A 0.1A
+            # })
             return info
 
         elif (self.protocol_version == '3.04' or self.protocol_version == '3.14'):
             row = self.client.read_input_registers(0, 33, unit=self.unit)
-            if type(row) is ModbusIOException:
+            if row.isinstance(ModbusIOException):
+                self.__log.error(row.__str__)
                 return None
             # http://www.growatt.pl/dokumenty/Inne/Growatt%20PV%20Inverter%20Modbus%20RS485%20RTU%20Protocol%20V3.04.pdf
             #                                           # Unit,     Variable Name,      Description
@@ -404,7 +470,7 @@ class Growatt:
 
             return info
         else:
-            print('Error unknown protocol %s\n', self.protocol_version)
+            self.__log.error('Error unknown protocol %s\n', self.protocol_version)
 
     # def read_fault_table(self, name, base_index, count):
     #     fault_table = {}

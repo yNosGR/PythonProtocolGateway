@@ -5,6 +5,8 @@ Main module for Growatt ModBus RTU data to MQTT
 import time
 import os
 import json
+import logging
+import sys
 from configparser import RawConfigParser
 import paho.mqtt.client as mqtt
 from paho.mqtt.properties import Properties
@@ -53,15 +55,25 @@ class Growatt2MQTT:
     __mqtt_error_topic = ""
     # mqtt properties handle for publishing data
     __properties = None
+    # logging module
+    __log = None
+    # log level, available log levels are CRITICAL, FATAL, ERROR, WARNING, INFO, DEBUG
+    __log_level = 'DEBUG'
 
     def __init__(self):
+        self.__log = logging.getLogger('growatt2mqqt_log')
+        handler = logging.StreamHandler(sys.stdout)
+        self.__log.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('[%(asctime)s]  {%(filename)s:%(lineno)d}  %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+        self.__log.addHandler(handler)
         return None
 
     def init_growatt2mqtt(self):
         """
         initialize growatt 2 mqtt
         """
-        print("Initialize growatt2mqtt")
+        self.__log.info("Initialize growatt2mqtt")
         self.__settings = RawConfigParser()
         self.__settings.read(os.path.dirname(
             os.path.realpath(__file__)) + '/growatt2mqtt.cfg')
@@ -71,8 +83,10 @@ class Growatt2MQTT:
             'time', 'offline_interval', fallback=60)
         self.__error_interval = self.__settings.getint(
             'time', 'error_interval', fallback=60)
-
-        print('Setup Serial Connection... ', end='')
+        self.__log_level = self.__settings.get('general','log_level', fallback='DEBUG')
+        if (self.__log_level != 'DEBUG'):
+            self.__log.setLevel(logging.getLevelName(self.__log_level))
+        self.__log.info('Setup Serial Connection... ')
         self.__port = self.__settings.get(
             'serial', 'port', fallback='/dev/ttyUSB0')
         self.__baudrate = self.__settings.get(
@@ -80,9 +94,9 @@ class Growatt2MQTT:
         self.__client = ModbusClient(method='rtu', port=self.__port, baudrate=int(
             self.__baudrate), stopbits=1, parity='N', bytesize=8, timeout=1)
         self.__client.connect()
-        print('Serial connection established...')
+        self.__log.info('Serial connection established...')
 
-        print("start connection mqtt ...")
+        self.__log.info("start connection mqtt ...")
         self.__mqtt_host = self.__settings.get(
             'mqtt', 'host', fallback='mqtt.eclipseprojects.io')
         self.__mqtt_port = self.__settings.get('mqtt', 'port', fallback=1883)
@@ -90,10 +104,10 @@ class Growatt2MQTT:
             'mqtt', 'topic', fallback='home/inverter')
         self.__mqtt_error_topic = self.__settings.get(
             'mqtt', 'error_topic', fallback='home/inverter/error')
-        print("mqtt settings: ")
-        print("mqtt host "+self.__mqtt_host)
-        print("mqtt port "+self.__mqtt_port)
-        print("mqtt_topic "+self.__mqtt_topic)
+        self.__log.info("mqtt settings: ")
+        self.__log.info("mqtt host "+self.__mqtt_host)
+        self.__log.info("mqtt port "+self.__mqtt_port)
+        self.__log.info("mqtt_topic "+self.__mqtt_topic)
         self.__mqtt_client = mqtt.Client()
         self.__mqtt_client.on_connect = self.on_connect
         self.__mqtt_client.on_message = self.on_message
@@ -107,17 +121,17 @@ class Growatt2MQTT:
 
     def on_connect(self, client, userdata, flags, rc):
         """ The callback for when the client receives a CONNACK response from the server. """
-        print("Connected with result code "+str(rc))
+        self.__log.info("Connected with result code "+str(rc))
 
     def on_message(self, client, userdata, msg):
         """ The callback for when a PUBLISH message is received from the server. """
-        print(msg.topic+" "+str(msg.payload))
+        self.__log.info(msg.topic+" "+str(msg.payload))
 
     def run(self):
         """
         run method, starts ModBus connection and mqtt connection
         """
-        print('Loading inverters... ')
+        self.__log.info('Loading inverters... ')
         inverters = []
         for section in self.__settings.sections():
             if not section.startswith('inverters.'):
@@ -128,14 +142,14 @@ class Growatt2MQTT:
             protocol_version = str(
                 self.__settings.get(section, 'protocol_version'))
             measurement = self.__settings.get(section, 'measurement')
-            growatt = Growatt(self.__client, name, unit, protocol_version)
+            growatt = Growatt(self.__client, name, unit, protocol_version, self.__log)
             growatt.print_info()
             inverters.append({
                 'error_sleep': 0,
                 'growatt': growatt,
                 'measurement': measurement
             })
-        print('Done!')
+        self.__log.info('Done!')
 
         while True:
             online = False
@@ -161,7 +175,7 @@ class Growatt2MQTT:
                         'measurement': inverter['measurement'],
                         "fields": info
                     }]
-                    print(points)
+                    self.__log.info(points)
                     # Serializing json
                     json_object = json.dumps(points[0], indent=4)
 
@@ -169,8 +183,8 @@ class Growatt2MQTT:
                         self.__mqtt_topic, json_object, 0, properties=self.__properties)
 
                 except Exception as err:
-                    print(growatt.name)
-                    print(err)
+                    self.__log.error(growatt.name)
+                    self.__log.error(err)
                     json_object = '{"name":' + \
                         str(growatt.name)+',error_code:'+str(err)+'}'
                     self.__mqtt_client.publish(
