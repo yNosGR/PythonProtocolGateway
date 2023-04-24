@@ -67,7 +67,7 @@ class Growatt2MQTT:
         formatter = logging.Formatter('[%(asctime)s]  {%(filename)s:%(lineno)d}  %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
         self.__log.addHandler(handler)
-        return None
+        return 0
 
     def init_growatt2mqtt(self):
         """
@@ -104,10 +104,10 @@ class Growatt2MQTT:
             'mqtt', 'topic', fallback='home/inverter')
         self.__mqtt_error_topic = self.__settings.get(
             'mqtt', 'error_topic', fallback='home/inverter/error')
-        self.__log.info("mqtt settings: ")
-        self.__log.info("mqtt host "+self.__mqtt_host)
-        self.__log.info("mqtt port "+self.__mqtt_port)
-        self.__log.info("mqtt_topic "+self.__mqtt_topic)
+        self.__log.info("mqtt settings: \n")
+        self.__log.info("mqtt host %s\n", self.__mqtt_host)
+        self.__log.info("mqtt port %s\n", self.__mqtt_port)
+        self.__log.info("mqtt_topic %s\n", self.__mqtt_topic)
         self.__mqtt_client = mqtt.Client()
         self.__mqtt_client.on_connect = self.on_connect
         self.__mqtt_client.on_message = self.on_message
@@ -121,7 +121,7 @@ class Growatt2MQTT:
 
     def on_connect(self, client, userdata, flags, rc):
         """ The callback for when the client receives a CONNACK response from the server. """
-        self.__log.info("Connected with result code "+str(rc))
+        self.__log.info("Connected with result code %s\n",str(rc))
 
     def on_message(self, client, userdata, msg):
         """ The callback for when a PUBLISH message is received from the server. """
