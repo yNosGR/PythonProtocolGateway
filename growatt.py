@@ -84,8 +84,8 @@ class Growatt:
     def read_info(self):
         """ reads holding registers from Growatt inverters """
         row = self.client.read_holding_registers(73, unit=self.unit)
-        if row.isinstance(ModbusIOException):
-            raise row
+        if row.isError():
+            raise ModbusIOException
 
         self.modbus_version = row.registers[0]
 
@@ -101,7 +101,7 @@ class Growatt:
         if (self.protocol_version == 'MAXSeries'):
             self.__log.info('MAX Series Protocol\n')
             row = self.client.read_input_registers(0, 117, unit=self.unit)
-            if row.isinstance(ModbusIOException):
+            if row.isError():
                 self.__log.error(row.__str__)
                 return None
             info = {                                    # ==================================================================

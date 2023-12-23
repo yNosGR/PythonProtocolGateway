@@ -67,7 +67,7 @@ class Growatt2MQTT:
         formatter = logging.Formatter('[%(asctime)s]  {%(filename)s:%(lineno)d}  %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
         self.__log.addHandler(handler)
-        return 0
+        return None
 
     def init_growatt2mqtt(self):
         """
