@@ -206,7 +206,7 @@ class Growatt2MQTT:
                         json_object = json.dumps(points[0], indent=4)
                         self.__mqtt_client.publish(self.__mqtt_topic, json_object, 0, properties=self.__properties)
                     else:
-                        for key, val in enumerate(info):
+                        for key, val in enumerate(info.items()):
                             print(self.__mqtt_topic+'/'+str(key))
                             self.__mqtt_client.publish(str(self.__mqtt_topic+'/'+key).lower(), str(val))
 
