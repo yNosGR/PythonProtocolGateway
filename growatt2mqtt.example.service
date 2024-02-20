@@ -9,7 +9,6 @@ StandardOutput=inherit
 StandardError=inherit
 Restart=always
 RestartSec=30
-User=pi
 
 [Install]
 WantedBy=multi-user.target
