@@ -7,3 +7,4 @@ growatt2mqtt.cfg
 growatt2mqtt.service
 variable_mask.txt
 .~lock.*
+protocols/*custom*
