@@ -230,7 +230,7 @@ class Growatt2MQTT:
         #self.__mqtt_client.publish(self.__mqtt_topic+'/'+field, str(info['OP WATT']))
 
         self.__mqtt_client.publish(self.__mqtt_topic+"/sensor/inverter-" + self.__device_serial_number  + "/" + disc_payload['name'].replace(' ', '_') + "/config",json.dumps(disc_payload),qos=0, retain=True)
-
+        self.__mqtt_client.publish(disc_payload['availability_topic'],"online")
 
 
 
