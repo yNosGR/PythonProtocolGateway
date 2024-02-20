@@ -190,7 +190,7 @@ class Growatt2MQTT:
                     
                     self.mqtt_discovery()
                     self.__mqtt_client.publish(self.__mqtt_topic, json_object, 0, properties=self.__properties)
-                    self.__mqtt_client.publish(self.__mqtt_topic+'/OP_Watt', str(info['OP WATT']))
+                    self.__mqtt_client.publish(self.__mqtt_topic+'/OP_Watt'.lower(), str(info['OP WATT']))
 
                 except Exception as err:
                     traceback.print_exc()
@@ -214,7 +214,7 @@ class Growatt2MQTT:
         disc_payload = {}
         disc_payload['availability_topic'] = self.__mqtt_topic + "/availability"
 
-        field = "OP_Watt"
+        field = "OP_Watt".lower()
         device = {}
         device['manufacturer'] = "Growatt"
         device['model'] = "SPF"
