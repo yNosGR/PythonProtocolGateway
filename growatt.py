@@ -150,13 +150,13 @@ class Growatt:
             value = ''
 
         
-            if item.data_type == Data_Type.BYTE: #read byte
-                value = float(registry[item.register])
-            elif item.data_type == Data_Type.UINT: #read uint
+
+            if item.data_type == Data_Type.UINT: #read uint
                 value = float((registry[item.register] << 16) + registry[item.register + 1])
             elif item.data_type == Data_Type.INT: #read int
                 value = int.from_bytes(bytes([registry[item.register], registry[item.register + 1]]), byteorder='little', signed=True)
-                
+            else: #default, Data_Type.BYTE
+                value = float(registry[item.register])
 
             if item.unit_mod != float(1):
                 value = value * item.unit_mod
