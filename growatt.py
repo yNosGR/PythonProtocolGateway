@@ -152,6 +152,10 @@ class Growatt:
 
             if item.unit_mod != float(1):
                 value = value * item.unit_mod
+
+            if item.documented_name+'_codes' in self.protocolSettings.codes:
+                if value in self.protocolSettings.codes[item.documented_name+'_codes']:
+                    value = self.protocolSettings.codes[item.documented_name+'_codes'][value]
             
             #if item.unit:
             #    value = str(value) + item.unit

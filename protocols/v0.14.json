@@ -1,5 +1,5 @@
 {
-    "system status codes" : 
+    "system_status_codes" : 
     {
         "0" : "StandBy",
         "1" : "PV and Grid Combine Discharge",
@@ -15,7 +15,7 @@
         "11" : "Bypass",
         "12" : "PV charge and Discharge"
     },
-    "check step codes":
+    "check_step_codes":
     {
         "1" : "PV1   charge   power check",
         "2" : "PV2   charge   power check",
