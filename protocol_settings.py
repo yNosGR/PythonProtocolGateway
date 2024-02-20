@@ -85,6 +85,9 @@ class protocol_settings:
                 #clean up doc name, for extra parsing
                 row['documented name'] = row['documented name'].strip().upper().replace('_',' ') 
 
+                variable_name = row['variable name'] if row['variable name'] else row['documented name']
+                variable_name = variable_name.lower().replace(' ', '_') #clean name
+
                 #convert to float
                 try:
                     numeric_part = float(numeric_part)
@@ -96,7 +99,7 @@ class protocol_settings:
                 
                 item = registry_map_entry( 
                                             register= int(row['register']),
-                                            variable_name= row['variable name'] if row['variable name'] else row['documented name'],
+                                            variable_name= variable_name,
                                             documented_name = row['documented name'],
                                             unit= str(character_part),
                                             unit_mod= numeric_part
@@ -109,16 +112,16 @@ class protocol_settings:
                 if index > 0:
                     #if high/low, its a double
                     if (
-                        item.documented_name.endswith(' L') 
-                        and registry_map[index-1].documented_name.replace(' H', ' L') == item.documented_name
+                        item.documented_name.endswith('_l') 
+                        and registry_map[index-1].documented_name.replace('_h', '_l') == item.documented_name
                         ):
                         combined_item = registry_map[index-1]
                         combined_item.bytes = 2
 
                         if combined_item.documented_name == combined_item.variable_name:
-                            combined_item.variable_name = combined_item.variable_name[:-1].strip()
+                            combined_item.variable_name = combined_item.variable_name[:-2].strip()
                             
-                        combined_item.documented_name = combined_item.documented_name[:-1].strip()
+                        combined_item.documented_name = combined_item.documented_name[:-2].strip()
                         del registry_map[index]
 
             #apply mask

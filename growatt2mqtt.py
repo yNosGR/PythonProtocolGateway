@@ -53,7 +53,11 @@ class Growatt2MQTT:
     # mqtt topic the inverter data will be published
     __mqtt_topic = ""
     
-    __mqtt_discovery_topic = "homeassistant"
+    __mqtt_discovery_topic : str = "homeassistant"
+
+    __mqtt_discovery_enabled : bool = True
+
+    __mqtt_json : bool = False
 
     # mqtt error topic in case the growatt2mqtt runs in error moder or inverter is powered off
     __mqtt_error_topic = ""
@@ -65,6 +69,8 @@ class Growatt2MQTT:
     __log_level = 'DEBUG'
 
     __device_serial_number = "hotnoob"
+    
+    growatt : Growatt
 
     def __init__(self):
         self.__log = logging.getLogger('growatt2mqqt_log')
@@ -108,6 +114,10 @@ class Growatt2MQTT:
         self.__mqtt_port = self.__settings.get('mqtt', 'port', fallback=1883)
         self.__mqtt_topic = self.__settings.get('mqtt', 'topic', fallback='home/inverter')
         self.__mqtt_discovery_topic = self.__settings.get('mqtt', 'discovery_topic', fallback='homeassistant')
+        self.__mqtt_discovery_enabled = strtobool(self.__settings.get('mqtt', 'discovery_enabled', fallback="true"))
+        self.__mqtt_json = strtobool(self.__settings.get('mqtt', 'json', fallback="false"))
+        
+
         self.__mqtt_error_topic = self.__settings.get(
             'mqtt', 'error_topic', fallback='home/inverter/error')
         self.__log.info("mqtt settings: \n")
@@ -143,7 +153,7 @@ class Growatt2MQTT:
         run method, starts ModBus connection and mqtt connection
         """
         self.__log.info('Loading inverters... ')
-        inverters = []
+        inverters : list[Growatt] = []
         for section in self.__settings.sections():
             if not section.startswith('inverters.'):
                 continue
@@ -153,15 +163,17 @@ class Growatt2MQTT:
             protocol_version = str(
                 self.__settings.get(section, 'protocol_version'))
             measurement = self.__settings.get(section, 'measurement')
-            growatt = Growatt(self.__client, name, unit, protocol_version, self.__log)
-            growatt.print_info()
+            self.growatt = Growatt(self.__client, name, unit, protocol_version, self.__log)
+            self.growatt.print_info()
             inverters.append({
                 'error_sleep': 0,
-                'growatt': growatt,
+                'growatt': self.growatt,
                 'measurement': measurement
             })
         self.__log.info('Done!')
 
+        if self.__mqtt_discovery_enabled:
+            self.mqtt_discovery()
 
         while True:
             online = False
@@ -171,10 +183,10 @@ class Growatt2MQTT:
                     inverter['error_sleep'] -= self.__interval
                     continue
 
-                growatt = inverter['growatt']
+                self.growatt = inverter['growatt']
                 try:
                     now = time.time()
-                    info = growatt.read_input_register()
+                    info = self.growatt.read_input_register()
 
                     if info is None:
                         continue
@@ -188,19 +200,21 @@ class Growatt2MQTT:
                         "fields": info
                     }]
                     self.__log.info(points)
-                    # Serializing json
-                    json_object = json.dumps(points[0], indent=4)
-                    
-                    self.mqtt_discovery()
-                    self.__mqtt_client.publish(self.__mqtt_topic, json_object, 0, properties=self.__properties)
-                    self.__mqtt_client.publish(self.__mqtt_topic+'/OP_Watt'.lower(), str(info['OP WATT']))
+
+                    if(self.__mqtt_json):
+                        # Serializing json
+                        json_object = json.dumps(points[0], indent=4)
+                        self.__mqtt_client.publish(self.__mqtt_topic, json_object, 0, properties=self.__properties)
+                    else:
+                        for key, val in enumerate(info):
+                            self.__mqtt_client.publish((self.__mqtt_topic+'/'+key).lower(), str(val))
 
                 except Exception as err:
                     traceback.print_exc()
-                    self.__log.error(growatt.name)
+                    self.__log.error(self.growatt.name)
                     self.__log.error(err)
                     json_object = '{"name":' + \
-                        str(growatt.name)+',error_code:'+str(err)+'}'
+                        str(self.growatt.name)+',error_code:'+str(err)+'}'
                     self.__mqtt_client.publish(
                         self.__mqtt_error_topic, json_object, 0, properties=self.__properties)
                     inverter['error_sleep'] = self.__error_interval
@@ -217,25 +231,39 @@ class Growatt2MQTT:
         disc_payload = {}
         disc_payload['availability_topic'] = self.__mqtt_topic + "/availability"
 
-        field = "OP_Watt".lower()
         device = {}
         device['manufacturer'] = "Growatt"
         device['model'] = "SPF"
         device['identifiers'] = "hotnoob_" + self.__device_serial_number
         device['name'] = "Growatt Inverter"
-        #device['sw_version'] = bms_version
-        disc_payload['device'] = device
-        disc_payload['name'] = field
-        disc_payload['unique_id'] = "hotnoob_" + self.__device_serial_number + "_"+field
-        disc_payload['state_topic'] = self.__mqtt_topic + "/"+field
-        disc_payload['unit_of_measurement'] = "w"
 
-        #self.__mqtt_client.publish(self.__mqtt_topic+'/'+field, str(info['OP WATT']))
+        for item in self.growatt.protocolSettings.input_registry_map:
 
-        self.__mqtt_client.publish(self.__mqtt_discovery_topic+"/sensor/inverter-" + self.__device_serial_number  + "/" + disc_payload['name'].replace(' ', '_') + "/config",json.dumps(disc_payload),qos=0, retain=True)
+            clean_name = item.variable_name.lower().replace(' ', '_')
+            #device['sw_version'] = bms_version
+            disc_payload['device'] = device
+            disc_payload['name'] = clean_name
+            disc_payload['unique_id'] = "hotnoob_" + self.__device_serial_number + "_"+clean_name
+            disc_payload['state_topic'] = self.__mqtt_topic + "/"+clean_name
+            disc_payload['unit_of_measurement'] = item.unit
+
+            discovery_topic = self.__mqtt_discovery_topic+"/sensor/inverter-" + self.__device_serial_number  + "/" + disc_payload['name'].replace(' ', '_') + "/config"
+            
+            self.__mqtt_client.publish(discovery_topic,
+                                       json.dumps(disc_payload),qos=0, retain=True)
+        
         self.__mqtt_client.publish(disc_payload['availability_topic'],"online")
 
 
+def strtobool (val):
+    """Convert a string representation of truth to true (1) or false (0).
+    True values are 'y', 'yes', 't', 'true', 'on', and '1'
+    """
+    val = val.lower()
+    if val in ('y', 'yes', 't', 'true', 'on', '1'):
+        return 1
+    
+    return 0
 
 def main():
     """
