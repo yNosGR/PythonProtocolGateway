@@ -207,7 +207,7 @@ class Growatt2MQTT:
                         self.__mqtt_client.publish(self.__mqtt_topic, json_object, 0, properties=self.__properties)
                     else:
                         for key, val in enumerate(info):
-                            print(str(self.__mqtt_topic+'/'+str(key)))
+                            print(self.__mqtt_topic+'/'+str(key))
                             self.__mqtt_client.publish(str(self.__mqtt_topic+'/'+key).lower(), str(val))
 
                 except Exception as err:
