@@ -146,7 +146,6 @@ class protocol_settings:
                         item.documented_name.strip().lower() not in self.variable_mask 
                         and item.variable_name.strip().lower() not in self.variable_mask
                         ):
-                        print("del " + item.documented_name)
                         del registry_map[index]
                         
             return registry_map
