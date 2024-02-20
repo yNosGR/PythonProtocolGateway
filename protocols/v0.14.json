@@ -21,7 +21,12 @@
         "2" : "PV2   charge   power check",
         "3" : "AC    charge    Powercheck"
     },
-
+    "production_line_mode_codes" :
+    {
+        "0" : "Not at Production Line Mode",
+        "1" : "Production Line Mode",
+        "2" : "Production Line Clear Fault Mode"
+    },
     "fault_codes":
     {
         "2" : "Over Temperature",
