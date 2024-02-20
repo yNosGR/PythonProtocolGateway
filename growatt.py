@@ -4,9 +4,10 @@ Python Module to implement ModBus RTU connection to Growatt Inverters
 """
 import logging
 import time
+import struct
 from pymodbus.exceptions import ModbusIOException
 
-from protocol_settings import registry_map_entry, protocol_settings
+from protocol_settings import Data_Type, registry_map_entry, protocol_settings
 
 # Codes
 StateCodes = {
@@ -145,11 +146,14 @@ class Growatt:
         for item in self.protocolSettings.input_registry_map:
             value = ''
 
-            if item.bytes == 1: #read byte
+        
+            if item.data_type == Data_Type.BYTE: #read byte
                 value = float(registry[item.register])
-            elif item.bytes == 2: #read double
-                #value = float((registry[item.register] << 16) + registry[item.register + 1])
-                value = int.from_bytes([registry[item.register], registry[item.register+1]])
+            elif item.data_type == Data_Type.UINT: #read uint
+                value = float((registry[item.register] << 16) + registry[item.register + 1])
+            elif item.data_type == Data_Type.INT: #read int
+                value = int.from_bytes(bytes([registry[item.register], registry[item.register + 1]]), byteorder='little', signed=True)
+                
 
             if item.unit_mod != float(1):
                 value = value * item.unit_mod
