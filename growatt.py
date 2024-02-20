@@ -116,8 +116,8 @@ class Growatt:
                 print("no error, get info")
 
                 #dump registers
-                for i in range(start,batch_size):
-                    print("Register {}: {}".format(i, float(register.registers[i])/10))
+                for i in range(0,batch_size):
+                    print("Register {}: {}".format(start+i, float(register.registers[i])/10))
 
 
 
