@@ -161,6 +161,7 @@ class Growatt:
                         value = self.protocolSettings.codes[item.documented_name+'_codes'][cleanval]
                 except:
                     #do nothing; try is for intval
+                    value = value
             
             #if item.unit:
             #    value = str(value) + item.unit
