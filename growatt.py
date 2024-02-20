@@ -155,7 +155,7 @@ class Growatt:
 
             if item.documented_name+'_codes' in self.protocolSettings.codes:
                 try:
-                    cleanval = int(value)
+                    cleanval = str(int(value))
             
                     if cleanval in self.protocolSettings.codes[item.documented_name+'_codes']:
                         value = self.protocolSettings.codes[item.documented_name+'_codes'][cleanval]
