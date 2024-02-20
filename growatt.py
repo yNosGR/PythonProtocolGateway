@@ -112,7 +112,7 @@ class Growatt:
         start = -batch_size
         registry = []
         
-        while (start := start+batch_size) < self.protocolSettings.input_registry_size:
+        while (start := start+batch_size) <= self.protocolSettings.input_registry_size :
 
             print("get registers: " + str(start) )
             time.sleep(0.001) #sleep for 1ms to give bus a rest
