@@ -1,6 +1,8 @@
 Originally from andiburger/growatt2mqtt, heavily modified to easily work with new and multiple protocols, configurable protocols, and added propper mqtt discovery / functionality to work with home assistant
 
 # donate
+![BitCoin Donation](https://github.com/HotNoob/growatt2mqtt-hotnoob/blob/main/donate_to_hotnoob.png?raw=true)
+
 (btc) bc1qh394vazcguedkw2rlklnuhapdq7qgpnnz9c3t0
 
 # growatt2mqtt
