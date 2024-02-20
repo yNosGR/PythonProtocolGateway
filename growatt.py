@@ -106,7 +106,7 @@ class Growatt:
             start = -batch_size
             max = 200
             
-            while (start := start+batch_size) < 200:
+            while (start := start+batch_size) < 400:
 
                 print("get registers: " + start )
 
