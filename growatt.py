@@ -113,7 +113,7 @@ class Growatt:
             info['StatusCode'] = register.registers[0]
             info['Status'] = StateCodes[register.registers[0]]
             info['PV1_Voltage'] = read_single(register, 1)
-            info['PV2_Voltage'] = read_single(register, 2)
+            #info['PV2_Voltage'] = read_single(register, 2)
 
             print("debug: info")
             print(info)
