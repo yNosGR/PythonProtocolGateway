@@ -12,38 +12,40 @@ The python service can be configured via a small config file.
 
 The config file is structured as follows:
 
+# Installation
+Connect the USB-B port on the inverter into your computer / device
+When connected, the device will show up as a serial port. 
+
+### install requirements
+```
+apt install pip python3 -y
+pip install -r requirements.txt
+```
+
 ### Config file (growatt2mqtt.cfg) - rename .example.cfg to .cfg
-[query] -- all values in seconds  
-interval = 10  
-offline_interval = 60  
-error_interval = 60
+Edit configuration.
+```
+cp growatt2mqtt.example.cfg  growatt2mqtt.cfg
+nano growatt2mqtt.cfg
+```
 
-[serial]  
-port = /dev/ttyUSB0
-baudrate = 9600  
+### install as service
+```
+cp growatt2mqtt.example.service  /etc/systemd/system/growatt2mqtt.service
+nano /etc/systemd/system/growatt2mqtt.service
+```
+edit working directory in service file to wherever you put the files
+```
+nano /etc/systemd/system/growatt2mqtt.service
+```
+reload daemon, enable and start service
+```
+sudo systemctl daemon-reload
+sudo systemctl enable growatt2mqtt.service
+sudo systemctl start growatt2mqtt.service
+systemctl status growatt2mqtt.service
+```
 
-[inverters.main]  
-unit = 1  
-measurement = inverter 
-protocol_version = MAXSeries | 3.04 | 3.15
-
-[mqtt]  
-host = YOUR MQTT BROKER IP  
-port = 1883  
-topic = inverter/growatt/MIC-600TL-X  
-error_topic = inverter/growatt/MIC-600TL-X/error  
-
-### Supported Inverters  
-- Growatt MIC-600TL-X  
-- more to come ...  
-
-### Install growatt2mqtt service on Linux
-- ```cp growatt2mqtt.service file to /etc/systemc/system/```
-- ```sudo systemctl daemon-reload```
-- ```sudo systemctl enable growatt2mqtt.service```
-- ```sudo systemctl start growatt2mqtt.service```
-- ```systemctl status growatt2mqtt.service```
-
-### Use Docker
+### Use Docker - untested
 - ```docker build -t growatt2mqtt ```
 - ```docker run --device=/dev/ttyUSB0 growatt2mqtt```
