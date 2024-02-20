@@ -162,7 +162,7 @@ class Growatt2MQTT:
                 growatt = inverter['growatt']
                 try:
                     now = time.time()
-                    info = growatt.read()
+                    info = growatt.read_input_register()
 
                     if info is None:
                         continue
