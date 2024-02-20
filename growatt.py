@@ -110,7 +110,7 @@ class Growatt:
 
             #dump registers
             for i in range(0,117):
-                print("Register {}: {}".format(i, register))
+                print("Register {}: {}".format(i, float(register.registers[i])/10))
 
 
 
