@@ -105,6 +105,7 @@ class Growatt:
                 self.__log.error(register.__str__)
                 return None
             
+            print("no error, get info")
 
             #info for growatt SPF1200T
             #this way may be less efficient, but better error handling
@@ -113,6 +114,9 @@ class Growatt:
             info['Status'] = StateCodes[register.registers[0]]
             info['PV1_Voltage'] = read_single(register, 1)
             info['PV2_Voltage'] = read_single(register, 2)
+
+            print("debug: info")
+            print(info)
 
             return info
             info = {                                    # ==================================================================
