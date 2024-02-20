@@ -62,7 +62,11 @@ more docs on setting up mqtt here: https://www.home-assistant.io/integrations/mq
 i probably might have missed something. ha is new to me.
 
 ### update procedure
-```git pull```
+update files and restart script / service
+```
+git pull
+systemctl start growatt2mqtt.service
+```
 
 ### Unknown Status MQTT Home Assistant 
 If all values appear as "Unknown"
