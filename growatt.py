@@ -113,8 +113,13 @@ class Growatt:
             info = {}
             info['StatusCode'] = register.registers[0]
             info['Status'] = StateCodes[register.registers[0]]
-            #info['PV1_Voltage'] = read_single(register, 1)
-            #info['PV2_Voltage'] = read_single(register, 2)
+            info['PV1_Voltage'] = read_single(register, 1)
+            info['PV2_Voltage'] = read_single(register, 2)
+
+
+            #lets try to verify protocol is right
+            info['Output_High'] = read_single(register, 11)
+            info['Output_Low'] = read_single(register, 12)
 
             print("debug: info")
             print(info)
