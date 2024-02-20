@@ -136,6 +136,11 @@ class protocol_settings:
                             combined_item.variable_name = combined_item.variable_name[:-2].strip()
                             
                         combined_item.documented_name = combined_item.documented_name[:-2].strip()
+
+                        if not combined_item.unit: #fix inconsistsent documentation
+                            combined_item.unit = registry_map[index].unit
+                            combined_item.unit_mod = registry_map[index].unit_mod
+
                         del registry_map[index]
 
             #apply mask
