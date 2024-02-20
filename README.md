@@ -24,6 +24,10 @@ cp growatt2mqtt.example.cfg  growatt2mqtt.cfg
 nano growatt2mqtt.cfg
 ```
 
+### run as script
+```python3 -u growatt2mqtt.py```
+
+
 ### install as service
 ```
 cp growatt2mqtt.example.service  /etc/systemd/system/growatt2mqtt.service
