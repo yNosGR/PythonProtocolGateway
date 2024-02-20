@@ -104,9 +104,10 @@ class Growatt:
 
             batch_size = 50
             start = -batch_size
-            max = 200
+            max = 400
+            register = []
             
-            while (start := start+batch_size) < 400:
+            while (start := start+batch_size) < max:
 
                 print("get registers: " + str(start) )
 
@@ -115,6 +116,8 @@ class Growatt:
                     self.__log.error(register.__str__)
                     return None
                 
+                #combine registers
+                register.extend(register.registers)                
 
                 #dump registers
                 for i in range(0,batch_size):
@@ -136,7 +139,7 @@ class Growatt:
             #lets try to verify protocol is right Low/High = double / 2 byte register
             info['Output_Load'] = read_double(register, 11) #
 
-            #info['Output_Voltage'] = read_single(register, 141) #"Real Value" im guessing output voltage?
+            info['Output_Voltage'] = read_single(register, 141) #"Real Value" im guessing output voltage?
 
             print("debug: info")
             print(info)
