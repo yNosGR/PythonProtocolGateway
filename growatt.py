@@ -105,7 +105,7 @@ class Growatt:
         self.__log.info('\tUnit: %s\n', str(self.unit))
         self.__log.info('\tModbus Version: %s\n', str(self.modbus_version))
 
-    def read_input_register(self):
+    def read_input_register(self) -> dict[str,str]:
         """ this function reads based on the given ModBus RTU protocol version the ModBus data from growatt inverters"""
         #read input register
         batch_size = 45 #see manual; says max batch is 45
