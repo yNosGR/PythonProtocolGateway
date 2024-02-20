@@ -1,12 +1,12 @@
 import csv
 from dataclasses import dataclass
-import enum
+from enum import Enum
 import json
 import re
 import os
 
 
-class Data_Type(enum):
+class Data_Type(Enum):
     BYTE = 1
     USHORT = 2
     UINT = 3
