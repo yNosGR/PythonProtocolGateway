@@ -108,12 +108,13 @@ class Growatt:
             
             while (start := start+batch_size) < 200:
 
+                print("get registers: " + start )
+
                 register = self.client.read_input_registers(start, batch_size, unit=self.unit)
                 if register.isError():
                     self.__log.error(register.__str__)
                     return None
                 
-                print("no error, get info")
 
                 #dump registers
                 for i in range(0,batch_size):
