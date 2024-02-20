@@ -159,7 +159,7 @@ class Growatt2MQTT:
             })
         self.__log.info('Done!')
 
-        self.mqtt_discovery()
+
         while True:
             online = False
             for inverter in inverters:
@@ -187,7 +187,8 @@ class Growatt2MQTT:
                     self.__log.info(points)
                     # Serializing json
                     json_object = json.dumps(points[0], indent=4)
-
+                    
+                    self.mqtt_discovery()
                     self.__mqtt_client.publish(self.__mqtt_topic, json_object, 0, properties=self.__properties)
                     self.__mqtt_client.publish(self.__mqtt_topic+'/OP_Watt', str(info['OP WATT']))
 
