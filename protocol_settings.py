@@ -19,9 +19,9 @@ class protocol_settings:
     settings_dir : str
     variable_mask : list[str]
     input_registry_map : list[registry_map_entry]
-    input_registry_size : int
+    input_registry_size : int = 0
     holding_registry_map : list[registry_map_entry]
-    holding_registry_size : int
+    holding_registry_size : int = 0
     codes : dict[str, str]
 
     def __init__(self, protocol : str, settings_dir : str = 'protocols'):
