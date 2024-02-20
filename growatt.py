@@ -82,6 +82,7 @@ class Growatt:
         self.unit = unit
         self.protocol_version = protocol_version
         self.max_precision = max_precision
+        print("max_precision: " + str(self.max_precision))
         if (log is None):
             self.__log = log
         else:
@@ -160,7 +161,7 @@ class Growatt:
             if item.unit_mod != float(1):
                 value = value * item.unit_mod
 
-            if  isinstance(value, float) and self.max_precision > -1 and False:
+            if  isinstance(value, float) and self.max_precision > -1:
                 value = round(value, self.max_precision)
 
             if item.documented_name+'_codes' in self.protocolSettings.codes:
