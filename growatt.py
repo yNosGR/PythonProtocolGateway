@@ -148,7 +148,8 @@ class Growatt:
             if item.bytes == 1: #read byte
                 value = float(registry[item.register])
             elif item.bytes == 2: #read double
-                value = float((registry[item.register] << 16) + registry[item.register + 1])
+                #value = float((registry[item.register] << 16) + registry[item.register + 1])
+                value = int.from_bytes(registry[item.register], registry[item.register+1])
 
             if item.unit_mod != float(1):
                 value = value * item.unit_mod
