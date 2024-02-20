@@ -83,7 +83,7 @@ class protocol_settings:
                             character_part = match[1].strip()
 
                 #clean up doc name, for extra parsing
-                row['documented name'] = row['documented name'].strip().upper().replace('_',' ') 
+                row['documented name'] = row['documented name'].strip().upper()
 
                 variable_name = row['variable name'] if row['variable name'] else row['documented name']
                 variable_name = variable_name.lower().replace(' ', '_') #clean name
