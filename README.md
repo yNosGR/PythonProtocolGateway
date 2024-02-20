@@ -58,6 +58,9 @@ once installed; the device should show up on home assistant under mqtt
 
 ```Settings -> Devices & Services -> MQTT ```
 
+more docs on setting up mqtt here: https://www.home-assistant.io/integrations/mqtt
+i probably might have missed something. ha is new to me.
+
 ### Unknown Status MQTT Home Assistant 
 If all values appear as "Unknown"
 This is a bug with home assistant's discovery that some times happens when adding for the first time. just restart the service / script and it will fix itself. 
