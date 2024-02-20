@@ -60,6 +60,7 @@ once installed; the device should show up on home assistant under mqtt
 ### variable names
 variable names have been modified for greater readability. if it's confusing you can change them via protocols/{version}_input_registry_map.csv
 you can also find the original documented variable names there; to use the original names, empty the variable name column
+the csvs are using ";" as the delimeter, because that is what open office uses. 
 
 ### donate
 this took me a while to make; and i had to make it because there werent any working solutions. 
