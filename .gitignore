@@ -5,3 +5,4 @@ settings.json
 
 growatt2mqtt.cfg
 variable_mask.txt
+.~lock.*
