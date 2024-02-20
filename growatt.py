@@ -103,7 +103,7 @@ class Growatt:
             self.__log.info('MAX Series Protocol\n')
 
             batch_size = 50
-            start = 0
+            start = -batch_size
             max = 200
             
             while (start := start+batch_size) < 200:
