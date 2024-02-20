@@ -98,7 +98,8 @@ class Growatt:
             if registry_entry is not None:
                 data = self.client.read_holding_registers(registry_entry.register)
                 serial_number = serial_number  + str(data.registers[0])
-
+                
+        return serial_number
 
     def read_info(self):
         """ reads holding registers from Growatt inverters """

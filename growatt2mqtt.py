@@ -172,7 +172,10 @@ class Growatt2MQTT:
             })
         self.__log.info('Done!')
 
-        self.__device_serial_number = self.growatt.read_serial_number()
+        self.__device_serial_number = self.__settings.get('mqtt_device', 'serial_number', fallback='')
+
+        if not self.__device_serial_number: #if empty, fetch serial
+            self.__device_serial_number = self.growatt.read_serial_number()
 
         if self.__mqtt_discovery_enabled:
             self.mqtt_discovery()
