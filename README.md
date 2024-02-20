@@ -57,6 +57,15 @@ once installed; the device should show up on home assistant under mqtt
 
 ```Settings -> Devices & Services -> MQTT ```
 
+### Unknown Status MQTT Home Assistant 
+If all values appear as "Unknown"
+This is a bug with home assistant's discovery that some times happens when adding for the first time. just restart the service / script and it will fix itself. 
+
+### variable names
+variable names have been modified for greater readability. if it's confusing you can change them via protocols/{version}_input_registry_map.csv
+you can also find the original documented variable names there; to use the original names, empty the variable name column
+the csvs are using ";" as the delimeter, because that is what open office uses. 
+
 ### donate
 this took me a while to make; and i had to make it because there werent any working solutions. 
 donations would be appreciated.
