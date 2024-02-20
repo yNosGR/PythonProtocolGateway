@@ -101,7 +101,7 @@ class Growatt:
         """ this function reads based on the given ModBus RTU protocol version the ModBus data from growatt inverters"""
         if (self.protocol_version == 'MAXSeries'):
             self.__log.info('MAX Series Protocol\n')
-            register = self.client.read_input_registers(0, 381, unit=self.unit)
+            register = self.client.read_input_registers(0, 141, unit=self.unit)
             if register.isError():
                 self.__log.error(register.__str__)
                 return None
