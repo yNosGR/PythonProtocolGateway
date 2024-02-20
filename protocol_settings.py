@@ -125,7 +125,7 @@ class protocol_settings:
                     numeric_part = float(1)
 
                 data_type = Data_Type.BYTE
-                if row['data_type']:
+                if 'data_type' in row and row['data_type']:
                     data_type = Data_Type.fromString(row['data type'])
                 
                 item = registry_map_entry( 
