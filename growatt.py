@@ -109,7 +109,10 @@ class Growatt:
             print("no error, get info")
 
             #dump registers
-            print(vars(register.registers))
+            for i in range(0,117):
+                print("Register {}: {}".format(i, register))
+
+
 
             #info for growatt SPF1200T
             #this way may be less efficient, but better error handling
@@ -118,6 +121,8 @@ class Growatt:
             info['Status'] = StateCodes[register.registers[0]]
             info['PV1_Voltage'] = read_single(register, 1)
             info['PV2_Voltage'] = read_single(register, 2)
+
+            
 
 
             #lets try to verify protocol is right Low/High = double / 2 byte register
