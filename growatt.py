@@ -160,7 +160,7 @@ class Growatt:
             if item.unit_mod != float(1):
                 value = value * item.unit_mod
 
-            if self.max_precision > -1:
+            if  isinstance(value, float) and self.max_precision > -1:
                 value = round(value, self.max_precision)
 
             if item.documented_name+'_codes' in self.protocolSettings.codes:
