@@ -41,6 +41,14 @@ sudo systemctl start growatt2mqtt.service
 systemctl status growatt2mqtt.service
 ```
 
+### install mqtt on home assistant
+```Settings -> Add-Ons -> Add-On Store -> Mosquitto broker```
+setup Mosquitto broker
+```Settings -> People -> Users -> Add User -> Can only log in from the local network -> Fill Details ```
+
+once installed; the device should show up on home assistant under mqtt
+```Settings -> Devices & Services -> MQTT ```
+
 ### donate
 this took me a while to make; and i had to make it because there werent any working solutions. 
 donations would be appreciated.
