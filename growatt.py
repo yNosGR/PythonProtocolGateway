@@ -3,6 +3,7 @@
 Python Module to implement ModBus RTU connection to Growatt Inverters
 """
 import logging
+import time
 from pymodbus.exceptions import ModbusIOException
 
 # Codes
@@ -105,19 +106,19 @@ class Growatt:
             batch_size = 50
             start = -batch_size
             max = 400
-            register = []
+            registry = []
             
             while (start := start+batch_size) < max:
 
                 print("get registers: " + str(start) )
-
+                time.sleep(0.001) #sleep for 1ms to give bus a rest
                 register = self.client.read_input_registers(start, batch_size, unit=self.unit)
                 if register.isError():
                     self.__log.error(register.__str__)
                     return None
                 
-                #combine registers
-                register.extend(register.registers)                
+                #combine registers into "registry"
+                registry.extend(register.registers)                
 
                 #dump registers
                 for i in range(0,batch_size):
