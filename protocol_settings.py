@@ -1,10 +1,23 @@
 import csv
 from dataclasses import dataclass
+from enum import Enum
 import json
 import re
 import os
 
 
+class Data_Type(Enum):
+    BYTE = 1
+    USHORT = 2
+    UINT = 3
+    SHORT = 4
+    INT = 5
+    @classmethod
+    def fromString(cls, name : str):
+        name = name.strip().upper()
+        return getattr(cls, name)
+
+    
 @dataclass
 class registry_map_entry:
     register : int
@@ -12,7 +25,7 @@ class registry_map_entry:
     documented_name : str
     unit : str
     unit_mod : float
-    bytes : int = 1
+    data_type : Data_Type = Data_Type.BYTE
 
 class protocol_settings:
     protocol : str
@@ -110,13 +123,20 @@ class protocol_settings:
 
                 if numeric_part == 0:
                     numeric_part = float(1)
+
+                data_type = Data_Type.BYTE
+
+                #optional row, only needed for non-default data types
+                if 'data_type' in row and row['data_type']:
+                    data_type = Data_Type.fromString(row['data type'])
                 
                 item = registry_map_entry( 
                                             register= int(row['register']),
                                             variable_name= variable_name,
                                             documented_name = row['documented name'],
                                             unit= str(character_part),
-                                            unit_mod= numeric_part
+                                            unit_mod= numeric_part,
+                                            data_type= data_type
                                         )
 
                 registry_map.append(item)
@@ -130,7 +150,12 @@ class protocol_settings:
                         and registry_map[index-1].documented_name.replace('_h', '_l') == item.documented_name
                         ):
                         combined_item = registry_map[index-1]
-                        combined_item.bytes = 2
+
+                        if not combined_item.data_type:
+                            if registry_map[index].data_type != Data_Type.BYTE:
+                                combined_item.data_type = registry_map[index].data_type
+                            else:
+                                combined_item.data_type = Data_Type.INT
 
                         if combined_item.documented_name == combined_item.variable_name:
                             combined_item.variable_name = combined_item.variable_name[:-2].strip()
@@ -188,4 +213,4 @@ class protocol_settings:
                 self.holding_registry_size = item.register
 
                     
-settings = protocol_settings('v0.14')
+#settings = protocol_settings('v0.14')
