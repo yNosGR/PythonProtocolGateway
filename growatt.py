@@ -154,8 +154,13 @@ class Growatt:
                 value = value * item.unit_mod
 
             if item.documented_name+'_codes' in self.protocolSettings.codes:
-                if value in self.protocolSettings.codes[item.documented_name+'_codes']:
-                    value = self.protocolSettings.codes[item.documented_name+'_codes'][value]
+                try:
+                    cleanval = int(value)
+            
+                    if cleanval in self.protocolSettings.codes[item.documented_name+'_codes']:
+                        value = self.protocolSettings.codes[item.documented_name+'_codes'][cleanval]
+                except:
+                    #do nothing; try is for intval
             
             #if item.unit:
             #    value = str(value) + item.unit
