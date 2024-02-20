@@ -1,3 +1,8 @@
+Originally from andiburger/growatt2mqtt, heavily modified to easily work with new and multiple protocols, configurable protocols, and added propper mqtt discovery / functionality to work with home assistant
+
+# donate
+(btc) bc1qh394vazcguedkw2rlklnuhapdq7qgpnnz9c3t0
+
 # growatt2mqtt
 
 Growatt2MQTT is a small python-based service which connects via usb to the Modbus interface of Growatt inverters and published the collected data on MQTT.
