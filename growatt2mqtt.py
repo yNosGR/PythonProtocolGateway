@@ -206,7 +206,7 @@ class Growatt2MQTT:
                         json_object = json.dumps(points[0], indent=4)
                         self.__mqtt_client.publish(self.__mqtt_topic, json_object, 0, properties=self.__properties)
                     else:
-                        for key, val in enumerate(info.items()):
+                        for key, val in info.items():
                             print(self.__mqtt_topic+'/'+str(key))
                             self.__mqtt_client.publish(str(self.__mqtt_topic+'/'+key).lower(), str(val))
 
@@ -214,8 +214,7 @@ class Growatt2MQTT:
                     traceback.print_exc()
                     self.__log.error(self.growatt.name)
                     self.__log.error(err)
-                    json_object = '{"name":' + \
-                        str(self.growatt.name)+',error_code:'+str(err)+'}'
+                    json_object = '{"name":' + str(self.growatt.name)+',error_code:'+str(err)+'}'
                     self.__mqtt_client.publish(
                         self.__mqtt_error_topic, json_object, 0, properties=self.__properties)
                     inverter['error_sleep'] = self.__error_interval
