@@ -5,7 +5,7 @@ The python service can be configured via a small config file.
 
 The config file is structured as follows:
 
-### Config file (growatt2mqtt.cfg)
+### Config file (growatt2mqtt.cfg) - rename .example.cfg to .cfg
 [query] -- all values in seconds  
 interval = 10  
 offline_interval = 60  
