@@ -109,8 +109,7 @@ class Growatt:
             print("no error, get info")
 
             #dump registers
-            
-
+            print(vars(register.registers))
 
             #info for growatt SPF1200T
             #this way may be less efficient, but better error handling
@@ -124,7 +123,7 @@ class Growatt:
             #lets try to verify protocol is right Low/High = double / 2 byte register
             info['Output_Load'] = read_double(register, 11) #
 
-            info['Output_Voltage'] = read_single(register, 141) #"Real Value" im guessing output voltage?
+            #info['Output_Voltage'] = read_single(register, 141) #"Real Value" im guessing output voltage?
 
             print("debug: info")
             print(info)
