@@ -79,7 +79,7 @@ register;variable name;documented name;description;value;unit;note;;;;;;;;;;
 77;Battery Input Watts;Bat_Watt H;Bat watt (high);(signed int 32) Positive:Battery Discharge Power  Negative:          Battery Charge Power;0.1W;;0.1W;;;;;;;;;
 78;;Bat_Watt L;Bat watt (low);;0.1W;;;;;;;;;;;
 79;;uwSlaveExistCnt ;uwSlaveExistCnt ;;;;;;;;;;;;;
-80;Battery Over Charge Flag;BatOverCharge ;Battery Over Charge Flag ;0:Battery not over charge; 1:Battery over charge; ;;;;;;;;;;
+80;Battery Over Charge Flag;BatOverCharge ;Battery Over Charge Flag ;0:Battery not over charge 1:Battery over charge ;; ;;;;;;;;;;
 81;MPPT Fan Speed Percent;MpptFanSpeed ;Fan speed of MPPT Charger ;0~100 ;1.00%;;;;;;;;;;;
 82;Inverter Fan Speed Percent;InvFanSpeed ;Fan speed of Inverter ;0~100 ;1.00%;;;;;;;;;;;
 83;Total Charge Current;TotalChgCur ;Total Charge current ;;0.1A;;;;;;;;;;;
