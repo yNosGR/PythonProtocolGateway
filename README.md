@@ -12,7 +12,7 @@ offline_interval = 60
 error_interval = 60
 
 [serial]  
-port = /dev/ttyACM0  
+port = /dev/ttyUSB0
 baudrate = 9600  
 
 [inverters.main]  
