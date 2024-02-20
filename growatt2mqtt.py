@@ -186,7 +186,7 @@ class Growatt2MQTT:
                     json_object = json.dumps(points[0], indent=4)
 
                     self.__mqtt_client.publish(self.__mqtt_topic, json_object, 0, properties=self.__properties)
-                    self.__mqtt_client.publish(self.__mqtt_topic+'/OP_Watt', str(info['OP_Watt']), 0, properties=self.__properties)
+                    self.__mqtt_client.publish(self.__mqtt_topic+'/OP_Watt', str(info['OP Watt']), 0, properties=self.__properties)
 
                 except Exception as err:
                     traceback.print_exc()
