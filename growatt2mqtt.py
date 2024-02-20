@@ -235,10 +235,10 @@ class Growatt2MQTT:
         disc_payload['availability_topic'] = self.__mqtt_topic + "/availability"
 
         device = {}
-        device['manufacturer'] = self.__settings.get('mqtt', 'manufacturer', fallback='HotNoob')
-        device['model'] = self.__settings.get('mqtt', 'model', fallback='HotNoob Was Here 2024')
+        device['manufacturer'] = self.__settings.get('mqtt_device', 'manufacturer', fallback='HotNoob')
+        device['model'] = self.__settings.get('mqtt_device', 'model', fallback='HotNoob Was Here 2024')
         device['identifiers'] = "hotnoob_" + self.__device_serial_number
-        device['name'] = self.__settings.get('mqtt', 'device_name', fallback='Growatt Inverter')
+        device['name'] = self.__settings.get('mqtt_device', 'device_name', fallback='Growatt Inverter')
 
         for item in self.growatt.protocolSettings.input_registry_map:
 
