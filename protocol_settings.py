@@ -83,7 +83,7 @@ class protocol_settings:
                             character_part = match[1].strip()
 
                 #clean up doc name, for extra parsing
-                row['documented name'] = row['documented name'].strip().upper()
+                row['documented name'] = row['documented name'].strip().lower().replace(' ', '_')
 
                 variable_name = row['variable name'] if row['variable name'] else row['documented name']
                 variable_name = variable_name.lower().replace(' ', '_') #clean name
@@ -170,3 +170,4 @@ class protocol_settings:
                 self.holding_registry_size = item.register
 
                     
+settings = protocol_settings('v0.14')
