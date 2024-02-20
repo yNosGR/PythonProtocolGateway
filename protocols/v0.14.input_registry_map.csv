@@ -16,7 +16,7 @@ register;variable name;documented name;description;value;unit;note;
 14;;ACChr_Watt L;AC charge watt (low);;0.1W;;
 15;;ACChr_VA H;AC   charge    apparent   power (high);;0.1VA;;
 16;;ACChr_VA L;AC   charge    apparent   power (low);;0.1VA;;
-17;;Bat Volt;Battery volt (M3);;0. 01V;;
+17;;Bat Volt;Battery volt (M3);;0.01V;;
 18;;BatterySOC;Battery SOC;0~100;1.00%;;
 19;;Bus Volt;Bus Voltage;;0.1V;;
 20;;Grid Volt;AC input Volt;;0.1V;;
