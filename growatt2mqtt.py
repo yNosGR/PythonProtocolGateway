@@ -248,7 +248,11 @@ class Growatt2MQTT:
             disc_payload['name'] = clean_name
             disc_payload['unique_id'] = "hotnoob_" + self.__device_serial_number + "_"+clean_name
             disc_payload['state_topic'] = self.__mqtt_topic + "/"+clean_name
-            disc_payload['unit_of_measurement'] = item.unit
+            
+            if item.unit:
+                disc_payload['unit_of_measurement'] = item.unit
+            else:
+                del disc_payload['unit_of_measurement']
 
             discovery_topic = self.__mqtt_discovery_topic+"/sensor/inverter-" + self.__device_serial_number  + "/" + disc_payload['name'].replace(' ', '_') + "/config"
             
