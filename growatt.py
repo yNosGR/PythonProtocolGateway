@@ -129,18 +129,18 @@ class Growatt:
             #info for growatt SPF1200T
             #this way may be less efficient, but better error handling
             info = {}
-            info['StatusCode'] = register.registers[0]
-            info['Status'] = StateCodes[register.registers[0]]
-            info['PV1_Voltage'] = read_single(register, 1)
-            info['PV2_Voltage'] = read_single(register, 2)
+            info['StatusCode'] = registry[0]
+            info['Status'] = StateCodes[registry[0]]
+            info['PV1_Voltage'] = read_single(registry, 1)
+            info['PV2_Voltage'] = read_single(registry, 2)
 
             
 
 
             #lets try to verify protocol is right Low/High = double / 2 byte register
-            info['Output_Load'] = read_double(register, 11) #
+            info['Output_Load'] = read_double(registry, 11) #
 
-            info['Output_Voltage'] = read_single(register, 141) #"Real Value" im guessing output voltage?
+            info['Output_Voltage'] = read_single(registry, 141) #"Real Value" im guessing output voltage?
 
             print("debug: info")
             print(info)
