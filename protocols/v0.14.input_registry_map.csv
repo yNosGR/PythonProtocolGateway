@@ -46,7 +46,7 @@ register;variable name;documented name;description;value;unit;note;;;;;;;;;;
 44;;DTC;Device Type Code;&*6;;;;;;;;;;;;
 45;;Check Step;Product check step;1:PV1   charge   power check 2:PV2   charge   power check 3:AC    charge    Powercheck;;;;;;;;;;;;
 46;;Production Line Mode;Production Line Mode;0:  Not  at  Production Line Mode 1:     Production     Line Mode 2:     Production     LineClear Fault Mode;;;;;;;;;;;;
-47;;ConstantPowerOKFlag;Constant Power OK Flag;0: Not OK;1: OK;;;;;;;;;;;
+47;;ConstantPowerOKFlag;Constant Power OK Flag;0: Not OK 1: OK;;;;;;;;;;;;
 48;PV1 KWH Today;Epv1_today H;PV Energy today;;;;;;;;;;;;;
 49;;Epv1_today L;PV Energy today;;0.1kWh;;;;;;;;;;;
 50;PV1 KWH Total;Epv1_total H;PV Energy total;;;;;;;;;;;;;
