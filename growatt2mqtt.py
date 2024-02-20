@@ -52,6 +52,9 @@ class Growatt2MQTT:
     __mqtt_port = -1
     # mqtt topic the inverter data will be published
     __mqtt_topic = ""
+    
+    __mqtt_discovery_topic = "homeassistant"
+
     # mqtt error topic in case the growatt2mqtt runs in error moder or inverter is powered off
     __mqtt_error_topic = ""
     # mqtt properties handle for publishing data
@@ -103,8 +106,8 @@ class Growatt2MQTT:
         self.__mqtt_host = self.__settings.get(
             'mqtt', 'host', fallback='mqtt.eclipseprojects.io')
         self.__mqtt_port = self.__settings.get('mqtt', 'port', fallback=1883)
-        self.__mqtt_topic = self.__settings.get(
-            'mqtt', 'topic', fallback='home/inverter')
+        self.__mqtt_topic = self.__settings.get('mqtt', 'topic', fallback='home/inverter')
+        self.__mqtt_discovery_topic = self.__settings.get('mqtt', 'discovery_topic', fallback='homeassistant')
         self.__mqtt_error_topic = self.__settings.get(
             'mqtt', 'error_topic', fallback='home/inverter/error')
         self.__log.info("mqtt settings: \n")
@@ -229,7 +232,7 @@ class Growatt2MQTT:
 
         #self.__mqtt_client.publish(self.__mqtt_topic+'/'+field, str(info['OP WATT']))
 
-        self.__mqtt_client.publish(self.__mqtt_topic+"/sensor/inverter-" + self.__device_serial_number  + "/" + disc_payload['name'].replace(' ', '_') + "/config",json.dumps(disc_payload),qos=0, retain=True)
+        self.__mqtt_client.publish(self.__mqtt_discovery_topic+"/sensor/inverter-" + self.__device_serial_number  + "/" + disc_payload['name'].replace(' ', '_') + "/config",json.dumps(disc_payload),qos=0, retain=True)
         self.__mqtt_client.publish(disc_payload['availability_topic'],"online")
 
 
