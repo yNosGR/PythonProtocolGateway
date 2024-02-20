@@ -109,10 +109,10 @@ class Growatt:
             #info for growatt SPF1200T
             #this way may be less efficient, but better error handling
             info = {}
-            info.StatusCode = register.registers[0]
-            info.Status = StateCodes[register.registers[0]]
-            info.PV1_Voltage = read_single(register, 1)
-            info.PV2_Voltage = read_single(register, 2)
+            info['StatusCode'] = register.registers[0]
+            info['Status'] = StateCodes[register.registers[0]]
+            info['PV1_Voltage'] = read_single(register, 1)
+            info['PV2_Voltage'] = read_single(register, 2)
 
             return info
             info = {                                    # ==================================================================
