@@ -113,8 +113,13 @@ class Growatt2MQTT:
         self.__mqtt_client.on_connect = self.on_connect
         self.__mqtt_client.on_message = self.on_message
 
-        self.__mqtt_client.connect(
-            str(self.__mqtt_host), int(self.__mqtt_port), 60)
+        ## Set username and password
+        username = self.__settings.get('mqtt', 'user')
+        password = self.__settings.get('mqtt', 'pass')
+        if username:
+            self.__mqtt_client.username_pw_set(username=username, password=password)
+
+        self.__mqtt_client.connect(str(self.__mqtt_host), int(self.__mqtt_port), 60)
         self.__mqtt_client.loop_start()
 
         self.__properties = Properties(PacketTypes.PUBLISH)
