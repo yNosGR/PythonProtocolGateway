@@ -227,7 +227,7 @@ class Growatt2MQTT:
         disc_payload['device'] = device
         disc_payload['name'] = field
         disc_payload['unique_id'] = "hotnoob_" + self.__device_serial_number + "_"+field
-        disc_payload['state_topic'] = self.__mqtt_topic + "_"+field
+        disc_payload['state_topic'] = self.__mqtt_topic + "/"+field
         disc_payload['unit_of_measurement'] = "mV"
 
         #self.__mqtt_client.publish(self.__mqtt_topic+'/'+field, str(info['OP WATT']))
