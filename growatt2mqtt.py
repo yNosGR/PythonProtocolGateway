@@ -69,6 +69,8 @@ class Growatt2MQTT:
     __log_level = 'DEBUG'
 
     __device_serial_number = "hotnoob"
+
+    __max_precision : int = -1
     
     growatt : Growatt
 
@@ -95,7 +97,10 @@ class Growatt2MQTT:
             'time', 'offline_interval', fallback=60)
         self.__error_interval = self.__settings.getint(
             'time', 'error_interval', fallback=60)
+        
         self.__log_level = self.__settings.get('general','log_level', fallback='DEBUG')
+        self.__max_precision = self.__settings.getint('general','max_precision', fallback=-1)
+
         if (self.__log_level != 'DEBUG'):
             self.__log.setLevel(logging.getLevelName(self.__log_level))
         self.__log.info('Setup Serial Connection... ')
@@ -163,7 +168,7 @@ class Growatt2MQTT:
             protocol_version = str(
                 self.__settings.get(section, 'protocol_version'))
             measurement = self.__settings.get(section, 'measurement')
-            self.growatt = Growatt(self.__client, name, unit, protocol_version, self.__log)
+            self.growatt = Growatt(self.__client, name, unit, protocol_version, self.__max_precision, self.__log)
             self.growatt.print_info()
             inverters.append({
                 'error_sleep': 0,
