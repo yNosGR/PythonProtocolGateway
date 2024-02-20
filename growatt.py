@@ -142,8 +142,8 @@ class Growatt:
             if item.unit_mod != float(1):
                 value = value * item.unit_mod
             
-            if item.unit:
-                value = str(value) + item.unit
+            #if item.unit:
+            #    value = str(value) + item.unit
 
             info[item.variable_name] = value
 
