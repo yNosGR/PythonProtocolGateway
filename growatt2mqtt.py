@@ -61,6 +61,8 @@ class Growatt2MQTT:
     # log level, available log levels are CRITICAL, FATAL, ERROR, WARNING, INFO, DEBUG
     __log_level = 'DEBUG'
 
+    __device_serial_number = "hotnoob"
+
     def __init__(self):
         self.__log = logging.getLogger('growatt2mqqt_log')
         handler = logging.StreamHandler(sys.stdout)
@@ -203,6 +205,31 @@ class Growatt2MQTT:
             else:
                 # If all the inverters are not online because no power is being generated then we sleep for 1 min
                 time.sleep(self.__offline_interval)
+
+    def mqtt_discovery(self):
+        print("Publishing HA Discovery topic...")
+
+        disc_payload = {}
+        disc_payload['availability_topic'] = self.__mqtt_topic + "/availability"
+
+        field = "OP_Watt"
+        device = {}
+        device['manufacturer'] = "Growatt"
+        device['model'] = "SPF"
+        device['identifiers'] = "hotnoob_" + self.__device_serial_number
+        device['name'] = "Growatt Inverter"
+        #device['sw_version'] = bms_version
+        disc_payload['device'] = device
+        disc_payload['name'] = field
+        disc_payload['unique_id'] = "hotnoob_" + self.__device_serial_number + "_"+field
+        disc_payload['state_topic'] = self.__mqtt_topic + "_"+field
+        disc_payload['unit_of_measurement'] = "mV"
+
+        #self.__mqtt_client.publish(self.__mqtt_topic+'/'+field, str(info['OP WATT']))
+
+        self.__mqtt_client.publish(self.__mqtt_topic+"/sensor/inverter-" + self.__device_serial_number  + "/" + disc_payload['name'].replace(' ', '_') + "/config",json.dumps(disc_payload),qos=0, retain=True)
+
+
 
 
 def main():
