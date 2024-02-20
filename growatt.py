@@ -118,8 +118,8 @@ class Growatt:
 
 
             #lets try to verify protocol is right
-            info['Output_High'] = read_single(register, 11)
-            info['Output_Low'] = read_single(register, 12)
+            info['Output_High'] = read_double(register, 11)
+            #info['Output_Low'] = read_single(register, 12)
 
             print("debug: info")
             print(info)
