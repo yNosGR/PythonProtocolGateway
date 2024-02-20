@@ -7,6 +7,7 @@ import os
 import json
 import logging
 import sys
+import traceback
 from configparser import RawConfigParser
 import paho.mqtt.client as mqtt
 from paho.mqtt.properties import Properties
@@ -183,6 +184,7 @@ class Growatt2MQTT:
                         self.__mqtt_topic, json_object, 0, properties=self.__properties)
 
                 except Exception as err:
+                    traceback.print_exc()
                     self.__log.error(growatt.name)
                     self.__log.error(err)
                     json_object = '{"name":' + \
