@@ -159,6 +159,7 @@ class Growatt2MQTT:
             })
         self.__log.info('Done!')
 
+        self.mqtt_discovery()
         while True:
             online = False
             for inverter in inverters:
