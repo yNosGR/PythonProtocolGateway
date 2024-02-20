@@ -97,9 +97,7 @@ class Growatt:
             registry_entry = self.protocolSettings.get_holding_registry_entry(field)
             if registry_entry is not None:
                 data = self.client.read_holding_registers(registry_entry.register)
-                serial_number = serial_number + " " + str(data.registers[0])
-
-        print("Serial Number: " + serial_number)
+                serial_number = serial_number  + str(data.registers[0])
 
 
     def read_info(self):
