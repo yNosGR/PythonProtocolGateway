@@ -41,6 +41,20 @@ class protocol_settings:
         self.load__holding_registry_map()
         self.load__codes()
 
+    def get_holding_registry_entry(self, name : str):
+        return self.get_registry_entry(name, self.holding_registry_map)
+    
+    def get_input_registry_entry(self, name : str):
+        return self.get_registry_entry(name, self.input_registry_map)
+
+    def get_registry_entry(self, name : str, map : list[registry_map_entry]) -> registry_map_entry | None:
+        name = name.strip().lower().replace(' ', '_') #clean name
+        for item in map:
+            if item.documented_name == name:
+                return item
+        
+        return None
+
     def load__codes(self, file : str = '', settings_dir : str = ''):
         if not settings_dir:
             settings_dir = self.settings_dir

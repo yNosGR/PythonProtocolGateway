@@ -90,6 +90,18 @@ class Growatt:
 
         self.read_info()
 
+    def read_serial_number(self) -> str:
+        serial_number = ""
+        fields = ['Serial No. 1', 'Serial No. 2', 'Serial No. 3', 'Serial No. 4', 'Serial No. 5']
+        for field in fields:
+            registry_entry = self.protocolSettings.get_holding_registry_entry(field)
+            if registry_entry is not None:
+                data = self.client.read_holding_registers(registry_entry.register)
+                serial_number = serial_number + " " + chr(int(data))
+
+        print("Serial Number: " + serial_number)
+
+
     def read_info(self):
         """ reads holding registers from Growatt inverters """
         row = self.client.read_holding_registers(73, unit=self.unit)

@@ -172,6 +172,9 @@ class Growatt2MQTT:
             })
         self.__log.info('Done!')
 
+        self.__device_serial_number = self.growatt.read_serial_number()
+        return
+
         if self.__mqtt_discovery_enabled:
             self.mqtt_discovery()
 
@@ -215,8 +218,7 @@ class Growatt2MQTT:
                     self.__log.error(self.growatt.name)
                     self.__log.error(err)
                     json_object = '{"name":' + str(self.growatt.name)+',error_code:'+str(err)+'}'
-                    self.__mqtt_client.publish(
-                        self.__mqtt_error_topic, json_object, 0, properties=self.__properties)
+                    self.__mqtt_client.publish(self.__mqtt_error_topic, json_object, 0, properties=self.__properties)
                     inverter['error_sleep'] = self.__error_interval
 
             if online:
@@ -232,10 +234,10 @@ class Growatt2MQTT:
         disc_payload['availability_topic'] = self.__mqtt_topic + "/availability"
 
         device = {}
-        device['manufacturer'] = "Growatt"
-        device['model'] = "SPF"
+        device['manufacturer'] = self.__settings.get('mqtt', 'manufacturer', fallback='HotNoob')
+        device['model'] = self.__settings.get('mqtt', 'model', fallback='HotNoob Was Here 2024')
         device['identifiers'] = "hotnoob_" + self.__device_serial_number
-        device['name'] = "Growatt Inverter"
+        device['name'] = self.__settings.get('mqtt', 'device_name', fallback='Growatt Inverter')
 
         for item in self.growatt.protocolSettings.input_registry_map:
 
