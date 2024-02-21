@@ -9,68 +9,6 @@ from pymodbus.exceptions import ModbusIOException
 
 from protocol_settings import Data_Type, registry_map_entry, protocol_settings
 
-# Codes
-StateCodes = {
-    0: 'Waiting',
-    1: 'Normal',
-    2: 'Unknown',
-    3: 'Fault'
-}
-
-ErrorCodes = {
-    0: 'None',
-    24: 'Auto Test Failed',
-    25: 'No AC Connection',
-    26: 'PV Isolation Low',
-    27: 'Residual Current High',
-    28: 'DC Current High',
-    29: 'PV Voltage High',
-    30: 'AC Voltage Outrange',
-    31: 'AC Freq Outrange',
-    32: 'Module Hot'
-}
-
-for i in range(1, 24):
-    ErrorCodes[i] = "Error Code: %s" % str(99 + i)
-
-DeratingMode = {
-    0: 'No Deratring',
-    1: 'PV',
-    2: '',
-    3: 'Vac',
-    4: 'Fac',
-    5: 'Tboost',
-    6: 'Tinv',
-    7: 'Control',
-    8: '*LoadSpeed',
-    9: '*OverBackByTime',
-}
-
-PIDStatus = {
-    1:'Wait Status',
-    2:'Normal Status',
-    3:'Fault Status'
-}
-
-
-def read_single(registers, index, unit=10):
-    """ reads a value from 1 ModBus register """
-    return float(registers[index]) / unit
-
-
-def read_double(registers, index, unit=10):
-    """ reads values consists of 2 ModBus register """
-    return float((registers[index] << 16) + registers[index + 1]) / unit
-
-
-def merge(*dict_args):
-    """ merges dictionaries """
-    result = {}
-    for dictionary in dict_args:
-        result.update(dictionary)
-    return result
-
-
 class Growatt:
     """ Class Growatt implements ModBus RTU protocol for growatt inverters """
     protocolSettings : protocol_settings
@@ -128,7 +66,6 @@ class Growatt:
         registry = []
         
         while (start := start+batch_size) <= self.protocolSettings.input_registry_size :
-
             print("get registers: " + str(start) )
             time.sleep(0.001) #sleep for 1ms to give bus a rest
             register = self.client.read_input_registers(start, batch_size, unit=self.unit)
