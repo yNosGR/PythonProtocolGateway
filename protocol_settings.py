@@ -100,7 +100,7 @@ class protocol_settings:
                     character_part = row['unit']
                 else:
                     # Use regular expressions to extract numeric and character parts
-                    matches = re.findall(r'([0-9.]+)|(.*?)', row['unit'])
+                    matches = re.findall(r'([0-9.]+)|(.*?)$', row['unit'])
 
                     # Iterate over the matches and assign them to appropriate variables
                     for match in matches:
@@ -108,6 +108,7 @@ class protocol_settings:
                             numeric_part = float(match[0])
                         elif match[1]:  # If it matches a character part
                             character_part = match[1].strip()
+                            #print(str(row['documented name']) + " Unit: " + str(character_part) )
 
                 #clean up doc name, for extra parsing
                 row['documented name'] = row['documented name'].strip().lower().replace(' ', '_')
@@ -157,7 +158,6 @@ class protocol_settings:
                             else:
                                 combined_item.data_type = Data_Type.UINT
 
-                        #print(str(combined_item.variable_name) + " DT: " + str(combined_item.data_type) )
 
                         if combined_item.documented_name == combined_item.variable_name:
                             combined_item.variable_name = combined_item.variable_name[:-2].strip()
