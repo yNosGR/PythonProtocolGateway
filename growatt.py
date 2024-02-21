@@ -92,7 +92,16 @@ class Growatt:
             if item.data_type == Data_Type.UINT: #read uint
                 value = float((registry[item.register] << 16) + registry[item.register + 1])
             elif item.data_type == Data_Type.INT: #read int
-                value = struct.unpack('<h', bytes([min(max(registry[item.register], 0), 255), min(max(registry[item.register+1], 0), 255)]))[0]
+
+                combined_value_unsigned = (registry[item.register] << 16) + registry[item.register + 1]
+
+                # Convert the combined unsigned value to a signed integer if necessary
+                if combined_value_unsigned & (1 << 31):  # Check if the sign bit (bit 31) is set
+                    # Perform two's complement conversion to get the signed integer
+                    value = combined_value_unsigned - (1 << 32)
+                else:
+                    value = combined_value_unsigned
+                #value = struct.unpack('<h', bytes([min(max(registry[item.register], 0), 255), min(max(registry[item.register+1], 0), 255)]))[0]
                 #value = int.from_bytes(bytes([registry[item.register], registry[item.register + 1]]), byteorder='little', signed=True)
             else: #default, Data_Type.BYTE
                 value = float(registry[item.register])
