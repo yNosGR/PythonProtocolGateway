@@ -1,0 +1,52 @@
+{
+    "system_status_codes" : 
+    {
+        "0" : "StandBy",
+        "1" : "(No Use)",
+        "2" : "Discharge", 
+        "3" : "Fault",
+        "4" : "Flash",
+        "5" : "PV charge",
+        "6" : "AC charge",
+        "7" : "Combine charge",
+        "8" : "Combine charge and Bypass",
+        "9" : "PV charge and Bypass",
+        "10" : "AC charge and Bypass",
+        "11" : "Bypass",
+        "12" : "PV charge and Discharge"
+    },
+    "check_step_codes":
+    {
+        "1" : "PV1   charge   power check",
+        "2" : "PV2   charge   power check",
+        "3" : "AC    charge    Powercheck"
+    },
+    "production_line_mode_codes" :
+    {
+        "0" : "Not at Production Line Mode",
+        "1" : "Production Line Mode",
+        "2" : "Production Line Clear Fault Mode"
+    },
+    "Solar_ConnectOKFlag_codes":
+    {
+        "1" : "Solar Charger1",
+        "2" : "Solar Charger2",
+        "3" : "Solar Charger1 and 2"
+    },
+    "Solar_BatVoltConsistFlag_codes":
+    {
+        "1" : "Check Solar Charger1 Battery voltage OK",
+        "2" : "Check Solar Charger2 Battery voltage OK",
+        "3" : "Check Solar Charger1 and 2 battery voltage OK"
+    },
+    "Solar_TypeSwState_codes":
+    {
+        "0" : "Master SolarCharger",
+        "1" : "Slave SolarCharger"
+    },
+    "Solar_ModeSwState_codes":
+    {
+        "0" : "Parallel Mode",
+        "1" : "Single Mode"
+    }
+}

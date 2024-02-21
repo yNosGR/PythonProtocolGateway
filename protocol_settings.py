@@ -128,7 +128,7 @@ class protocol_settings:
                 data_type = Data_Type.BYTE
 
                 #optional row, only needed for non-default data types
-                if 'data_type' in row and row['data_type']:
+                if 'data type' in row and row['data type']:
                     data_type = Data_Type.fromString(row['data type'])
                 
                 item = registry_map_entry( 
