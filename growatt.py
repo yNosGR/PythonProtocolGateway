@@ -150,6 +150,7 @@ class Growatt:
             value = ''
 
         
+            
 
             if item.data_type == Data_Type.UINT: #read uint
                 value = float((registry[item.register] << 16) + registry[item.register + 1])

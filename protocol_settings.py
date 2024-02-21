@@ -151,11 +151,13 @@ class protocol_settings:
                         ):
                         combined_item = registry_map[index-1]
 
-                        if not combined_item.data_type:
+                        if not combined_item.data_type or combined_item.data_type  == Data_Type.BYTE:
                             if registry_map[index].data_type != Data_Type.BYTE:
                                 combined_item.data_type = registry_map[index].data_type
                             else:
                                 combined_item.data_type = Data_Type.UINT
+
+                        #print(str(combined_item.variable_name) + " DT: " + str(combined_item.data_type) )
 
                         if combined_item.documented_name == combined_item.variable_name:
                             combined_item.variable_name = combined_item.variable_name[:-2].strip()
