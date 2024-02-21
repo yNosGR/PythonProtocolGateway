@@ -5,10 +5,12 @@ Originally from andiburger/growatt2mqtt, heavily modified to easily work with ne
 Growatt2MQTT is a small python-based service which connects via usb to the Modbus interface of Growatt inverters and published the collected data on MQTT.
 The python service can be configured via a small config file.
 
-# inverters
+# inverters / protocols
+manually select protocol in .cfg
+protocol_version = {{version}}
 ```
-growatt : 2020+
-sigineer : coming soon
+v0.14 = growatt inverters 2020+
+sigineer_v0.11 = sigineer inverters - currently untested
 ```
 
 # Installation
