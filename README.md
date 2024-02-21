@@ -77,6 +77,13 @@ variable names have been modified for greater readability. if it's confusing you
 you can also find the original documented variable names there; to use the original names, empty the variable name column
 the csvs are using ";" as the delimeter, because that is what open office uses. 
 
+### variable_mask.txt
+if you want to only send/get specific variables, put them in this file. one variable per line. if list is empty all variables will be sent
+```
+variable1
+variable2
+```
+
 ### donate
 this took me a while to make; and i had to make it because there werent any working solutions. 
 donations would be appreciated.
