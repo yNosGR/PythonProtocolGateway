@@ -2,12 +2,12 @@
     "system_status_codes" : 
     {
         "0" : "StandBy",
-        "1" : "PV and Grid Combine Discharge",
+        "1" : "(No Use)",
         "2" : "Discharge", 
         "3" : "Fault",
         "4" : "Flash",
         "5" : "PV charge",
-        "6" :  "AC charge",
+        "6" : "AC charge",
         "7" : "Combine charge",
         "8" : "Combine charge and Bypass",
         "9" : "PV charge and Bypass",
@@ -27,28 +27,26 @@
         "1" : "Production Line Mode",
         "2" : "Production Line Clear Fault Mode"
     },
-    "fault_codes":
+    "Solar_ConnectOKFlag_codes":
     {
-        "2" : "Over Temperature",
-        "3" : "Bat Voltage High",
-        "5" : "Output short",
-        "6" : "Output voltage high",
-        "7" : "Over Load",
-        "8" : "Bus voltage high",
-        "9" : "Bus start fail",
-        "51" : "Over current",
-        "52" : "Bus voltage low", 
-        "53" : "inverter softstart fail",
-        "56" : "battery open",
-        "58" : "output voltage low",
-        "60" : "negtive power",
-        "61" : "PV voltage high",
-        "62" : "SCI com error",
-        "80" : "can fault",
-        "81" : "host loss"
+        "1" : "Solar Charger1",
+        "2" : "Solar Charger2",
+        "3" : "Solar Charger1 and 2"
     },
-    "warning_codes":
+    "Solar_BatVoltConsistFlag_codes":
     {
-        "0x0001" : "Fan lock warning"
+        "1" : "Check Solar Charger1 Battery voltage OK",
+        "2" : "Check Solar Charger2 Battery voltage OK",
+        "3" : "Check Solar Charger1 and 2 battery voltage OK"
+    },
+    "Solar_TypeSwState_codes":
+    {
+        "0" : "Master SolarCharger",
+        "1" : "Slave SolarCharger"
+    },
+    "Solar_ModeSwState_codes":
+    {
+        "0" : "Parallel Mode",
+        "1" : "Single Mode"
     }
 }
