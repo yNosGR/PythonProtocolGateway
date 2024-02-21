@@ -1,9 +1,9 @@
 [Unit]
-Description=GrowattModbus
+Description=InverterModBus
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/python3 -u growatt2mqtt.py
+ExecStart=/usr/bin/python3 -u invertermodbustomqtt.py
 WorkingDirectory={{directory for files}}
 StandardOutput=inherit
 StandardError=inherit

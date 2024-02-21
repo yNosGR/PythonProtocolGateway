@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Main module for Growatt ModBus RTU data to MQTT
+Main module for Growatt / Inverters ModBus RTU data to MQTT
 """
 import time
 import os
@@ -14,7 +14,7 @@ from paho.mqtt.properties import Properties
 from paho.mqtt.packettypes import PacketTypes
 from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 
-from growatt import Growatt
+from inverter import Inverter
 __logo = """
    ____                        _   _   ____  __  __  ___ _____ _____ 
   / ___|_ __ _____      ____ _| |_| |_|___ \|  \/  |/ _ \_   _|_   _|
@@ -25,9 +25,9 @@ __logo = """
     """
 
 
-class Growatt2MQTT:
+class InverterModBusToMQTT:
     """
-    Main class, implementing the Growatt to MQTT functionality
+    Main class, implementing the Growatt / Inverters to MQTT functionality
     """
     # Global variables, defined private, all variables will be configured via cfg file
     # settings --> from config file
@@ -72,10 +72,10 @@ class Growatt2MQTT:
 
     __max_precision : int = -1
     
-    growatt : Growatt
+    inverter : Inverter
 
     def __init__(self):
-        self.__log = logging.getLogger('growatt2mqqt_log')
+        self.__log = logging.getLogger('invertermodbustomqqt_log')
         handler = logging.StreamHandler(sys.stdout)
         self.__log.setLevel(logging.DEBUG)
         formatter = logging.Formatter('[%(asctime)s]  {%(filename)s:%(lineno)d}  %(levelname)s - %(message)s')
@@ -83,14 +83,19 @@ class Growatt2MQTT:
         self.__log.addHandler(handler)
         return None
 
-    def init_growatt2mqtt(self):
+    def init_invertermodbustomqtt(self):
         """
-        initialize growatt 2 mqtt
+        initialize
         """
-        self.__log.info("Initialize growatt2mqtt")
+        self.__log.info("Initialize Inverter ModBus To MQTT Server")
         self.__settings = RawConfigParser()
-        self.__settings.read(os.path.dirname(
-            os.path.realpath(__file__)) + '/growatt2mqtt.cfg')
+
+        cfg = os.path.dirname(os.path.realpath(__file__)) + '/growatt2mqtt.cfg'
+        newcfg = os.path.dirname(os.path.realpath(__file__)) + '/config.cfg'
+        if os.path.isfile(newcfg):
+            cfg = newcfg
+
+        self.__settings.read(cfg)
         self.__interval = self.__settings.getint(
             'time', 'interval', fallback=1)
         self.__offline_interval = self.__settings.getint(
@@ -158,7 +163,7 @@ class Growatt2MQTT:
         run method, starts ModBus connection and mqtt connection
         """
         self.__log.info('Loading inverters... ')
-        inverters : list[Growatt] = []
+        inverters : list[Inverter] = []
         for section in self.__settings.sections():
             if not section.startswith('inverters.'):
                 continue
@@ -168,11 +173,11 @@ class Growatt2MQTT:
             protocol_version = str(
                 self.__settings.get(section, 'protocol_version'))
             measurement = self.__settings.get(section, 'measurement')
-            self.growatt = Growatt(self.__client, name, unit, protocol_version, self.__max_precision, self.__log)
-            self.growatt.print_info()
+            self.inverter = Inverter(self.__client, name, unit, protocol_version, self.__max_precision, self.__log)
+            self.inverter.print_info()
             inverters.append({
-                'error_sleep': 0,
-                'growatt': self.growatt,
+                'error_sleep': 15,
+                'inverter': self.inverter,
                 'measurement': measurement
             })
         self.__log.info('Done!')
@@ -180,7 +185,7 @@ class Growatt2MQTT:
         self.__device_serial_number = self.__settings.get('mqtt_device', 'serial_number', fallback='')
 
         if not self.__device_serial_number: #if empty, fetch serial
-            self.__device_serial_number = self.growatt.read_serial_number()
+            self.__device_serial_number = self.inverter.read_serial_number()
 
         if self.__mqtt_discovery_enabled:
             self.mqtt_discovery()
@@ -193,10 +198,10 @@ class Growatt2MQTT:
                     inverter['error_sleep'] -= self.__interval
                     continue
 
-                self.growatt = inverter['growatt']
+                self.inverter = inverter['inverter']
                 try:
                     now = time.time()
-                    info = self.growatt.read_input_register()
+                    info = self.inverter.read_input_register()
 
                     if info is None:
                         continue
@@ -221,9 +226,9 @@ class Growatt2MQTT:
 
                 except Exception as err:
                     traceback.print_exc()
-                    self.__log.error(self.growatt.name)
+                    self.__log.error(self.inverter.name)
                     self.__log.error(err)
-                    json_object = '{"name":' + str(self.growatt.name)+',error_code:'+str(err)+'}'
+                    json_object = '{"name":' + str(self.inverter.name)+',error_code:'+str(err)+'}'
                     self.__mqtt_client.publish(self.__mqtt_error_topic, json_object, 0, properties=self.__properties)
                     inverter['error_sleep'] = self.__error_interval
 
@@ -243,9 +248,9 @@ class Growatt2MQTT:
         device['manufacturer'] = self.__settings.get('mqtt_device', 'manufacturer', fallback='HotNoob')
         device['model'] = self.__settings.get('mqtt_device', 'model', fallback='HotNoob Was Here 2024')
         device['identifiers'] = "hotnoob_" + self.__device_serial_number
-        device['name'] = self.__settings.get('mqtt_device', 'device_name', fallback='Growatt Inverter')
+        device['name'] = self.__settings.get('mqtt_device', 'device_name', fallback='Solar Inverter')
 
-        for item in self.growatt.protocolSettings.input_registry_map:
+        for item in self.inverter.protocolSettings.input_registry_map:
 
             clean_name = item.variable_name.lower().replace(' ', '_')
             #device['sw_version'] = bms_version
@@ -283,9 +288,9 @@ def main():
     main method
     """
     print(__logo)
-    my_growatt2mqtt = Growatt2MQTT()
-    my_growatt2mqtt.init_growatt2mqtt()
-    my_growatt2mqtt.run()
+    inverter2mqtt = InverterModBusToMQTT()
+    inverter2mqtt.init_invertermodbustomqtt()
+    inverter2mqtt.run()
 
 
 if __name__ == "__main__":

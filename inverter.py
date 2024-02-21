@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Python Module to implement ModBus RTU connection to Growatt Inverters
+Python Module to implement ModBus RTU connection to ModBus Based Inverters
 """
 import logging
 import time
@@ -9,8 +9,8 @@ from pymodbus.exceptions import ModbusIOException
 
 from protocol_settings import Data_Type, registry_map_entry, protocol_settings
 
-class Growatt:
-    """ Class Growatt implements ModBus RTU protocol for growatt inverters """
+class Inverter:
+    """ Class Inverter implements ModBus RTU protocol for modbus based inverters """
     protocolSettings : protocol_settings
     max_precision : int
 
@@ -24,7 +24,7 @@ class Growatt:
         if (log is None):
             self.__log = log
         else:
-            self.__log = logging.getLogger('growatt2mqqt_log')
+            self.__log = logging.getLogger('invertermodbustomqqt_log')
             self.__log.setLevel(logging.DEBUG)
 
         #load protocol settings
@@ -44,7 +44,7 @@ class Growatt:
         return serial_number
 
     def read_info(self):
-        """ reads holding registers from Growatt inverters """
+        """ reads holding registers from ModBus register inverters -- needs to be updated to support protocol csv """
         row = self.client.read_holding_registers(73, unit=self.unit)
         if row.isError():
             raise ModbusIOException
@@ -52,14 +52,14 @@ class Growatt:
         self.modbus_version = row.registers[0]
 
     def print_info(self):
-        """ prints basic information about the current Growatt inverter """
-        self.__log.info('Growatt:')
+        """ prints basic information about the current ModBus inverter """
+        self.__log.info('Inverter:')
         self.__log.info('\tName: %s\n', str(self.name))
         self.__log.info('\tUnit: %s\n', str(self.unit))
         self.__log.info('\tModbus Version: %s\n', str(self.modbus_version))
 
     def read_input_register(self) -> dict[str,str]:
-        """ this function reads based on the given ModBus RTU protocol version the ModBus data from growatt inverters"""
+        """ this function reads based on the given ModBus RTU protocol version the ModBus data from ModBus inverters"""
         #read input register
         batch_size = 45 #see manual; says max batch is 45
         start = -batch_size
