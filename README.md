@@ -4,7 +4,6 @@ Originally from andiburger/growatt2mqtt, heavily modified to easily work with ne
 Sorry, better now than later. 
 if you installed this when it was called growatt2mqtt-hotnoob, you'll need to reinstall if you want to update. 
 
-
 # InverterModBusToMQTT
 
 InverterModBusToMQTT is a small python-based service which connects via usb to the Modbus Over Serial interface of your solar inverters and published the collected data on MQTT.
@@ -81,6 +80,9 @@ update files and restart script / service
 git pull
 systemctl restart invertermodbustomqtt.service
 ```
+
+**if you installed this when it was called growatt2mqtt-hotnoob, you'll need to reinstall if you want to update. **
+
 
 ### Unknown Status MQTT Home Assistant 
 If all values appear as "Unknown"
