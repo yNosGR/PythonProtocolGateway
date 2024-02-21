@@ -92,7 +92,8 @@ class Growatt:
             if item.data_type == Data_Type.UINT: #read uint
                 value = float((registry[item.register] << 16) + registry[item.register + 1])
             elif item.data_type == Data_Type.INT: #read int
-                value = int.from_bytes(bytes([registry[item.register], registry[item.register + 1]]), byteorder='little', signed=True)
+                value = struct.unpack('<h', bytes([registry[item.register], registry[item.register + 1]]))[0]
+                #value = int.from_bytes(bytes([registry[item.register], registry[item.register + 1]]), byteorder='little', signed=True)
             else: #default, Data_Type.BYTE
                 value = float(registry[item.register])
 
