@@ -32,6 +32,7 @@ protocol_version = {{version}}
 ```
 v0.14 = growatt inverters 2020+
 sigineer_v0.11 = sigineer inverters - currently untested
+eg4_v58 = eg4 inverters - comming soon
 ```
 
 ### run as script
