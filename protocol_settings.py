@@ -155,7 +155,7 @@ class protocol_settings:
                             if registry_map[index].data_type != Data_Type.BYTE:
                                 combined_item.data_type = registry_map[index].data_type
                             else:
-                                combined_item.data_type = Data_Type.INT
+                                combined_item.data_type = Data_Type.UINT
 
                         if combined_item.documented_name == combined_item.variable_name:
                             combined_item.variable_name = combined_item.variable_name[:-2].strip()
