@@ -101,6 +101,7 @@ class Growatt:
                     value = combined_value_unsigned - (1 << 32)
                 else:
                     value = combined_value_unsigned
+                value = -value
                 #value = struct.unpack('<h', bytes([min(max(registry[item.register], 0), 255), min(max(registry[item.register+1], 0), 255)]))[0]
                 #value = int.from_bytes(bytes([registry[item.register], registry[item.register + 1]]), byteorder='little', signed=True)
             else: #default, Data_Type.BYTE
