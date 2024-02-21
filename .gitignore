@@ -5,6 +5,8 @@ settings.json
 
 growatt2mqtt.cfg
 growatt2mqtt.service
+config.cfg
+invertermodbustomqtt.service
 variable_mask.txt
 .~lock.*
 protocols/*custom*
