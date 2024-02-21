@@ -1,6 +1,6 @@
 Originally from andiburger/growatt2mqtt, heavily modified to easily work with new and multiple protocols, configurable protocols, and added propper mqtt discovery / functionality to work with home assistant
 
-###Rebranding to InverterModBusToMQTT
+### Rebranding to InverterModBusToMQTT
 Sorry, better now than later. 
 if you installed this when it was called growatt2mqtt-hotnoob, you'll need to reinstall if you want to update. 
 
