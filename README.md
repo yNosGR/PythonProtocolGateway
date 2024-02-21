@@ -1,8 +1,8 @@
 Originally from andiburger/growatt2mqtt, heavily modified to easily work with new and multiple protocols, configurable protocols, and added propper mqtt discovery / functionality to work with home assistant
 
-# growatt2mqtt
+# InverterModBusToMQTT
 
-Growatt2MQTT is a small python-based service which connects via usb to the Modbus interface of Growatt inverters and published the collected data on MQTT.
+InverterModBusToMQTT is a small python-based service which connects via usb to the Modbus Over Serial interface of your solar inverters and published the collected data on MQTT.
 The python service can be configured via a small config file.
 
 with the addition of other brands, this will need to be renamed eventually to something... maybe ModBusInverterToMQTT
@@ -19,11 +19,11 @@ apt install pip python3 -y
 pip install -r requirements.txt
 ```
 
-### Config file (growatt2mqtt.cfg) - rename .example.cfg to .cfg
+### Config file (config.cfg) - rename .example.cfg to .cfg
 Edit configuration.
 ```
-cp growatt2mqtt.example.cfg  growatt2mqtt.cfg
-nano growatt2mqtt.cfg
+cp config.example.cfg  config.cfg
+nano config.cfg
 ```
 
 ### inverters / protocols
@@ -35,24 +35,24 @@ sigineer_v0.11 = sigineer inverters - currently untested
 ```
 
 ### run as script
-```python3 -u growatt2mqtt.py```
+```python3 -u invertermodbustomqtt.py```
 
 
 ### install as service
 ```
-cp growatt2mqtt.example.service  /etc/systemd/system/growatt2mqtt.service
-nano /etc/systemd/system/growatt2mqtt.service
+cp invertermodbustomqtt.example.service  /etc/systemd/system/invertermodbustomqtt.service
+nano /etc/systemd/system/invertermodbustomqtt.service
 ```
 edit working directory in service file to wherever you put the files
 ```
-nano /etc/systemd/system/growatt2mqtt.service
+nano /etc/systemd/system/invertermodbustomqtt.service
 ```
 reload daemon, enable and start service
 ```
 sudo systemctl daemon-reload
-sudo systemctl enable growatt2mqtt.service
-sudo systemctl start growatt2mqtt.service
-systemctl status growatt2mqtt.service
+sudo systemctl enable invertermodbustomqtt.service
+sudo systemctl start invertermodbustomqtt.service
+systemctl status invertermodbustomqtt.service
 ```
 
 ### install mqtt on home assistant
@@ -75,7 +75,7 @@ i probably might have missed something. ha is new to me.
 update files and restart script / service
 ```
 git pull
-systemctl restart growatt2mqtt.service
+systemctl restart invertermodbustomqtt.service
 ```
 
 ### Unknown Status MQTT Home Assistant 
@@ -102,5 +102,5 @@ donations would be appreciated.
 ```(btc) bc1qh394vazcguedkw2rlklnuhapdq7qgpnnz9c3t0```
 
 ### Use Docker - untested
-- ```docker build -t growatt2mqtt ```
-- ```docker run --device=/dev/ttyUSB0 growatt2mqtt```
+- ```docker build -t invertermodbustomqtt ```
+- ```docker run --device=/dev/ttyUSB0 invertermodbustomqtt```

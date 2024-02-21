@@ -7,8 +7,9 @@ RUN pip install --prefix=/install -r /requirements.txt
 
 FROM base
 COPY --from=builder /install /usr/local
-COPY growatt2mqtt.py /app/
-COPY growatt.py /app/
-COPY growatt2mqtt.cfg /app/
+COPY protocol_settings.py /app/
+COPY invertermodbustomqtt.py /app/
+COPY inverter.py /app/
+COPY config.cfg /app/
 WORKDIR /app
-CMD ["python3", "growatt2mqtt.py"] 
+CMD ["python3", "invertermodbustomqtt.py"] 
