@@ -135,12 +135,12 @@ class InverterModBusToMQTT:
         self.__mqtt_discovery_topic = self.__settings.get('mqtt', 'discovery_topic', fallback='homeassistant')
         self.__mqtt_discovery_enabled = strtobool(self.__settings.get('mqtt', 'discovery_enabled', fallback="true"))
         self.__mqtt_json = strtobool(self.__settings.get('mqtt', 'json', fallback="false"))
-        self.__mqtt_reconnect_delay = self.__settings.getint('mqtt', 'json', fallback=7)
+        self.__mqtt_reconnect_delay = self.__settings.getint('mqtt', 'reconnect_delay', fallback=7)
         if not isinstance( self.__mqtt_reconnect_delay , int) or self.__mqtt_reconnect_delay < 1: #minumum 1 second
             self.__mqtt_reconnect_delay = 1
 
 
-        self.__mqtt_reconnect_attempts = self.__settings.getint('mqtt', 'json', fallback=21)
+        self.__mqtt_reconnect_attempts = self.__settings.getint('mqtt', 'reconnect_attempts', fallback=21)
         if not isinstance( self.__mqtt_reconnect_attempts , int) or self.__mqtt_reconnect_attempts < 0: #minimum 0
             self.__mqtt_reconnect_attempts = 0
         
