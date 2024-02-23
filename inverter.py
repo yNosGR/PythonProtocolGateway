@@ -71,7 +71,7 @@ class Inverter:
         
         while (start := start+batch_size) <= self.protocolSettings.input_registry_size :
             print("get registers: " + str(start) )
-            time.sleep(0.100) #sleep for 1ms to give bus a rest
+            time.sleep(0.500) #sleep for 1ms to give bus a rest #manual recommends 1s between commands
             register = self.client.read_input_registers(start, batch_size, unit=self.unit)
             if register.isError():
                 self.__log.error(register.__str__)
