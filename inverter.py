@@ -39,6 +39,10 @@ class Inverter:
             registry_entry = self.protocolSettings.get_holding_registry_entry(field)
             if registry_entry is not None:
                 data = self.client.read_holding_registers(registry_entry.register)
+                if not hasattr(data, 'registers') or data.registers is None:
+                    self.__log.critical("Failed to get serial number register ("+field+") ; exiting")
+                    exit()
+                    
                 serial_number = serial_number  + str(data.registers[0])
 
         return serial_number
