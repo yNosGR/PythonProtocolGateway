@@ -13,6 +13,8 @@ class Inverter:
     """ Class Inverter implements ModBus RTU protocol for modbus based inverters """
     protocolSettings : protocol_settings
     max_precision : int
+    modbus_delay : float = 0.75
+    '''time inbetween requests'''
 
     def __init__(self, client, name, unit, protocol_version, max_precision : int = -1, log = None):
         self.client = client
@@ -46,7 +48,7 @@ class Inverter:
                     
                 serial_number = serial_number  + str(data.registers[0])
 
-            time.sleep(0.5) #sleep inbetween requests so modbus can rest
+            time.sleep(self.modbus_delay) #sleep inbetween requests so modbus can rest
 
         return serial_number
 
@@ -74,7 +76,7 @@ class Inverter:
         
         while (start := start+batch_size) <= self.protocolSettings.input_registry_size :
             print("get registers: " + str(start) )
-            time.sleep(0.500) #sleep for 1ms to give bus a rest #manual recommends 1s between commands
+            time.sleep(self.modbus_delay) #sleep for 1ms to give bus a rest #manual recommends 1s between commands
             register = self.client.read_input_registers(start, batch_size, unit=self.unit)
             if register.isError():
                 self.__log.error(register.__str__)
