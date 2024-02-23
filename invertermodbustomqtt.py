@@ -288,7 +288,7 @@ class InverterModBusToMQTT:
                 time.sleep(self.__offline_interval)
 
     def mqtt_discovery(self):
-        print("Publishing HA Discovery topic...")
+        print("Publishing HA Discovery Topics...")
 
         disc_payload = {}
         disc_payload['availability_topic'] = self.__mqtt_topic + "/availability"
@@ -325,6 +325,8 @@ class InverterModBusToMQTT:
                                        json.dumps(disc_payload),qos=0, retain=True)
         
         self.__mqtt_client.publish(disc_payload['availability_topic'],"online")
+        print()
+        self.__log.info("Published HA Discovery Topics")
 
 
 def strtobool (val):
