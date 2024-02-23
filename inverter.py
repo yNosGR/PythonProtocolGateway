@@ -45,6 +45,8 @@ class Inverter:
                     
                 serial_number = serial_number  + str(data.registers[0])
 
+            time.sleep(0.25) #sleep inbetween requests so modbus can rest
+
         return serial_number
 
     def read_info(self):
