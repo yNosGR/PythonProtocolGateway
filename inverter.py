@@ -73,14 +73,27 @@ class Inverter:
         batch_size = 45 #see manual; says max batch is 45
         start = -batch_size
         registry = []
-        
+        retries = 7
+        retry = 0
         while (start := start+batch_size) <= self.protocolSettings.input_registry_size :
             print("get registers: " + str(start) )
             time.sleep(self.modbus_delay) #sleep for 1ms to give bus a rest #manual recommends 1s between commands
             register = self.client.read_input_registers(start, batch_size, unit=self.unit)
+
             if register.isError():
                 self.__log.error(register.__str__)
-                return None
+                self.modbus_delay = self.modbus_delay + 0.050 #increase delay, error is likely due to modbus being busy
+
+                if self.modbus_delay > 60: #max delay. 60 seconds between requests should be way over kill if it happens
+                    self.modbus_delay = 60
+
+                if retry > retries:
+                    return None
+                else:
+                    #undo step in loop and retry read
+                    retry = retry + 1
+                    start = start - batch_size
+                    continue
             
             #combine registers into "registry"
             registry.extend(register.registers)                
