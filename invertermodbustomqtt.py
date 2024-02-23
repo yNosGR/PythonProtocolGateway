@@ -299,12 +299,12 @@ class InverterModBusToMQTT:
         device['identifiers'] = "hotnoob_" + self.__device_serial_number
         device['name'] = self.__settings.get('mqtt_device', 'device_name', fallback='Solar Inverter')
 
-        len = len(self.inverter.protocolSettings.input_registry_map)
+        length = len(self.inverter.protocolSettings.input_registry_map)
         count = 0
         for item in self.inverter.protocolSettings.input_registry_map:
             print('Publishing Topic '+str(count)+' of ' + str(len), end='\r', flush=True)
             count = count + 1
-            
+
             clean_name = item.variable_name.lower().replace(' ', '_')
             #device['sw_version'] = bms_version
             disc_payload = {}
