@@ -36,6 +36,7 @@ class Inverter:
         serial_number = ""
         fields = ['Serial No. 1', 'Serial No. 2', 'Serial No. 3', 'Serial No. 4', 'Serial No. 5']
         for field in fields:
+            self.__log.info("Reading " + field)
             registry_entry = self.protocolSettings.get_holding_registry_entry(field)
             if registry_entry is not None:
                 data = self.client.read_holding_registers(registry_entry.register)
@@ -45,7 +46,7 @@ class Inverter:
                     
                 serial_number = serial_number  + str(data.registers[0])
 
-            time.sleep(0.25) #sleep inbetween requests so modbus can rest
+            time.sleep(0.5) #sleep inbetween requests so modbus can rest
 
         return serial_number
 
