@@ -219,7 +219,7 @@ class InverterModBusToMQTT:
             self.inverter = Inverter(self.__client, name, unit, protocol_version, self.__max_precision, self.__log)
             self.inverter.print_info()
             inverters.append({
-                'error_sleep': 15,
+                'error_sleep': 0,
                 'inverter': self.inverter,
                 'measurement': measurement
             })
@@ -234,7 +234,6 @@ class InverterModBusToMQTT:
             self.mqtt_discovery()
 
         while True:
-
             if not self.__mqtt_client.is_connected(): ##mqtt not connected. 
                 print('MQTT is not connected')
                 time.sleep(self.__mqtt_reconnect_delay)
