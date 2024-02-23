@@ -302,7 +302,7 @@ class InverterModBusToMQTT:
         length = len(self.inverter.protocolSettings.input_registry_map)
         count = 0
         for item in self.inverter.protocolSettings.input_registry_map:
-            print('Publishing Topic '+str(count)+' of ' + str(len), end='\r', flush=True)
+            print('Publishing Topic '+str(count)+' of ' + str(length), end='\r', flush=True)
             count = count + 1
 
             clean_name = item.variable_name.lower().replace(' ', '_')
