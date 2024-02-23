@@ -302,8 +302,9 @@ class InverterModBusToMQTT:
         length = len(self.inverter.protocolSettings.input_registry_map)
         count = 0
         for item in self.inverter.protocolSettings.input_registry_map:
-            print('Publishing Topic '+str(count)+' of ' + str(length), end='\r', flush=True)
             count = count + 1
+            print('Publishing Topic '+str(count)+' of ' + str(length), end='\r', flush=True)
+
 
             clean_name = item.variable_name.lower().replace(' ', '_')
             #device['sw_version'] = bms_version
