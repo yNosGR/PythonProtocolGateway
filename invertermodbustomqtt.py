@@ -253,6 +253,8 @@ class InverterModBusToMQTT:
                     info = self.inverter.read_input_register()
 
                     if info is None:
+                        time.sleep(1) #info is none; modbus may be busy
+                        self.__log.info("Register is None; modbus busy?")
                         continue
 
                     # Mark that at least one inverter is online so we should continue collecting data
