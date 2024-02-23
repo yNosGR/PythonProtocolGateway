@@ -2,6 +2,7 @@
 """
 Main module for Growatt / Inverters ModBus RTU data to MQTT
 """
+import atexit
 import time
 import os
 import json
@@ -48,6 +49,7 @@ class InverterModBusToMQTT:
     __mqtt_host = None
     # mqtt client handle
     __mqtt_client = None
+
     # mqtt port of mqtt broker
     __mqtt_port = -1
     # mqtt topic the inverter data will be published
@@ -58,6 +60,12 @@ class InverterModBusToMQTT:
     __mqtt_discovery_enabled : bool = True
 
     __mqtt_json : bool = False
+
+    __mqtt_reconnect_delay : int = 7
+
+    
+    __mqtt_reconnect_attempts : int = 21
+    ''' max number of reconnects during a disconnect '''
 
     # mqtt error topic in case the growatt2mqtt runs in error moder or inverter is powered off
     __mqtt_error_topic = ""
@@ -121,11 +129,20 @@ class InverterModBusToMQTT:
         self.__log.info("start connection mqtt ...")
         self.__mqtt_host = self.__settings.get(
             'mqtt', 'host', fallback='mqtt.eclipseprojects.io')
+        
         self.__mqtt_port = self.__settings.get('mqtt', 'port', fallback=1883)
         self.__mqtt_topic = self.__settings.get('mqtt', 'topic', fallback='home/inverter')
         self.__mqtt_discovery_topic = self.__settings.get('mqtt', 'discovery_topic', fallback='homeassistant')
         self.__mqtt_discovery_enabled = strtobool(self.__settings.get('mqtt', 'discovery_enabled', fallback="true"))
         self.__mqtt_json = strtobool(self.__settings.get('mqtt', 'json', fallback="false"))
+        self.__mqtt_reconnect_delay = self.__settings.getint('mqtt', 'json', fallback=7)
+        if not isinstance( self.__mqtt_reconnect_delay , int) or self.__mqtt_reconnect_delay < 1: #minumum 1 second
+            self.__mqtt_reconnect_delay = 1
+
+
+        self.__mqtt_reconnect_attempts = self.__settings.getint('mqtt', 'json', fallback=21)
+        if not isinstance( self.__mqtt_reconnect_attempts , int) or self.__mqtt_reconnect_attempts < 0: #minimum 0
+            self.__mqtt_reconnect_attempts = 0
         
 
         self.__mqtt_error_topic = self.__settings.get(
@@ -137,6 +154,7 @@ class InverterModBusToMQTT:
         self.__mqtt_client = mqtt.Client()
         self.__mqtt_client.on_connect = self.on_connect
         self.__mqtt_client.on_message = self.on_message
+        self.__mqtt_client.on_disconnect = self.on_disconnect
 
         ## Set username and password
         username = self.__settings.get('mqtt', 'user')
@@ -149,6 +167,31 @@ class InverterModBusToMQTT:
 
         self.__properties = Properties(PacketTypes.PUBLISH)
         self.__properties.MessageExpiryInterval = 30  # in seconds
+
+        atexit.register(self.exit_handler)
+
+    def exit_handler(self):
+        '''on exit handler'''
+        print("Exiting")
+        self.__mqtt_client.publish( self.__mqtt_topic + "/availability","offline")
+        return
+
+
+    def on_disconnect(self):
+        self.__log.info("Disconnected from MQTT Broker!")
+        # Attempt to reconnect
+        for attempt in range(0, self.__mqtt_reconnect_attempts):
+            try:
+                self.__log.warning("Attempting to reconnect("+str(attempt)+")...")
+                self.__mqtt_client.reconnect()
+                return
+            except:
+                self.__log.warning("Reconnection failed. Retrying in "+str(self.__mqtt_reconnect_delay)+" second(s)...")
+                time.sleep(self.__mqtt_reconnect_delay)
+        
+        #failed to reonnect
+        self.__log.critical("Failed to Reconnect, Too many attempts")
+        exit() #exit, service should restart entire script
 
     def on_connect(self, client, userdata, flags, rc):
         """ The callback for when the client receives a CONNACK response from the server. """
@@ -191,6 +234,12 @@ class InverterModBusToMQTT:
             self.mqtt_discovery()
 
         while True:
+
+            if not self.__mqtt_client.is_connected(): ##mqtt not connected. 
+                print('MQTT is not connected')
+                time.sleep(self.__mqtt_reconnect_delay)
+                continue
+
             online = False
             for inverter in inverters:
                 # If this inverter errored then we wait a bit before trying again
