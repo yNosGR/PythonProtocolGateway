@@ -196,8 +196,7 @@ class InverterModBusToMQTT:
     def on_connect(self, client, userdata, flags, rc):
         """ The callback for when the client receives a CONNACK response from the server. """
         self.__log.info("Connected with result code %s\n",str(rc))
-        #notify online on reconnect.
-        self.__mqtt_client.publish(self.__mqtt_topic + "/availability","online")
+
 
     def on_message(self, client, userdata, msg):
         """ The callback for when a PUBLISH message is received from the server. """
@@ -266,6 +265,9 @@ class InverterModBusToMQTT:
                         "fields": info
                     }]
                     self.__log.info(points)
+
+                    #have to send this every loop, because mqtt doesnt disconnect when HA restarts. HA bug. 
+                    self.__mqtt_client.publish(self.__mqtt_topic + "/availability","online")
 
                     if(self.__mqtt_json):
                         # Serializing json
