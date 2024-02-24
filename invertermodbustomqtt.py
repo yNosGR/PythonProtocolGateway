@@ -196,6 +196,8 @@ class InverterModBusToMQTT:
     def on_connect(self, client, userdata, flags, rc):
         """ The callback for when the client receives a CONNACK response from the server. """
         self.__log.info("Connected with result code %s\n",str(rc))
+        #notify online on reconnect.
+        self.__class__.publish(self.__mqtt_topic + "/availability","online")
 
     def on_message(self, client, userdata, msg):
         """ The callback for when a PUBLISH message is received from the server. """
