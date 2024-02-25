@@ -178,7 +178,7 @@ class InverterModBusToMQTT:
         return
 
 
-    def on_disconnect(self, userdata, rc):
+    def on_disconnect(self, client, userdata, rc):
         self.__log.info("Disconnected from MQTT Broker!")
         # Attempt to reconnect
         for attempt in range(0, self.__mqtt_reconnect_attempts):
