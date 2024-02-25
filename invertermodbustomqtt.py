@@ -155,6 +155,7 @@ class InverterModBusToMQTT:
         self.__mqtt_client.on_connect = self.on_connect
         self.__mqtt_client.on_message = self.on_message
         self.__mqtt_client.on_disconnect = self.on_disconnect
+        
 
         ## Set username and password
         username = self.__settings.get('mqtt', 'user')
@@ -177,13 +178,16 @@ class InverterModBusToMQTT:
         return
 
 
-    def on_disconnect(self):
+    def on_disconnect(self, userdata, rc):
         self.__log.info("Disconnected from MQTT Broker!")
         # Attempt to reconnect
         for attempt in range(0, self.__mqtt_reconnect_attempts):
             try:
                 self.__log.warning("Attempting to reconnect("+str(attempt)+")...")
                 self.__mqtt_client.reconnect()
+                #self.__mqtt_client.loop_stop()
+                #self.__mqtt_client.connect(str(self.__mqtt_host), int(self.__mqtt_port), 60)
+                #self.__mqtt_client.loop_start()
                 return
             except:
                 self.__log.warning("Reconnection failed. Retrying in "+str(self.__mqtt_reconnect_delay)+" second(s)...")
@@ -267,7 +271,7 @@ class InverterModBusToMQTT:
                     self.__log.info(points)
 
                     #have to send this every loop, because mqtt doesnt disconnect when HA restarts. HA bug. 
-                    self.__mqtt_client.publish(self.__mqtt_topic + "/availability","online")
+                    self.__mqtt_client.publish(self.__mqtt_topic + "/availability","online", qos=0,retain=True)
 
                     if(self.__mqtt_json):
                         # Serializing json
@@ -328,7 +332,7 @@ class InverterModBusToMQTT:
             self.__mqtt_client.publish(discovery_topic,
                                        json.dumps(disc_payload),qos=0, retain=True)
         
-        self.__mqtt_client.publish(disc_payload['availability_topic'],"online")
+        self.__mqtt_client.publish(disc_payload['availability_topic'],"online",qos=0, retain=True)
         print()
         self.__log.info("Published HA Discovery Topics")
 
