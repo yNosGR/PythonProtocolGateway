@@ -77,6 +77,7 @@ class Inverter:
         retries = 7
         retry = 0
     
+        index = -1
         while (index := index + 1) < len(self.protocolSettings.holding_registry_ranges) :
             range = self.protocolSettings.holding_registry_ranges[index]
 
