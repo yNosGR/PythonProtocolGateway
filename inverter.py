@@ -109,8 +109,8 @@ class Inverter:
                 if self.modbus_delay > 60: #max delay. 60 seconds between requests should be way over kill if it happens
                     self.modbus_delay = 60
 
-                if retry > retries:
-                    return None
+                if retry > retries: #instead of none, attempt to continue to read. but with no retires. 
+                    continue
                 else:
                     #undo step in loop and retry read
                     retry = retry + 1
@@ -137,12 +137,20 @@ class Inverter:
         info['StatusCode'] = registry[0]
         
         for item in self.protocolSettings.input_registry_map:
+
+            if item.register not in registry:
+                continue
+
             value = ''    
 
             if item.data_type == Data_Type.UINT: #read uint
+                if item.register + 1 not in registry:
+                    continue
                 value = float((registry[item.register] << 16) + registry[item.register + 1])
             elif item.data_type == Data_Type.INT: #read int
-
+                if item.register + 1 not in registry:
+                    continue
+                
                 combined_value_unsigned = (registry[item.register] << 16) + registry[item.register + 1]
 
                 # Convert the combined unsigned value to a signed integer if necessary
