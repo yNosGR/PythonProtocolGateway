@@ -80,7 +80,7 @@ class Inverter:
         while (index := + 1) < len(self.protocolSettings.holding_registry_ranges) :
             range = self.protocolSettings.holding_registry_ranges[index]
 
-            print("get registers: " + str(range[0]) + " to " + str(range[1]) )
+            print("get registers("+str(index)+"): " + str(range[0]) + " to " + str(range[1]) )
             time.sleep(self.modbus_delay) #sleep for 1ms to give bus a rest #manual recommends 1s between commands
             register = self.client.read_input_registers(range[0], range[1], unit=self.unit)
 
