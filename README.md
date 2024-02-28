@@ -39,6 +39,19 @@ sigineer_v0.11 = sigineer inverters - currently untested
 eg4_v58 = eg4 inverters - comming soon
 ```
 
+### protocol analyzer
+this is a new feature, currently in the making. probably needs some fine tuning, but is usable. 
+update the configuration:
+```
+[inverter]
+analyze_protocol = true
+```
+
+![Results Example](https://raw.githubusercontent.com/HotNoob/InverterModBusToMQTT/main/images/protocol_analyzer_results.jpg)
+
+when this mode runs, it will read the registers of your inverter and attempt to determine which protocol best fits. 
+the higher the value, the more likely that the protocol matches. the results above suggests that "growatt_2020_v1.24" is the most likely protocol for the inverter
+
 ### run as script
 ```python3 -u invertermodbustomqtt.py```
 
