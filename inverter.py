@@ -13,7 +13,8 @@ class Inverter:
     """ Class Inverter implements ModBus RTU protocol for modbus based inverters """
     protocolSettings : protocol_settings
     max_precision : int
-    modbus_delay : float = 0.75
+    modbus_delay : float = 0.85
+    
     '''time inbetween requests'''
 
     def __init__(self, client, name, unit, protocol_version, max_precision : int = -1, log = None):
@@ -67,24 +68,36 @@ class Inverter:
         self.__log.info('\tUnit: %s\n', str(self.unit))
         self.__log.info('\tModbus Version: %s\n', str(self.modbus_version))
 
-    def read_input_register(self) -> dict[str,str]:
-        """ this function reads based on the given ModBus RTU protocol version the ModBus data from ModBus inverters"""
-        #read input register
-        #batch_size = 45 #see manual; says max batch is 45
+    def read_registers(self, ranges : list[tuple] = None, min : int = 0, max : int = None, batch_size : int = 45) -> dict:
+        
+
+        if not ranges: #ranges is empty, use min max
+            ranges = []
+            min = -batch_size
+            while( min := min + batch_size ) < max:
+                ranges.append((min, min + batch_size)) ##APPEND TUPLE
 
         registry : dict = {}
         retries = 7
         retry = 0
     
         index = -1
-        while (index := index + 1) < len(self.protocolSettings.input_registry_ranges) :
-            range = self.protocolSettings.input_registry_ranges[index]
+        while (index := index + 1) < len(range) :
+            range = ranges[index]
 
             print("get registers("+str(index)+"): " + str(range[0]) + " to " + str(range[1]+1) )
             time.sleep(self.modbus_delay) #sleep for 1ms to give bus a rest #manual recommends 1s between commands
-            register = self.client.read_input_registers(range[0], range[1]+1, unit=self.unit)
 
-            if register.isError():
+            isError = False
+            try:
+                register = self.client.read_input_registers(range[0], range[1]+1, unit=self.unit)
+            except ModbusIOException as e: 
+                if e.error_code == 4: #if no response; probably time out. retry with increased delay
+                    isError = True
+                else:
+                    raise
+
+            if register.isError() or isError:
                 self.__log.error(register.__str__)
                 self.modbus_delay = self.modbus_delay + 0.050 #increase delay, error is likely due to modbus being busy
 
@@ -103,12 +116,16 @@ class Inverter:
             i = -1
             while(i := i + 1 ) < range[1]+1:
                 registry[i+range[0]] = register.registers[i]
-                
-            #registry.extend(register.registers)                
 
-            #dump registers
-            #for i in range(0,batch_size):
-            #    print("Register {}: {}".format(start+i, float(register.registers[i])/10))
+        return registry
+
+
+    def read_input_register(self) -> dict[str,str]:
+        """ this function reads based on the given ModBus RTU protocol version the ModBus data from ModBus inverters"""
+        #read input register
+        #batch_size = 45 #see manual; says max batch is 45
+
+        registry = self.read_registers(self.protocolSettings.input_registry_ranges)
 
         info = {}
         info['StatusCode'] = registry[0]
