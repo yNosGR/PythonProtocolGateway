@@ -33,8 +33,11 @@ class protocol_settings:
     variable_mask : list[str]
     input_registry_map : list[registry_map_entry]
     input_registry_size : int = 0
+    input_registry_ranges : list[tuple]
     holding_registry_map : list[registry_map_entry]
     holding_registry_size : int = 0
+    holding_registry_ranges : list[tuple]
+
     codes : dict[str, str]
 
     def __init__(self, protocol : str, settings_dir : str = 'protocols'):
@@ -178,9 +181,30 @@ class protocol_settings:
                         item.documented_name.strip().lower() not in self.variable_mask 
                         and item.variable_name.strip().lower() not in self.variable_mask
                         ):
-                        del registry_map[index]
-                        
+                        del registry_map[index]                  
+
             return registry_map
+        
+    def calculate_registry_ranges(self, map : list[registry_map_entry], max_register : int) -> list[tuple]:
+        ''' read optimization; calculate which ranges to read'''
+        max_batch_size = 45 #see manual; says max batch is 45
+        start = -max_batch_size
+        ranges : list[tuple] = []
+
+        while (start := start+max_batch_size) <= max_register:
+            
+            registers : list[int] = [] #use a list, im too lazy to write logic
+
+            end = start+max_batch_size
+            for register in map:
+                if register.register > start and register.register < end:
+                    registers.append(register.register)
+
+            if registers: #not empty
+                ranges.append(min(registers), max(registers))
+
+        return ranges
+
 
     def load__input_registry_map(self, file : str = '', settings_dir : str = ''):
         if not settings_dir:
@@ -198,6 +222,8 @@ class protocol_settings:
             if item.register > self.input_registry_size:
                 self.input_registry_size = item.register
 
+        self.input_registry_ranges = self.calculate_registry_ranges(self.input_registry_map, self.input_registry_size)
+
     def load__holding_registry_map(self, file : str = '', settings_dir : str = ''):
         if not settings_dir:
             settings_dir = self.settings_dir
@@ -213,6 +239,8 @@ class protocol_settings:
         for item in self.holding_registry_map:
             if item.register > self.holding_registry_size:
                 self.holding_registry_size = item.register
+        
+        self.holding_registry_ranges = self.calculate_registry_ranges(self.holding_registry_map, self.holding_registry_size)
 
-                    
+        
 #settings = protocol_settings('v0.14')
