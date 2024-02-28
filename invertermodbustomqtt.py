@@ -81,6 +81,7 @@ class InverterModBusToMQTT:
     __max_precision : int = -1
     
     inverter : Inverter
+    measurement : str
 
     def __init__(self):
         self.__log = logging.getLogger('invertermodbustomqqt_log')
@@ -143,6 +144,21 @@ class InverterModBusToMQTT:
         self.__mqtt_reconnect_attempts = self.__settings.getint('mqtt', 'reconnect_attempts', fallback=21)
         if not isinstance( self.__mqtt_reconnect_attempts , int) or self.__mqtt_reconnect_attempts < 0: #minimum 0
             self.__mqtt_reconnect_attempts = 0
+
+
+        #this is kinda dumb, overcomplicates things, let's stick to 1 inverter at a time, can always run multiple instances of script
+        #keep this loop for backwards compatability
+        for section in self.__settings.sections():
+            if not section.startswith('inverter'):
+                continue
+
+            name = self.__settings.get(section, 'name', fallback="NO NAME")
+            unit = int(self.__settings.get(section, 'unit'))
+            protocol_version = str(self.__settings.get(section, 'protocol_version'))
+            self.measurement = self.__settings.get(section, 'measurement')
+            self.inverter = Inverter(self.__client, name, unit, protocol_version, self.__max_precision, self.__log)
+            self.inverter.print_info()
+
         
 
         self.__mqtt_error_topic = self.__settings.get(
@@ -210,25 +226,6 @@ class InverterModBusToMQTT:
         """
         run method, starts ModBus connection and mqtt connection
         """
-        self.__log.info('Loading inverters... ')
-        inverters : list[Inverter] = []
-        for section in self.__settings.sections():
-            if not section.startswith('inverters.'):
-                continue
-
-            name = section[10:]
-            unit = int(self.__settings.get(section, 'unit'))
-            protocol_version = str(
-                self.__settings.get(section, 'protocol_version'))
-            measurement = self.__settings.get(section, 'measurement')
-            self.inverter = Inverter(self.__client, name, unit, protocol_version, self.__max_precision, self.__log)
-            self.inverter.print_info()
-            inverters.append({
-                'error_sleep': 0,
-                'inverter': self.inverter,
-                'measurement': measurement
-            })
-        self.__log.info('Done!')
 
         self.__device_serial_number = self.__settings.get('mqtt_device', 'serial_number', fallback='')
 
@@ -238,62 +235,66 @@ class InverterModBusToMQTT:
         if self.__mqtt_discovery_enabled:
             self.mqtt_discovery()
 
+        error_sleep = 0
         while True:
             if not self.__mqtt_client.is_connected(): ##mqtt not connected. 
                 print('MQTT is not connected')
                 time.sleep(self.__mqtt_reconnect_delay)
                 continue
 
+
+
             online = False
-            for inverter in inverters:
-                # If this inverter errored then we wait a bit before trying again
-                if inverter['error_sleep'] > 0:
-                    inverter['error_sleep'] -= self.__interval
+            # If this inverter errored then we wait a bit before trying again
+            if error_sleep > 0:
+                error_sleep -= self.__interval
+                continue
+
+            try:
+                
+                info = self.inverter.read_input_register()
+
+                if info is None:
+                    self.__log.info("Register is None; modbus busy?")
                     continue
 
-                self.inverter = inverter['inverter']
-                try:
-                    
-                    info = self.inverter.read_input_register()
+                # Mark that at least one inverter is online so we should continue collecting data
+                online = True
+                now = time.time()
+                points = [{
+                    'time': int(now),
+                    'measurement': self.measurement,
+                    "fields": info
+                }]
+                self.__log.info(points)
 
-                    if info is None:
-                        self.__log.info("Register is None; modbus busy?")
-                        continue
+                #have to send this every loop, because mqtt doesnt disconnect when HA restarts. HA bug. 
+                self.__mqtt_client.publish(self.__mqtt_topic + "/availability","online", qos=0,retain=True)
 
-                    # Mark that at least one inverter is online so we should continue collecting data
-                    online = True
-                    now = time.time()
-                    points = [{
-                        'time': int(now),
-                        'measurement': inverter['measurement'],
-                        "fields": info
-                    }]
-                    self.__log.info(points)
+                if(self.__mqtt_json):
+                    # Serializing json
+                    json_object = json.dumps(points[0], indent=4)
+                    self.__mqtt_client.publish(self.__mqtt_topic, json_object, 0, properties=self.__properties)
+                else:
+                    for key, val in info.items():
+                        self.__mqtt_client.publish(str(self.__mqtt_topic+'/'+key).lower(), str(val))
 
-                    #have to send this every loop, because mqtt doesnt disconnect when HA restarts. HA bug. 
-                    self.__mqtt_client.publish(self.__mqtt_topic + "/availability","online", qos=0,retain=True)
-
-                    if(self.__mqtt_json):
-                        # Serializing json
-                        json_object = json.dumps(points[0], indent=4)
-                        self.__mqtt_client.publish(self.__mqtt_topic, json_object, 0, properties=self.__properties)
-                    else:
-                        for key, val in info.items():
-                            self.__mqtt_client.publish(str(self.__mqtt_topic+'/'+key).lower(), str(val))
-
-                except Exception as err:
-                    traceback.print_exc()
-                    self.__log.error(self.inverter.name)
-                    self.__log.error(err)
-                    json_object = '{"name":' + str(self.inverter.name)+',error_code:'+str(err)+'}'
-                    self.__mqtt_client.publish(self.__mqtt_error_topic, json_object, 0, properties=self.__properties)
-                    inverter['error_sleep'] = self.__error_interval
+            except Exception as err:
+                traceback.print_exc()
+                self.__log.error(self.inverter.name)
+                self.__log.error(err)
+                json_object = '{"name":' + str(self.inverter.name)+',error_code:'+str(err)+'}'
+                self.__mqtt_client.publish(self.__mqtt_error_topic, json_object, 0, properties=self.__properties)
+                error_sleep = self.__error_interval
 
             if online:
                 time.sleep(self.__interval)
             else:
                 # If all the inverters are not online because no power is being generated then we sleep for 1 min
                 time.sleep(self.__offline_interval)
+
+    def analyze_protocol(self):
+        self.__client
 
     def mqtt_discovery(self):
         print("Publishing HA Discovery Topics...")
