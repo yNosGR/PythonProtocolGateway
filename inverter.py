@@ -67,13 +67,12 @@ class Inverter:
         self.__log.info('\tUnit: %s\n', str(self.unit))
         self.__log.info('\tModbus Version: %s\n', str(self.modbus_version))
 
-
     def read_input_register(self) -> dict[str,str]:
         """ this function reads based on the given ModBus RTU protocol version the ModBus data from ModBus inverters"""
         #read input register
         #batch_size = 45 #see manual; says max batch is 45
 
-        registry = []
+        registry : dict = {}
         retries = 7
         retry = 0
     
@@ -101,7 +100,11 @@ class Inverter:
                     continue
             
             #combine registers into "registry"
-            registry.extend(register.registers)                
+            i = -1
+            while(i := i + 1 ) < range[1]+1:
+                registry[i+range[0]] = register.registers[i]
+                
+            #registry.extend(register.registers)                
 
             #dump registers
             #for i in range(0,batch_size):
