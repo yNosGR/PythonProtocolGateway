@@ -197,7 +197,7 @@ class protocol_settings:
 
             end = start+max_batch_size
             for register in map:
-                if register.register > start and register.register < end:
+                if register.register >= start and register.register < end:
                     registers.append(register.register)
 
             if registers: #not empty
