@@ -82,7 +82,7 @@ class Inverter:
         retry = 0
     
         index = -1
-        while (index := index + 1) < len(range) :
+        while (index := index + 1) < len(ranges) :
             range = ranges[index]
 
             print("get registers("+str(index)+"): " + str(range[0]) + " to " + str(range[1]+1) )
