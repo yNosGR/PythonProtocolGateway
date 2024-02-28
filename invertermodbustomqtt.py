@@ -3,6 +3,7 @@
 Main module for Growatt / Inverters ModBus RTU data to MQTT
 """
 import atexit
+import glob
 import time
 import os
 import json
@@ -16,6 +17,9 @@ from paho.mqtt.packettypes import PacketTypes
 from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 
 from inverter import Inverter
+
+from protocol_settings import protocol_settings
+
 __logo = """
    ____                        _   _   ____  __  __  ___ _____ _____ 
   / ___|_ __ _____      ____ _| |_| |_|___ \|  \/  |/ _ \_   _|_   _|
@@ -79,6 +83,9 @@ class InverterModBusToMQTT:
     __device_serial_number = "hotnoob"
 
     __max_precision : int = -1
+
+    __analyze_protocol : bool = False
+    ''' enable / disable analyze mode'''
     
     inverter : Inverter
     measurement : str
@@ -155,6 +162,7 @@ class InverterModBusToMQTT:
             name = self.__settings.get(section, 'name', fallback="NO NAME")
             unit = int(self.__settings.get(section, 'unit'))
             protocol_version = str(self.__settings.get(section, 'protocol_version'))
+            self.__analyze_protocol = self.__settings.getboolean(section, 'analyze_protocol', fallback=False)
             self.measurement = self.__settings.get(section, 'measurement')
             self.inverter = Inverter(self.__client, name, unit, protocol_version, self.__max_precision, self.__log)
             self.inverter.print_info()
@@ -227,6 +235,11 @@ class InverterModBusToMQTT:
         run method, starts ModBus connection and mqtt connection
         """
 
+        if self.__analyze_protocol:
+            self.analyze_protocol()
+            quit()
+
+
         self.__device_serial_number = self.__settings.get('mqtt_device', 'serial_number', fallback='')
 
         if not self.__device_serial_number: #if empty, fetch serial
@@ -293,9 +306,67 @@ class InverterModBusToMQTT:
                 # If all the inverters are not online because no power is being generated then we sleep for 1 min
                 time.sleep(self.__offline_interval)
 
-    def analyze_protocol(self):
-        self.__client
+    def analyze_protocol(self, settings_dir : str = 'protocols'):
+        protocol_names : list[str] = []
+        protocols : dict[str,protocol_settings] = {}
 
+        for file in glob.glob(settings_dir + "/*.json"):
+            file = file.lower().replace(settings_dir, '').replace('/', '').replace('\\', '').replace('\\', '').replace('.json', '')
+            print(file)
+            protocol_names.append(file)
+
+        max_input_register : int = 0
+        max_holding_register : int = 0
+
+        for name in protocol_names:
+            protocols[name] = protocol_settings(name)
+
+            if protocols[name].input_registry_size > max_input_register:
+                max_input_register = protocols[name].input_registry_size
+
+            if protocols[name].input_registry_size > max_holding_register:
+                max_holding_register = protocols[name].holding_registry_size
+
+        print("max input register: ", max_input_register)
+        print("max holding register: ", max_holding_register)
+
+        self.inverter.modbus_delay = self.inverter.modbus_delay * 2 #increase delay because were doing some heavy reads
+        input_register = self.inverter.read_registers(min=0, max=max_input_register)
+        holding_register = self.inverter.read_registers(min=0, max=max_holding_register)
+
+        #very well possible the registers will be incomplete due to different hardware sizes
+        #so dont assume they are set / complete
+        #we'll see about the behaviour. if it glitches, this could be a way to determine protocol.
+
+        input_register_score : dict[str, int] = {}
+        holding_register_score : dict[str, int] = {}
+
+        for name, protocol in protocols.items():
+            input_register_score[name] = 0
+            holding_register_score[name] = 0
+
+            for entry in protocol.input_registry_map:
+                if entry.register in input_register and input_register[entry.register] > 0: #empty registers appear as 0; so if it is being used it is likely above 0. if the normal state is zero it wont be detected
+                    input_register_score[name] = input_register_score[name] + 1
+
+            for entry in protocol.holding_registry_map:
+                if entry.register in holding_register and holding_register[entry.register] > 0:
+                    holding_register_score[name] = holding_register_score[name] + 1
+
+        
+        protocol_scores: dict[str, int] = {}
+        #combine scores
+        for name, protocol in protocols.items():
+            protocol_scores[name] = input_register_score[name] + holding_register_score[name]
+
+        #print scores
+        for name in sorted(protocol_scores, key=protocol_scores.get, reverse=True):
+            print("=== "+str(name)+" - "+str(protocol_scores[name])+" ===")
+            print("input register : " + str(input_register_score[name]) + " of " + str(len(protocols[name].input_registry_map)))
+            print("holding register : " + str(holding_register_score[name]) + " of " + str(len(protocols[name].holding_registry_map)))
+        
+                    
+                    
     def mqtt_discovery(self):
         print("Publishing HA Discovery Topics...")
 
