@@ -62,7 +62,7 @@ input register : 19 of 63
 holding register : 41 of 101
 ```
 
-the results above suggests that "growatt_2020_v1.24" is the most likely protocol for the inverter.
+the results above suggests that "growatt_2020_v1.24" is the most likely protocol for the inverter. turn off analyze_protocol and change protocol_version.
 
 ### run as script
 ```python3 -u invertermodbustomqtt.py```
