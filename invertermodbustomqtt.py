@@ -307,6 +307,7 @@ class InverterModBusToMQTT:
                 time.sleep(self.__offline_interval)
 
     def analyze_protocol(self, settings_dir : str = 'protocols'):
+        print("=== PROTOCOL ANALYZER ===")
         protocol_names : list[str] = []
         protocols : dict[str,protocol_settings] = {}
 
@@ -331,8 +332,9 @@ class InverterModBusToMQTT:
         print("max holding register: ", max_holding_register)
 
         self.inverter.modbus_delay = self.inverter.modbus_delay * 5 #increase delay because were doing some heavy reads
+        print("read INPUT Registers: ")
         input_register = self.inverter.read_registers(min=0, max=max_input_register)
-        holding_register = self.inverter.read_registers(min=0, max=max_holding_register)
+        holding_register = self.inverter.read_registers(min=0, max=max_holding_register, register_type="holding")
 
         #print results for debug
         print("=== START INPUT REGISTER ===")

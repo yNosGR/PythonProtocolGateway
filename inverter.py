@@ -68,7 +68,7 @@ class Inverter:
         self.__log.info('\tUnit: %s\n', str(self.unit))
         self.__log.info('\tModbus Version: %s\n', str(self.modbus_version))
 
-    def read_registers(self, ranges : list[tuple] = None, min : int = 0, max : int = None, batch_size : int = 45) -> dict:
+    def read_registers(self, ranges : list[tuple] = None, min : int = 0, max : int = None, batch_size : int = 45, register_type : str = "input" ) -> dict:
         
 
         if not ranges: #ranges is empty, use min max
@@ -90,7 +90,11 @@ class Inverter:
 
             isError = False
             try:
-                register = self.client.read_input_registers(range[0], range[1]+1, unit=self.unit)
+                if register_type == "input":
+                    register = self.client.read_input_registers(range[0], range[1]+1, unit=self.unit)
+                else:
+                    register = self.client.read_holding_registers(range[0], range[1]+1, unit=self.unit)
+
             except ModbusIOException as e: 
                 print("ModbusIOException : ", e.error_code)
                 if e.error_code == 4: #if no response; probably time out. retry with increased delay
