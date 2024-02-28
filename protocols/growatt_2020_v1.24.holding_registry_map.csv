@@ -22,11 +22,11 @@ variable name;data type;register;documented name;description;write;value;unit;In
 ;;20;wPowerStart Slope;Power start slope;W;01/01/00;0.10%;;;;;;;;;
 ;;21;wPowerRest artSlopeEE;Power restart slope;W;01/01/00;0.10%;;;;;;;;;
 ;;22;wSelectBaud rate;Select communicationbaudrat e 0: 9600bps 1:38400bps;W;0-1;;0;;;;;;;;
-;;23;Serial NO;Serial number 1-2;;;ASCII;;;;;;;;;
-;;24;Serial NO;Serial number 3-4;;;;;;;;;;;;
-;;25;Serial NO;Serial number 5-6;;;;;;;;;;;;
-;;26;Serial NO;Serial number 7-8;;;;;;;;;;;;
-;;27;Serial NO;Serial number 9-10;;;;;;;;;;;;
+;;23;Serial NO 1;Serial number 1-2;;;ASCII;;;;;;;;;
+;;24;Serial NO 2;Serial number 3-4;;;;;;;;;;;;
+;;25;Serial NO 3;Serial number 5-6;;;;;;;;;;;;
+;;26;Serial NO 4;Serial number 7-8;;;;;;;;;;;;
+;;27;Serial NO 5;Serial number 9-10;;;;;;;;;;;;
 ;;28;Module H;Inverter Module (high);;&*5;;;;;;;;;;
 ;;29;Module L;Inverter Module (low);;&*5;;;;;;;;;;
 ;;30;Com Address;Communicate address;W;01/01/54;;1;;;;;;;;
