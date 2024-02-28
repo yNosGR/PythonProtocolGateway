@@ -1,5 +1,5 @@
 register;variable name;documented name;description;customer write;value;unit;initial value;note;;;
-0;;On/Off;"The Standby On/Off state and the AC output DisEN/EN state; The low byte is the Standby on/off(1/0), the high byte is the AC output disable/enable (1/0). ";;0x0000: Output enable 0x0100: Output disable;;;;;0;
+0;;On_Off;"The Standby On/Off state and the AC output DisEN/EN state; The low byte is the Standby on/off(1/0), the high byte is the AC output disable/enable (1/0). ";;0x0000: Output enable 0x0100: Output disable;;;;;0;
 1;;OutputConfig;AC output set;W;0: BAT First 1: PV First;; 2: UTI First; 3: PV&UTI First;;;0
 2;;ChargeConfig;Charge source set;W;0: PV first 1: PV&UTI;; 2: PV Only;;;;0
 3;;UtiOutStart;Uti Output Start Time;W;0-23;;H(hour);0;;;
@@ -22,11 +22,11 @@ register;variable name;documented name;description;customer write;value;unit;ini
 20;;OverLoadRestart;Over Load Restart;W;0:Yes 1:No 2: Swith to UTI ;;0;Yes(over 1mins restart; Load to after over Load three times to stop output); ;
 21;;OverTempRestart;Over Temperature Restart;W;0:Yes 1:No ;;0;Yes(over  Temperature to restart ; after over Temperature  three times to stop output)  ;;
 22;;BuzzerEN;Buzzer on/off enable;W;1:Enable 0:Disable;;;1;;;
-23;;Serial NO. 5;Serial number 5;W;ASCII;;;;;;
-24;;Serial No. 4;Serial number 4;W;;;;;;;
-25;;Serial No. 3;Serial number 3;W;;;;;;;
-26;;Serial No. 2;Serial number 2;W;;;;;;;
-27;;Serial No. 1;Serial number 1;W;;;;;;;
+23;;Serial NO 5;Serial number 5;W;ASCII;;;;;;
+24;;Serial No 4;Serial number 4;W;;;;;;;
+25;;Serial No 3;Serial number 3;W;;;;;;;
+26;;Serial No 2;Serial number 2;W;;;;;;;
+27;;Serial No1;Serial number 1;W;;;;;;;
 28;;Moudle H;Inverter Moudle (high);W;;;Can be set at standy state Only	 		 		 		 ;;;;
 29;;Moudle L;Inverter Moudle (low);W;P-battery type: 0: Lead_Acid 1: Lithium 2: CustomLead_Acid U-user type: ;;Can be set at;;;;
 30;;Com Address;Communicate address;W;1~254;;;1;;;
@@ -61,10 +61,10 @@ register;variable name;documented name;description;customer write;value;unit;ini
 64;;Manufacturer Info3;Manufacturer information (low);;;;;;;;
 65;;Manufacturer Info 2;Manufacturer information (low);;;;;;;;
 66;;Manufacturer Info 1;Manufacturer information (high);;ASCII;;;;;;
-67;;FW Build No. 4;Control FW Build No. 2;;;;;;;;
-68;;FW Build No. 3;Control FW Build No. 1;;;;;;;;
-69;;FW Build No. 2;COM FW Build No. 2;;;;;;;;
-70;;FW Build No. 1;COM FW Build No. 1;;;;;;;;
+67;;FW Build No_ 4;Control FW Build No. 2;;;;;;;;
+68;;FW Build No_ 3;Control FW Build No. 1;;;;;;;;
+69;;FW Build No_ 2;COM FW Build No. 2;;;;;;;;
+70;;FW Build No_ 1;COM FW Build No. 1;;;;;;;;
 72;;Sys Weekly;Sys Weekly;W;0-6;;;;;;
 73;;ModbusVersion;Modbus Version;;Eg:207 is V2.07 Int(16bit s);0.01;;;;;
 75;;SCC_ComMode;SCC Communication;;;;For;BMS;;;

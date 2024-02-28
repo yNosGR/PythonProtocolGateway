@@ -1,0 +1,6 @@
+common replacements for cleaning
+
+"\s+" " "
+"\+" "Plus"
+"\%" "Percent"
+"[\[\]\(\)\.\/\-]" "_"

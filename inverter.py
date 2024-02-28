@@ -37,7 +37,7 @@ class Inverter:
 
     def read_serial_number(self) -> str:
         serial_number = ""
-        fields = ['Serial No. 1', 'Serial No. 2', 'Serial No. 3', 'Serial No. 4', 'Serial No. 5']
+        fields = ['Serial No 1', 'Serial No 2', 'Serial No 3', 'Serial No 4', 'Serial No 5']
         for field in fields:
             self.__log.info("Reading " + field)
             registry_entry = self.protocolSettings.get_holding_registry_entry(field)
