@@ -80,6 +80,7 @@ class Inverter:
         registry : dict = {}
         retries = 7
         retry = 0
+        total_retries = 0
 
         index = -1
         while (index := index + 1) < len(ranges) :
@@ -114,10 +115,15 @@ class Inverter:
                 else:
                     #undo step in loop and retry read
                     retry = retry + 1
-                    print("Retry("+str(retry)+") range("+str(index)+")")
+                    total_retries = total_retries + 1
+                    print("Retry("+str(retry)+" - ("+str(total_retries)+")) range("+str(index)+")")
                     index = index - 1
                     continue
             
+
+            retry -= 1
+            if retry < 0:
+                retry = 0
             #combine registers into "registry"
             i = -1
             while(i := i + 1 ) < range[1]:
