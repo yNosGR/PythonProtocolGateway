@@ -78,8 +78,8 @@ class Inverter:
         retry = 0
     
         index = -1
-        while (index := index + 1) < len(self.protocolSettings.holding_registry_ranges) :
-            range = self.protocolSettings.holding_registry_ranges[index]
+        while (index := index + 1) < len(self.protocolSettings.input_registry_ranges) :
+            range = self.protocolSettings.input_registry_ranges[index]
 
             print("get registers("+str(index)+"): " + str(range[0]) + " to " + str(range[1]+1) )
             time.sleep(self.modbus_delay) #sleep for 1ms to give bus a rest #manual recommends 1s between commands
