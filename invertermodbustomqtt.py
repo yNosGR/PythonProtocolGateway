@@ -244,6 +244,8 @@ class InverterModBusToMQTT:
 
         if not self.__device_serial_number: #if empty, fetch serial
             self.__device_serial_number = self.inverter.read_serial_number()
+                    
+        print("using serial number: " + self.__device_serial_number)
 
         if self.__mqtt_discovery_enabled:
             self.mqtt_discovery()

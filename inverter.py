@@ -3,6 +3,7 @@
 Python Module to implement ModBus RTU connection to ModBus Based Inverters
 """
 import logging
+import re
 import time
 import struct
 from pymodbus.exceptions import ModbusIOException
@@ -55,10 +56,14 @@ class Inverter:
                 data_bytes = data.registers[0].to_bytes((data.registers[0].bit_length() + 7) // 8, byteorder='big')
                 sn2 = sn2 + str(data_bytes.decode('utf-8')) 
                 sn3 = str(data_bytes.decode('utf-8')) + sn3
-                print(sn2)
-                print(sn3)
 
             time.sleep(self.modbus_delay) #sleep inbetween requests so modbus can rest
+        
+        print(sn2)
+        print(sn3)
+        
+        if not re.search("[^a-zA-Z0-9\_]", sn2) :
+            serial_number = sn2
 
         return serial_number
 
