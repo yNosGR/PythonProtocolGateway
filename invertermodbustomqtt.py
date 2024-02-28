@@ -330,9 +330,17 @@ class InverterModBusToMQTT:
         print("max input register: ", max_input_register)
         print("max holding register: ", max_holding_register)
 
-        self.inverter.modbus_delay = self.inverter.modbus_delay * 2 #increase delay because were doing some heavy reads
+        self.inverter.modbus_delay = self.inverter.modbus_delay * 5 #increase delay because were doing some heavy reads
         input_register = self.inverter.read_registers(min=0, max=max_input_register)
         holding_register = self.inverter.read_registers(min=0, max=max_holding_register)
+
+        #print results for debug
+        print("=== START INPUT REGISTER ===")
+        print([(key, value) for key, value in input_register.items()])
+        print("=== END INPUT REGISTER ===")
+        print("=== START HOLDING REGISTER ===")
+        print([(key, value) for key, value in holding_register.items()])
+        print("=== END HOLDING REGISTER ===")
 
         #very well possible the registers will be incomplete due to different hardware sizes
         #so dont assume they are set / complete
