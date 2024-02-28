@@ -110,7 +110,7 @@ class Inverter:
                 else:
                     #undo step in loop and retry read
                     retry = retry + 1
-                    print("Retry("+str(retry)+")")
+                    print("Retry("+str(retry)+") range("+str(index)+")")
                     index = index - -1
                     continue
             
