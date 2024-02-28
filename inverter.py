@@ -80,7 +80,7 @@ class Inverter:
         registry : dict = {}
         retries = 7
         retry = 0
-    
+
         index = -1
         while (index := index + 1) < len(ranges) :
             range = ranges[index]
@@ -96,7 +96,7 @@ class Inverter:
                 if e.error_code == 4: #if no response; probably time out. retry with increased delay
                     isError = True
                 else:
-                    raise ModbusIOException
+                    raise
 
             if register.isError() or isError:
                 self.__log.error(register.__str__)
@@ -110,6 +110,7 @@ class Inverter:
                 else:
                     #undo step in loop and retry read
                     retry = retry + 1
+                    print("Retry("+str(retry)+")")
                     index = index - -1
                     continue
             
@@ -132,10 +133,7 @@ class Inverter:
         info['StatusCode'] = registry[0]
         
         for item in self.protocolSettings.input_registry_map:
-            value = ''
-
-        
-            
+            value = ''    
 
             if item.data_type == Data_Type.UINT: #read uint
                 value = float((registry[item.register] << 16) + registry[item.register + 1])
