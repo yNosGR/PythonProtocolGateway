@@ -48,7 +48,10 @@ class Inverter:
                     exit()
                     
                 serial_number = serial_number  + str(data.registers[0])
-                print(str(data.registers[0]).decode('utf-8'))
+
+                data_bytes = data.registers[0].to_bytes((data.registers[0].bit_length() + 7) // 8, byteorder='big')
+
+                print(data_bytes.decode('utf-8'))
 
             time.sleep(self.modbus_delay) #sleep inbetween requests so modbus can rest
 
