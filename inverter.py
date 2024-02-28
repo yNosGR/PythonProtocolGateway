@@ -120,7 +120,7 @@ class Inverter:
             
             #combine registers into "registry"
             i = -1
-            while(i := i + 1 ) < range[1] - range[0]:
+            while(i := i + 1 ) < range[1]:
                 print(i)
                 registry[i+range[0]] = register.registers[i]
 
