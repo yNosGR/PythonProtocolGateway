@@ -61,7 +61,7 @@ systemctl status invertermodbustomqtt.service
 ```
 
 ### install mqtt on home assistant
-![HA Demo](https://github.com/HotNoob/growatt2mqtt-hotnoob/blob/main/images/home%20assistant%20example.png?raw=true)
+![HA Demo](https://raw.githubusercontent.com/HotNoob/InverterModBusToMQTT/main/images/home%20assistant%20example2.png)
 
 ```Settings -> Add-Ons -> Add-On Store -> Mosquitto broker```
 
