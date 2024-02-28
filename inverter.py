@@ -85,15 +85,15 @@ class Inverter:
         while (index := index + 1) < len(ranges) :
             range = ranges[index]
 
-            print("get registers("+str(index)+"): " + str(range[0]) + " to " + str(range[1]) )
+            print("get registers("+str(index)+"): " + str(range[0]) + " to " + str(range[0]+range[1]) )
             time.sleep(self.modbus_delay) #sleep for 1ms to give bus a rest #manual recommends 1s between commands
 
             isError = False
             try:
                 if register_type == "input":
-                    register = self.client.read_input_registers(range[0], range[1] - range[0], unit=self.unit)
+                    register = self.client.read_input_registers(range[0], range[1], unit=self.unit)
                 else:
-                    register = self.client.read_holding_registers(range[0], range[1] - range[0], unit=self.unit)
+                    register = self.client.read_holding_registers(range[0], range[1], unit=self.unit)
 
             except ModbusIOException as e: 
                 print("ModbusIOException : ", e.error_code)
