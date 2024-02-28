@@ -39,8 +39,8 @@ sigineer_v0.11 = sigineer inverters - currently untested
 eg4_v58 = eg4 inverters - comming soon
 ```
 
-### protocol analyzer
-this is a new feature, currently in the making. probably needs some fine tuning, but is usable. 
+### protocol analyzer - work in progress
+this is a new feature, currently in the making.
 update the configuration:
 ```
 [inverter]
@@ -62,7 +62,7 @@ input register : 19 of 63
 holding register : 41 of 101
 ```
 
-the results above suggests that "growatt_2020_v1.24" is the most likely protocol for the inverter. turn off analyze_protocol and change protocol_version.
+the results above suggests that "growatt_2020_v1.24" is the most likely protocol for the inverter.
 
 ### run as script
 ```python3 -u invertermodbustomqtt.py```
