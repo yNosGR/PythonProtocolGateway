@@ -86,7 +86,7 @@ class protocol_settings:
     def load__registry(self, path) -> list[registry_map_entry]: 
         registry_map : list[registry_map_entry] = []
 
-        with open(path, newline='') as csvfile:
+        with open(path, newline='', encoding='latin-1') as csvfile:
             # Create a CSV reader object
             reader = csv.DictReader(csvfile, delimiter=';') #compensate for openoffice
             
