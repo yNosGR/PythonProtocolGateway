@@ -201,7 +201,7 @@ class protocol_settings:
                     registers.append(register.register)
 
             if registers: #not empty
-                ranges.append((min(registers), max(registers))) ## APPENDING A TUPLE!
+                ranges.append((min(registers), max(registers)-min(registers))) ## APPENDING A TUPLE!
 
         return ranges
 
