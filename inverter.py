@@ -37,6 +37,7 @@ class Inverter:
 
     def read_serial_number(self) -> str:
         serial_number = ""
+        sn2 = ""
         fields = ['Serial No 1', 'Serial No 2', 'Serial No 3', 'Serial No 4', 'Serial No 5']
         for field in fields:
             self.__log.info("Reading " + field)
@@ -50,8 +51,8 @@ class Inverter:
                 serial_number = serial_number  + str(data.registers[0])
 
                 data_bytes = data.registers[0].to_bytes((data.registers[0].bit_length() + 7) // 8, byteorder='big')
-
-                print(data_bytes.decode('utf-8'))
+                sn2 = sn2 + str(data_bytes.decode('utf-8'))
+                print(sn2)
 
             time.sleep(self.modbus_delay) #sleep inbetween requests so modbus can rest
 
