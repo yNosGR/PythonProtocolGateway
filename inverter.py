@@ -75,7 +75,7 @@ class Inverter:
             ranges = []
             min = -batch_size
             while( min := min + batch_size ) < max:
-                ranges.append((min, min + batch_size)) ##APPEND TUPLE
+                ranges.append((min, batch_size)) ##APPEND TUPLE
 
         registry : dict = {}
         retries = 7
@@ -91,9 +91,9 @@ class Inverter:
             isError = False
             try:
                 if register_type == "input":
-                    register = self.client.read_input_registers(range[0], range[1]+1, unit=self.unit)
+                    register = self.client.read_input_registers(range[0], range[1] - range[0], unit=self.unit)
                 else:
-                    register = self.client.read_holding_registers(range[0], range[1]+1, unit=self.unit)
+                    register = self.client.read_holding_registers(range[0], range[1] - range[0], unit=self.unit)
 
             except ModbusIOException as e: 
                 print("ModbusIOException : ", e.error_code)
