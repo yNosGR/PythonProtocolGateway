@@ -61,7 +61,7 @@ systemctl status invertermodbustomqtt.service
 ```
 
 ### install mqtt on home assistant
-![HA Demo](https://github.com/HotNoob/growatt2mqtt-hotnoob/blob/main/home%20assistant%20example.png?raw=true)
+![HA Demo](https://github.com/HotNoob/growatt2mqtt-hotnoob/blob/main/images/home%20assistant%20example.png?raw=true)
 
 ```Settings -> Add-Ons -> Add-On Store -> Mosquitto broker```
 
@@ -105,7 +105,7 @@ variable2
 ### donate
 this took me a while to make; and i had to make it because there werent any working solutions. 
 donations would be appreciated.
-![BitCoin Donation](https://github.com/HotNoob/growatt2mqtt-hotnoob/blob/main/donate_to_hotnoob.png?raw=true)
+![BitCoin Donation](https://github.com/HotNoob/growatt2mqtt-hotnoob/blob/main/images/donate_to_hotnoob.png?raw=true)
 
 ```(btc) bc1qh394vazcguedkw2rlklnuhapdq7qgpnnz9c3t0```
 
