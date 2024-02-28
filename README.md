@@ -39,6 +39,31 @@ sigineer_v0.11 = sigineer inverters - currently untested
 eg4_v58 = eg4 inverters - comming soon
 ```
 
+### protocol analyzer
+this is a new feature, currently in the making. probably needs some fine tuning, but is usable. 
+update the configuration:
+```
+[inverter]
+analyze_protocol = true
+```
+
+when this mode runs, it will read the registers of your inverter and attempt to determine which protocol best fits. 
+the higher the value, the more likely that the protocol matches. 
+
+```
+=== growatt_2020_v1.24 - 710 ===
+input register : 405 of 695
+holding register : 305 of 561
+=== sigineer_v0.11 - 62 ===
+input register : 31 of 150
+holding register : 31 of 63
+=== v0.14 - 60 ===
+input register : 19 of 63
+holding register : 41 of 101
+```
+
+the results above suggests that "growatt_2020_v1.24" is the most likely protocol for the inverter. turn off analyze_protocol and change protocol_version.
+
 ### run as script
 ```python3 -u invertermodbustomqtt.py```
 
@@ -61,7 +86,7 @@ systemctl status invertermodbustomqtt.service
 ```
 
 ### install mqtt on home assistant
-![HA Demo](https://github.com/HotNoob/growatt2mqtt-hotnoob/blob/main/images/home%20assistant%20example.png?raw=true)
+![HA Demo](https://raw.githubusercontent.com/HotNoob/InverterModBusToMQTT/main/images/home%20assistant%20example2.png)
 
 ```Settings -> Add-Ons -> Add-On Store -> Mosquitto broker```
 
