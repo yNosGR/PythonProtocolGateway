@@ -331,11 +331,11 @@ class InverterModBusToMQTT:
         print("max input register: ", max_input_register)
         print("max holding register: ", max_holding_register)
 
-        self.inverter.modbus_delay = self.inverter.modbus_delay / 2 #decrease delay because can probably get away with it due to lots of small reads
+        self.inverter.modbus_delay = self.inverter.modbus_delay #decrease delay because can probably get away with it due to lots of small reads
         print("read INPUT Registers: ")
         ##batch_size = 1, read registers one by one; if out of bound. it just returns error
-        input_register = self.inverter.read_registers(min=0, max=max_input_register, batch_size=10)
-        holding_register = self.inverter.read_registers(min=0, max=max_holding_register, batch_size=1, register_type="holding")
+        input_register = self.inverter.read_registers(min=0, max=max_input_register, batch_size=45)
+        holding_register = self.inverter.read_registers(min=0, max=max_holding_register, batch_size=45, register_type="holding")
 
         #print results for debug
         print("=== START INPUT REGISTER ===")
