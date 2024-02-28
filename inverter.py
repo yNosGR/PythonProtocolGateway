@@ -111,7 +111,7 @@ class Inverter:
                     #undo step in loop and retry read
                     retry = retry + 1
                     print("Retry("+str(retry)+") range("+str(index)+")")
-                    index = index - -1
+                    index = index - 1
                     continue
             
             #combine registers into "registry"
