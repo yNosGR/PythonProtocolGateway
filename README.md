@@ -47,10 +47,22 @@ update the configuration:
 analyze_protocol = true
 ```
 
-![Results Example](https://raw.githubusercontent.com/HotNoob/InverterModBusToMQTT/main/images/protocol_analyzer_results.jpg)
-
 when this mode runs, it will read the registers of your inverter and attempt to determine which protocol best fits. 
-the higher the value, the more likely that the protocol matches. the results above suggests that "growatt_2020_v1.24" is the most likely protocol for the inverter
+the higher the value, the more likely that the protocol matches. 
+
+```
+=== growatt_2020_v1.24 - 710 ===
+input register : 405 of 695
+holding register : 305 of 561
+=== sigineer_v0.11 - 62 ===
+input register : 31 of 150
+holding register : 31 of 63
+=== v0.14 - 60 ===
+input register : 19 of 63
+holding register : 41 of 101
+```
+
+the results above suggests that "growatt_2020_v1.24" is the most likely protocol for the inverter.
 
 ### run as script
 ```python3 -u invertermodbustomqtt.py```
