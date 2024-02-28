@@ -119,6 +119,9 @@ class protocol_settings:
                 variable_name = row['variable name'] if row['variable name'] else row['documented name']
                 variable_name = variable_name.lower().replace(' ', '_') #clean name
 
+                if re.search("[^a-zA-Z0-9\_]", variable_name) :
+                    print("WARNING Invalid Name : " + str(variable_name) + " reg: " + str(row['register']) + " doc name: " + str(row['documented name']) + " path: " + str(path))
+
                 #convert to float
                 try:
                     numeric_part = float(numeric_part)
