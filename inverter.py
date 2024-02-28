@@ -92,10 +92,11 @@ class Inverter:
             try:
                 register = self.client.read_input_registers(range[0], range[1]+1, unit=self.unit)
             except ModbusIOException as e: 
+                print("ModbusIOException : ", e.error_code)
                 if e.error_code == 4: #if no response; probably time out. retry with increased delay
                     isError = True
                 else:
-                    raise
+                    raise ModbusIOException
 
             if register.isError() or isError:
                 self.__log.error(register.__str__)
