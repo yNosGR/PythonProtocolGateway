@@ -77,7 +77,7 @@ class Inverter:
         retries = 7
         retry = 0
     
-        while (index := + 1) <= len(self.protocolSettings.holding_registry_ranges) :
+        while (index := + 1) < len(self.protocolSettings.holding_registry_ranges) :
             range = self.protocolSettings.holding_registry_ranges[index]
 
             print("get registers: " + str(range[0]) + " to " + str(range[1]) )
