@@ -394,10 +394,11 @@ class InverterModBusToMQTT:
         count = 0
         for item in self.inverter.protocolSettings.input_registry_map:
             count = count + 1
-            print('Publishing Topic '+str(count)+' of ' + str(length) + ' "'+str(clean_name)+'"', end='\r', flush=True)
 
 
             clean_name = item.variable_name.lower().replace(' ', '_')
+            print('Publishing Topic '+str(count)+' of ' + str(length) + ' "'+str(clean_name)+'"', end='\r', flush=True)
+
             #device['sw_version'] = bms_version
             disc_payload = {}
             disc_payload['availability_topic'] = self.__mqtt_topic + "/availability"
