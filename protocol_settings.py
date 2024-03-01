@@ -187,7 +187,7 @@ class protocol_settings:
                 if match:
                     register = int(match.group('register'))
                     register_bit = int(match.group('bit'))
-                    print("register: " + str(register) + " bit : " + str(register_bit))
+                    #print("register: " + str(register) + " bit : " + str(register_bit))
                 else:
                     register = int(row['register'])
                 
