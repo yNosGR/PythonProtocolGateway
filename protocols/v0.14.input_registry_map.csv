@@ -1,5 +1,5 @@
 variable name;data type;register;documented name;description;value;unit;note;;;;;;;;;;
-;;0;System Status;System run state;0: Standby;1;          PV     an     Grid Combine Discharge2: Discharge;3: Fault;4: Flash;5: PV charge;6: AC charge;7: Combine charge;8:    Combine    charge and Bypass;9:    PV    charge    and Bypass;10:    AC    charge    and Bypass;  11: Bypass;12:    PV    charge    andDischarge
+;;0;System Status;System run state;{{system_status_codes}};1;          PV     an     Grid Combine Discharge2: Discharge;3: Fault;4: Flash;5: PV charge;6: AC charge;7: Combine charge;8:    Combine    charge and Bypass;9:    PV    charge    and Bypass;10:    AC    charge    and Bypass;  11: Bypass;12:    PV    charge    andDischarge
 PV1 Voltage;;1;Vpv1;PV1 voltage;;0.1V;;;;;;;;;;;
 PV2 Voltage;;2;Vpv2;PV2 voltage;;0.1V;;;;;;;;;;;
 PV1 Watts;;3;Ppv1 H;PV1 charge power (high);;0.1W;;;;;;;;;;;
@@ -39,13 +39,13 @@ AC Input Watts;;36;AC_InWatt H;AC input watt (high);;0.1W;;;;;;;;;;;
 ;;37;AC_InWatt L;AC input watt (low);;0.1W;;;;;;;;;;;
 AC Input VA;;38;AC_InVA H;AC    input    apparent    power (high);;0.1VA;;;;;;;;;;;
 ;;39;AC_InVA L;AC    input    apparent    power (low);;0.1VA;;;;;;;;;;;
-;;40;Fault bit;fault bit;&*1;;;;;;;;;;;;
-;16bit_flags;41;Warning bit;Warning bit;&*1;;;;;;;;;;;;
-;16bit_flags;42;Warning bit high;;;;;;;;;;;;;;
+;;40;Fault bit;fault bit;{{fault_bit_codes}};;;;;;;;;;;;
+;16bit_flags;41;Warning bit;Warning bit;{{warning_bit_codes}};;;;;;;;;;;;
+;16bit_flags;42;Warning bit high;;{{warning_bit_high_codes}};;;;;;;;;;;;
 ;;43;warning value;warning value;;;;;;;;;;;;;
 ;;44;DTC;Device Type Code;&*6;;;;;;;;;;;;
-;;45;Check Step;Product check step;1:PV1   charge   power check 2:PV2   charge   power check 3:AC    charge    Powercheck;;;;;;;;;;;;
-;;46;Production Line Mode;Production Line Mode;0:  Not  at  Production Line Mode 1:     Production     Line Mode 2:     Production     LineClear Fault Mode;;;;;;;;;;;;
+;;45;Check Step;Product check step;{{check_step_codes}};;;;;;;;;;;;
+;;46;Production Line Mode;Production Line Mode;{{production_line_mode_codes}};;;;;;;;;;;;
 ;;47;ConstantPowerOKFlag;Constant Power OK Flag;0: Not OK 1: OK;;;;;;;;;;;;
 PV1 KWH Today;;48;Epv1_today H;PV Energy today;;;;;;;;;;;;;
 ;;49;Epv1_today L;PV Energy today;;0.1kWh;;;;;;;;;;;

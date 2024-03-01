@@ -1,3 +1,5 @@
+pdf2go.com does the cleanest job of pdf to tables so far. still needs a lot of cleaning cause pdfs are dirty
+
 common replacements for cleaning
 
 "\s+" " "

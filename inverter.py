@@ -8,6 +8,10 @@ import time
 import struct
 from pymodbus.exceptions import ModbusIOException
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from pymodbus.client.sync import ModbusSerialClient as ModbusClient
+
 from protocol_settings import Data_Type, registry_map_entry, protocol_settings
 
 class Inverter:
@@ -19,7 +23,7 @@ class Inverter:
     '''time inbetween requests'''
 
     def __init__(self, client, name, unit, protocol_version, max_precision : int = -1, log = None):
-        self.client = client
+        self.client : ModbusClient = client
         self.name = name
         self.unit = unit
         self.protocol_version = protocol_version
