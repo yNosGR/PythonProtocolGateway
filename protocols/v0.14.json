@@ -27,7 +27,7 @@
         "1" : "Production Line Mode",
         "2" : "Production Line Clear Fault Mode"
     },
-    "fault_codes":
+    "fault_bit_codes":
     {
         "2" : "Over Temperature",
         "3" : "Bat Voltage High",
@@ -47,8 +47,42 @@
         "80" : "can fault",
         "81" : "host loss"
     },
-    "warning_codes":
+    "warning_bit_codes":
     {
-        "0x0001" : "Fan lock warning"
+       "b0" : "Fan_lock_warning", 
+       "b1": "Over_charge", 
+       "b2": "Battery_voltage_low", 
+       "b3": "Over_load", 
+       "b4": "Op_power_derating", 
+       "b5": "Solar_stop_due_to_bat_low", 
+       "b6": "Solar_stop_due_to_Pv_high", 
+       "b7": "Solar_stop_due_to_over_load", 
+       "b8": "Grid_different", 
+       "b9": "Grid_phase_error", 
+       "b10": "Op_phase_loss", 
+       "b11": "Over_temprature", 
+       "b12": "Buck_current_over", 
+       "b13": "Battery_disconnected", 
+       "b14": "BMS_com_error", 
+       "b15": "Pv_power_insufficient"
+    },
+    "warning_high_codes":
+    {
+       "b0" : "No bat parallel disable", 
+       "b1": "Parallel version different", 
+       "b2": "Unknown", 
+       "b3": "Capacity different", 
+       "b4": "Host Loss", 
+       "b5": "BmsCellOverVolt", 
+       "b6": "BmsTotalOverVolt", 
+       "b7": "BmsDischgOverCurr", 
+       "b8": "BmsChgOverCurr", 
+       "b9": "BmsOverTemp", 
+       "b10": "Battery voltage consistent", 
+       "b11": "Unknown - Bit Flag 11", 
+       "b12": "Unknown - Bit Flag 12", 
+       "b13": "Unknown - Bit Flag 13", 
+       "b14": "Unknown - Bit Flag 14", 
+       "b15": "Unknown - Bit Flag 16"
     }
 }

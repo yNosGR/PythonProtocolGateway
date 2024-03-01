@@ -17,6 +17,8 @@ class Data_Type(Enum):
     '''16 bit signed int'''
     INT = 5
     '''32 bit signed int'''
+    _16BIT_FLAGS = 7
+
     _1BIT = 11,
     _2BIT = 12, 
     _3BIT = 13,
@@ -47,7 +49,8 @@ class Data_Type(Enum):
                     Data_Type.USHORT : 16,
                     Data_Type.UINT : 32,
                     Data_Type.SHORT : 16,
-                    Data_Type.INT : 32
+                    Data_Type.INT : 32,
+                    Data_Type._16BIT_FLAGS : 16
                  }
         
         if data_type in sizes:

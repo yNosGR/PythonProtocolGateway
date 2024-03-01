@@ -188,6 +188,30 @@ class Inverter:
                 bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
                 bit_index = item.register_bit
                 value = (registry[item.register] >> bit_index) & bit_mask
+            elif item.data_type == Data_Type._16BIT_FLAGS:
+                val = registry[item.register]
+                #16 bit flags
+                
+                if item.documented_name+'_codes' in self.protocolSettings.codes:
+                    flags : list[str] = []
+                    for i in range(16):  # Iterate over each bit position (0 to 15)
+                        # Check if the i-th bit is set
+                        if (val >> i) & 1:
+                            flag_index = "b"+str(i)
+                            if flag_index in self.protocolSettings.codes[item.documented_name+'_codes']:
+                                flags.append[self.protocolSettings.codes[item.documented_name+'_codes'][flag_index]]
+                            
+                    value = ",".join(flags)
+                else:
+                    flags : str = ""
+                    for i in range(16):  # Iterate over each bit position (0 to 15)
+                        # Check if the i-th bit is set
+                        if (val >> i) & 1:
+                            flags = flags + "1"
+                        else:
+                            flags = flags + "0"
+                    value = flags
+                
             else: #default, Data_Type.BYTE
                 value = float(registry[item.register])
 
@@ -197,7 +221,8 @@ class Inverter:
             if  isinstance(value, float) and self.max_precision > -1:
                 value = round(value, self.max_precision)
 
-            if item.documented_name+'_codes' in self.protocolSettings.codes:
+            if (item.data_type is not Data_Type._16BIT_FLAGS and
+                item.documented_name+'_codes' in self.protocolSettings.codes):
                 try:
                     cleanval = str(int(value))
             
