@@ -8,19 +8,59 @@ import os
 
 class Data_Type(Enum):
     BYTE = 1
+    '''8bit byte'''
     USHORT = 2
+    '''16 bit unsigned int'''
     UINT = 3
+    '''32 bit unsigned int'''
     SHORT = 4
+    '''16 bit signed int'''
     INT = 5
+    '''32 bit signed int'''
+    _1BIT = 11,
+    _2BIT = 12, 
+    _3BIT = 13,
+    _4BIT = 14, 
+    _5BIT = 15, 
+    _6BIT = 16, 
+    _7BIT = 17, 
+    _8BIT = 18, 
+    _9BIT = 19, 
+    _10BIT = 20, 
+    _11BIT = 21, 
+    _12BIT = 22, 
+    _13BIT = 23,
+    _14BIT = 24, 
+    _15BIT = 25,
+    _16BIT = 26
     @classmethod
     def fromString(cls, name : str):
         name = name.strip().upper()
+        if name[0].isdigit():
+            name = "_"+name
         return getattr(cls, name)
-
     
+    @classmethod
+    def getSize(cls, data_type : 'Data_Type'):
+        sizes = {
+                    Data_Type.BYTE : 8,
+                    Data_Type.USHORT : 16,
+                    Data_Type.UINT : 32,
+                    Data_Type.SHORT : 16,
+                    Data_Type.INT : 32
+                 }
+        
+        if data_type in sizes:
+            return sizes[data_type]
+
+        if data_type.value > 10: 
+            return data_type.value-10
+
+        return -1 #should never happen
 @dataclass
 class registry_map_entry:
     register : int
+    register_bit : int
     variable_name : str
     documented_name : str
     unit : str
@@ -85,6 +125,7 @@ class protocol_settings:
 
     def load__registry(self, path) -> list[registry_map_entry]: 
         registry_map : list[registry_map_entry] = []
+        register_regex = re.compile(r'(?P<register>\d+)\.b(?P<bit>\d{1,2})')
 
         with open(path, newline='', encoding='latin-1') as csvfile:
             # Create a CSV reader object
@@ -136,9 +177,21 @@ class protocol_settings:
                 #optional row, only needed for non-default data types
                 if 'data type' in row and row['data type']:
                     data_type = Data_Type.fromString(row['data type'])
+
+                register : int = -1;
+                register_bit : int = 0;
+                match = register_regex.search(row['register'])
+                if match:
+                    register = int(match.group('register'))
+                    register_bit = int(match.group('bit'))
+                    print("register: " + str(register) + " bit : " + str(register_bit))
+                else:
+                    register = int(row['register'])
+                
                 
                 item = registry_map_entry( 
-                                            register= int(row['register']),
+                                            register= register,
+                                            register_bit=register_bit,
                                             variable_name= variable_name,
                                             documented_name = row['documented name'],
                                             unit= str(character_part),

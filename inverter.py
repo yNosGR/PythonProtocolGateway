@@ -183,6 +183,11 @@ class Inverter:
                 value = -value
                 #value = struct.unpack('<h', bytes([min(max(registry[item.register], 0), 255), min(max(registry[item.register+1], 0), 255)]))[0]
                 #value = int.from_bytes(bytes([registry[item.register], registry[item.register + 1]]), byteorder='little', signed=True)
+            elif item.data_type.value > 10:
+                bit_size = Data_Type.getSize(item.data_type)
+                bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
+                bit_index = item.register_bit
+                value = (registry[item.register] >> bit_index) & bit_mask
             else: #default, Data_Type.BYTE
                 value = float(registry[item.register])
 

@@ -4,3 +4,4 @@ common replacements for cleaning
 "\+" "Plus"
 "\%" "Percent"
 "[\[\]\(\)\.\/\-]" "_"
+"\_\s+|\s+\_" "_"
