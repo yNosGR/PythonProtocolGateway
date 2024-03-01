@@ -25,7 +25,7 @@ class registry_map_entry:
     documented_name : str
     unit : str
     unit_mod : float
-    data_type : Data_Type = Data_Type.BYTE
+    data_type : Data_Type = Data_Type.USHORT
 
 class protocol_settings:
     protocol : str
@@ -131,7 +131,7 @@ class protocol_settings:
                 if numeric_part == 0:
                     numeric_part = float(1)
 
-                data_type = Data_Type.BYTE
+                data_type = Data_Type.USHORT
 
                 #optional row, only needed for non-default data types
                 if 'data type' in row and row['data type']:
@@ -158,8 +158,8 @@ class protocol_settings:
                         ):
                         combined_item = registry_map[index-1]
 
-                        if not combined_item.data_type or combined_item.data_type  == Data_Type.BYTE:
-                            if registry_map[index].data_type != Data_Type.BYTE:
+                        if not combined_item.data_type or combined_item.data_type  == Data_Type.USHORT:
+                            if registry_map[index].data_type != Data_Type.USHORT:
                                 combined_item.data_type = registry_map[index].data_type
                             else:
                                 combined_item.data_type = Data_Type.UINT
