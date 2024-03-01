@@ -1,0 +1,64 @@
+{
+    "warning_flag_codes": 
+    {
+        "b0" : "battery cell overvoltage alarm",
+        "b1" : "battery cell low voltage alarm",
+        "b2" : "battery pack overvoltage alarm",
+        "b3" : "battery pack low voltage alarm",
+        "b4" : "charging over current alarm",
+        "b5" : "discharging over current alarm",
+        "b6" : "reserved",
+        "b7" : "reserved",
+        "b8" : "charging high temperature alarm",
+        "b9" : "discharging high temperature alarm",
+        "b10" : "charging low temperature alarm",
+        "b11" : "discharging low temperature alarm",
+        "b12" : "environment high temperature alarm",
+        "b13" : "environment low temperature alarm",
+        "b14" : "MOSFET high temperature alarm",
+        "b15" : "SOC Low alarm"
+    },
+    "protection_flag_codes":
+    {
+        "b0" : "battery cell over voltage protection",
+        "b1" : "battery cell low voltage protection",
+        "b2" : "battery pack over voltage protection",
+        "b3" : "battery pack low voltage protection",
+        "b4" : "charging over current protection",
+        "b5" : "discharging over current protection",
+        "b6" : "short circuit protection",
+        "b7" : "charger overvoltage protection",
+        "b8" : "charging high temperature protection",
+        "b9" : "discharging high temperature protection",
+        "b10" : "charging low temperature protection",
+        "b11" : "discharging low temperature protection",
+        "b12" : "MOSFET high temperature protection",
+        "b13" : "environment high temperature protection",
+        "b14" : "environment low temperature protection",
+        "b15" : "reserved"
+    },
+    "fault_flag_codes":
+    {
+        "b0" : "charging MOSFET fault",
+        "b1" : "discharging MOSFET fault",
+        "b2" : "temperature sensor fault",
+        "b3" : "reserve",
+        "b4" : "battery cell fault",
+        "b5" : "front end sampling communication fault",
+        "b6" : "reserve",
+        "b7" : "reserve"
+    },
+    "status_flag_codes":
+    {
+        "b0" : "state of charge",
+        "b1" : "state of discharge",
+        "b2" : "charging MOSFET is ON",
+        "b3" : "discharging MOSFET is ON",
+        "b4" : "charging Limiter is ON",
+        "b5" : "reserve",
+        "b6" : "charger inversed",
+        "b7" : "heater is ON"
+    },
+
+
+}
