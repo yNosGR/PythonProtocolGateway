@@ -73,6 +73,7 @@ class Inverter:
 
     def read_info(self):
         """ reads holding registers from ModBus register inverters -- needs to be updated to support protocol csv """
+        return None
         row = self.client.read_holding_registers(73, unit=self.unit)
         if row.isError():
             raise ModbusIOException
