@@ -472,6 +472,7 @@ class InverterModBusToMQTT:
 
 
             for entry in protocol.holding_registry_map:
+                if entry.variable_name in holding_info:
                     val = holding_info[entry.variable_name]
                     score = evaluate_score(entry, val)
 
