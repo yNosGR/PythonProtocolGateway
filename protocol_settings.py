@@ -41,6 +41,17 @@ class Data_Type(Enum):
         name = name.strip().upper()
         if name[0].isdigit():
             name = "_"+name
+
+        #common alternative names
+        alias : dict[str,str] = {
+            "UINT8" : "BYTE",
+            "INT16" : "SHORT",
+            "UINT16" : "USHORT"
+        }
+        
+        if name in alias:
+            name = alias[name]
+
         return getattr(cls, name)
     
     @classmethod
@@ -69,7 +80,11 @@ class registry_map_entry:
     documented_name : str
     unit : str
     unit_mod : float
+    concatenate : bool
+    concatenate_registers : list[int] 
+    ''' if value needs to be concatenated with other registers'''
     data_type : Data_Type = Data_Type.USHORT
+
 
 class protocol_settings:
     protocol : str
@@ -131,6 +146,12 @@ class protocol_settings:
         registry_map : list[registry_map_entry] = []
         register_regex = re.compile(r'(?P<register>\d+)\.b(?P<bit>\d{1,2})')
 
+        range_regex = re.compile(r'(?P<start>\d+)\-(?P<end>\d+)')
+
+
+        if not os.path.exists(path): #return empty is file doesnt exist.
+            return registry_map
+        
         with open(path, newline='', encoding='latin-1') as csvfile:
             # Create a CSV reader object
             reader = csv.DictReader(csvfile, delimiter=';') #compensate for openoffice
@@ -182,28 +203,48 @@ class protocol_settings:
                 if 'data type' in row and row['data type']:
                     data_type = Data_Type.fromString(row['data type'])
 
-                register : int = -1;
-                register_bit : int = 0;
+                concatenate : bool = False
+                concatenate_registers : list[int] = []
+
+                register : int = -1
+                register_bit : int = 0
                 match = register_regex.search(row['register'])
                 if match:
                     register = int(match.group('register'))
                     register_bit = int(match.group('bit'))
                     #print("register: " + str(register) + " bit : " + str(register_bit))
                 else:
-                    register = int(row['register'])
+                    range_match = range_regex.search(row['register'])
+                    if not range_match:
+                        register = int(row['register'])
+                    else:
+                        start = int(range_match.group('start'))
+                        end = int(range_match.group('start'))
+                        register = start
+                        if end > start:
+                            concatenate = True
+                            for i in range(start, end):
+                                concatenate_registers.append(i)
+                       
+                if concatenate_registers:
+                    r = range(len(concatenate_registers))
+                else:
+                    r = range(1)
                 
-                
-                item = registry_map_entry( 
-                                            register= register,
-                                            register_bit=register_bit,
-                                            variable_name= variable_name,
-                                            documented_name = row['documented name'],
-                                            unit= str(character_part),
-                                            unit_mod= numeric_part,
-                                            data_type= data_type
-                                        )
-
-                registry_map.append(item)
+                for i in r:
+                    item = registry_map_entry( 
+                                                register= register,
+                                                register_bit=register_bit,
+                                                variable_name= variable_name,
+                                                documented_name = row['documented name'],
+                                                unit= str(character_part),
+                                                unit_mod= numeric_part,
+                                                data_type= data_type,
+                                                concatenate = concatenate,
+                                                concatenate_registers = concatenate_registers
+                                            )
+                    registry_map.append(item)
+                    register = register + 1
             
             for index in reversed(range(len(registry_map))):
                 item = registry_map[index]

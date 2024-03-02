@@ -153,6 +153,7 @@ class Inverter:
     def process_registery(self, registry : dict ) -> dict[str,str]:
         '''process registry into appropriate datatypes and names'''
         
+        concatenate_registry : dict = {}
         info = {}
         for item in self.protocolSettings.input_registry_map:
 
@@ -234,8 +235,17 @@ class Inverter:
             
             #if item.unit:
             #    value = str(value) + item.unit
-
-            info[item.variable_name] = value
+            if item.concatenate:
+                concatenate_registry[item.register] = value
+                if all(key in concatenate_registry for key in item.concatenate_registers):
+                    concatenated_value = ""
+                    for key in item.concatenate_registers:
+                        concatenated_value = concatenated_value + concatenate_registry[key]
+                        del concatenate_registry[key]
+                        
+                    info[item.variable_name] = value
+            else:
+                info[item.variable_name] = value
 
 
     def read_input_registry(self) -> dict[str,str]:
