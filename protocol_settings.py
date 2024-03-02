@@ -123,9 +123,10 @@ class protocol_settings:
 
                     self.variable_mask.append(line.strip().lower())
 
+        self.load__codes() #load first, so priority to json codes
         self.load__input_registry_map()
         self.load__holding_registry_map()
-        self.load__codes()
+
 
     def get_holding_registry_entry(self, name : str):
         return self.get_registry_entry(name, self.holding_registry_map)
