@@ -285,11 +285,14 @@ class InverterModBusToMQTT:
                 info = {}
 
                 if self.__send_input_register:
-                    info.update(self.inverter.read_input_registry())
+                    new_info = self.inverter.read_input_registry()
+                    info.update(new_info)
 
                 if self.__send_holding_register:
                     print("read holding registers")
-                    info.update(self.inverter.read_holding_registry())
+                    new_info = self.inverter.read_holding_registry()
+                    print(new_info)
+                    info.update(new_info)
 
                 if info is None:
                     self.__log.info("Register is None; modbus busy?")
