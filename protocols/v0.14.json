@@ -84,5 +84,10 @@
        "b13": "Unknown - Bit Flag 13", 
        "b14": "Unknown - Bit Flag 14", 
        "b15": "Unknown - Bit Flag 16"
+    },
+    "lcd_language_codes" :
+    {
+       "0" : "Other",
+       "1" : "English"
     }
 }

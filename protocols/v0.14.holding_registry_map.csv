@@ -1,6 +1,6 @@
 variable name;data type;register;documented name;description;customer write;values;unit;initial value;note;;;
 ;;0;On_Off;"The Standby On/Off state and the AC output DisEN/EN state; The low byte is the Standby on/off(1/0), the high byte is the AC output disable/enable (1/0). ";;0x0000: Output enable 0x0100: Output disable;;;;;0;
-;;1;OutputConfig;AC output set;W;0: BAT First 1: PV First;; 2: UTI First; 3: PV&UTI First;;;0
+;;1;OutputConfig;AC output set;W;"{""0"": ""BAT First"", ""1"":""PV First""}";; 2: UTI First; 3: PV&UTI First;;;0
 ;;2;ChargeConfig;Charge source set;W;0: PV first 1: PV&UTI;; 2: PV Only;;;;0
 ;;3;UtiOutStart;Uti Output Start Time;W;0-23;;H(hour);0;;;
 ;;4;UtiOutEnd;Uti Output End Time;W;0-23;;H(hour);0;;;
@@ -10,7 +10,7 @@ variable name;data type;register;documented name;description;customer write;valu
 ;;8;ACInModel;AC Input Mode;W;"0: APL,90-280VAC;1: UPS,170-280VAC;2: GEN";;;0;;;
 ;ASCII;r9~11;Fw version;Firmware version (high);;;;ASCII;;;;
 ;ASCII;r12~14;Fw version2;Control Firmware version (high);;;;ASCII;;;;
-;;15;LCD language;LCD language;W;0-1;1;English;;;;
+;;15;LCD language;LCD language;W;{{lcd_language_codes}};1;English;;;;
 ;;16;GridV_Adj;;;;;;;;;
 ;;17;InvV_Adj;;;;;;;;;
 ;;18;OutputVoltType;Output Volt Type;W;0: 208VAC 1: 230VAC 2: 240VAC 3:220VAC 4:100VAC 5:110VAC 6:120VAC ;;1;;;;

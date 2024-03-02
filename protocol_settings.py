@@ -220,20 +220,36 @@ class protocol_settings:
                 if 'data type' in row and row['data type']:
                     data_type = Data_Type.fromString(row['data type'])
 
+
                 #get value range for protocol analyzer
                 value_min : int = 0
                 value_max : int = 65535 #default - max value for ushort
                 value_regex : str = ""
-                val_match = range_regex.search(row['values'])
-                if val_match:
-                    value_min = int(val_match.group('start'))
-                    value_max = int(val_match.group('end'))
+                value_is_json : bool = False
 
-                if data_type == Data_Type.ASCII:
-                    #value_regex
-                    val_match = ascii_value_regex.search(row['values'])
+                #test if value is json.
+                try:
+                    codes_json = json.loads(row['values'])
+                    value_is_json = True
+
+                    name = item.documented_name+'_codes'
+                    if name not in self.codes:
+                        self.codes[name] = codes_json
+
+                except ValueError:
+                    value_is_json = False
+
+                if not value_is_json:
+                    val_match = range_regex.search(row['values'])
                     if val_match:
-                        value_regex = val_match.group('regex') 
+                        value_min = int(val_match.group('start'))
+                        value_max = int(val_match.group('end'))
+
+                    if data_type == Data_Type.ASCII:
+                        #value_regex
+                        val_match = ascii_value_regex.search(row['values'])
+                        if val_match:
+                            value_regex = val_match.group('regex') 
 
                 concatenate : bool = False
                 concatenate_registers : list[int] = []
