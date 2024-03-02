@@ -107,6 +107,12 @@ class InverterModBusToMQTT:
         formatter = logging.Formatter('[%(asctime)s]  {%(filename)s:%(lineno)d}  %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
         self.__log.addHandler(handler)
+
+        #logging.basicConfig()
+        pymodbus_log = logging.getLogger('pymodbus')
+        pymodbus_log.setLevel(logging.DEBUG)
+        pymodbus_log.addHandler(handler)
+
         return None
 
     def init_invertermodbustomqtt(self):
@@ -134,9 +140,7 @@ class InverterModBusToMQTT:
         if (self.__log_level != 'DEBUG'):
             self.__log.setLevel(logging.getLevelName(self.__log_level))
 
-            logging.basicConfig()
-            pymodbus_log = logging.getLogger('pymodbus')
-            pymodbus_log.setLevel(logging.DEBUG)
+
 
         self.__log.info('Setup Serial Connection... ')
         self.__port = self.__settings.get(
