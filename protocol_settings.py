@@ -23,21 +23,21 @@ class Data_Type(Enum):
     ASCII = 84
     ''' 2 characters '''
 
-    _1BIT = 11,
-    _2BIT = 12, 
-    _3BIT = 13,
-    _4BIT = 14, 
-    _5BIT = 15, 
-    _6BIT = 16, 
-    _7BIT = 17, 
-    _8BIT = 18, 
-    _9BIT = 19, 
-    _10BIT = 20, 
-    _11BIT = 21, 
-    _12BIT = 22, 
-    _13BIT = 23,
-    _14BIT = 24, 
-    _15BIT = 25,
+    _1BIT = 11
+    _2BIT = 12
+    _3BIT = 13
+    _4BIT = 14
+    _5BIT = 15
+    _6BIT = 16
+    _7BIT = 17
+    _8BIT = 18
+    _9BIT = 19
+    _10BIT = 20
+    _11BIT = 21
+    _12BIT = 22
+    _13BIT = 23
+    _14BIT = 24
+    _15BIT = 25
     _16BIT = 26
     @classmethod
     def fromString(cls, name : str):
