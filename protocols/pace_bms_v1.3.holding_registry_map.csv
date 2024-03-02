@@ -6,12 +6,12 @@ variable name;data type;register;documented name;length;writeable;unit;note;
 ;USHORT;4;Remain capacity;2byte;R;10mAH;;
 ;USHORT;5;Full capacity;2byte;R;10mAH;;
 ;USHORT;6;Design capacity;2byte;R;10mAH;;
-;USHORT;7;Battery cycle counts;2byte;R;Cyc.;;
-;16BIT_FLAGS;9;Warning flag;2byte;R;Hex;See description-1;
-;16BIT_FLAGS ;10;Protection flag;2byte;R;Hex;See description-2;
-;8BIT_FLAGS ;11;Fault flag;2byte;R;Hex;See description-3;
+;USHORT;7;Battery cycle counts;2byte;R;Cycles;;
+;16BIT_FLAGS;9;Warning flag;2byte;R;;See description-1;
+;16BIT_FLAGS ;10;Protection flag;2byte;R;;See description-2;
+;8BIT_FLAGS ;11;Fault flag;2byte;R;;See description-3;
 ;8BIT_FLAGS ;11.b8;Status Flag;;R;;;
-;16BIT_FLAGS ;12;Balance status;2byte;R;Hex;;
+;16BIT_FLAGS ;12;Balance status;2byte;R;;;
 ;USHORT;15;Cell voltage 1;32byte;R;mV;Voltage of 16 cells; 2 byte for each cell
 ;USHORT;16;Cell voltage 2;;R;mV;;
 ;USHORT;17;Cell voltage 3;;R;mV;;
