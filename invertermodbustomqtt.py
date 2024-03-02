@@ -19,7 +19,7 @@ from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 
 from inverter import Inverter
 
-from protocol_settings import protocol_settings,Data_Type,registry_map_entry
+from protocol_settings import protocol_settings,Data_Type,registry_map_entry,registry_type
 
 
 __logo = """
@@ -97,6 +97,9 @@ class InverterModBusToMQTT:
     __send_input_register : bool = True
     ''' send input register over mqtt '''
 
+    __holding_register_prefix : str = ""
+    __input_register_prefix : str = ""
+
     
     inverter : Inverter
     measurement : str
@@ -170,10 +173,12 @@ class InverterModBusToMQTT:
         if not isinstance( self.__mqtt_reconnect_delay , int) or self.__mqtt_reconnect_delay < 1: #minumum 1 second
             self.__mqtt_reconnect_delay = 1
 
-
         self.__mqtt_reconnect_attempts = self.__settings.getint('mqtt', 'reconnect_attempts', fallback=21)
         if not isinstance( self.__mqtt_reconnect_attempts , int) or self.__mqtt_reconnect_attempts < 0: #minimum 0
             self.__mqtt_reconnect_attempts = 0
+
+        self.__holding_register_prefix = self.__settings.get("mqtt", "holding_register_prefix", fallback="")
+        self.__input_register_prefix = self.__settings.get("mqtt", "input_register_prefix", fallback="")
 
         # inverter / device
         #this is kinda dumb, overcomplicates things, let's stick to 1 inverter at a time, can always run multiple instances of script
@@ -299,12 +304,18 @@ class InverterModBusToMQTT:
 
                 if self.__send_input_register:
                     new_info = self.inverter.read_input_registry()
+                    if self.__input_register_prefix:
+                        new_info = {self.__input_register_prefix + key: value for key, value in new_info.items()}
+                        
                     info.update(new_info)
 
                 if self.__send_holding_register:
                     print("read holding registers")
                     new_info = self.inverter.read_holding_registry()
-                    print(new_info)
+
+                    if self.__holding_register_prefix:
+                        new_info = {self.__holding_register_prefix + key: value for key, value in new_info.items()}
+
                     info.update(new_info)
 
                 if info is None:
@@ -525,8 +536,17 @@ class InverterModBusToMQTT:
 
             if item.concatenate and item.register != item.concatenate_registers[0]:
                 continue #skip all except the first register so no duplicates
+            
 
             clean_name = item.variable_name.lower().replace(' ', '_')
+
+            if self.__input_register_prefix and item.registry_type == registry_type.INPUT:
+                clean_name = self.__input_register_prefix + clean_name
+
+            if self.__holding_register_prefix and item.registry_type == registry_type.HOLDING:
+                clean_name = self.__holding_register_prefix + clean_name
+
+
             print('Publishing Topic '+str(count)+' of ' + str(length) + ' "'+str(clean_name)+'"', end='\r', flush=True)
 
             #device['sw_version'] = bms_version
