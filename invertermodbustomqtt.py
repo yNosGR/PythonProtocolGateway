@@ -425,7 +425,7 @@ class InverterModBusToMQTT:
         def evaluate_score(entry : registry_map_entry, val):
             score = 0
             if entry.data_type == Data_Type.ASCII:
-                if not re.match('[^a-zA-Z0-9\_\-]', val): #validate ascii
+                if val and not re.match('[^a-zA-Z0-9\_\-]', val): #validate ascii
                     mod = 1
                     if entry.concatenate:
                         mod = len(entry.concatenate_registers)
