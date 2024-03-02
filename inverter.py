@@ -245,7 +245,14 @@ class Inverter:
             #    value = str(value) + item.unit
             if item.concatenate:
                 concatenate_registry[item.register] = value
-                if all(key in concatenate_registry for key in item.concatenate_registers):
+                
+                all_exist = True
+                for key in item.concatenate_registers:
+                    if key not in concatenate_registry:
+                        all_exist = False
+                        break
+                if all_exist:
+                #if all(key in concatenate_registry for key in item.concatenate_registers):
                     concatenated_value = ""
                     for key in item.concatenate_registers:
                         concatenated_value = concatenated_value + str(concatenate_registry[key])
