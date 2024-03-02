@@ -95,7 +95,8 @@ class Inverter:
         self.__log.info('\tModbus Version: %s\n', str(self.modbus_version))
 
     def read_variable(self, variable_name : str, registry : registry_type):
-
+        ##clean for convinecne  
+        variable_name = variable_name.strip().lower().replace(' ', '_')
         if registry == registry_type.INPUT:
             registry_map = self.protocolSettings.input_registry_map
         elif registry == registry_type.HOLDING:
