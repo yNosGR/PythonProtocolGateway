@@ -152,7 +152,7 @@ class Inverter:
                 #print(str(i) + " => " + str(i+range[0]))
                 registry[i+range[0]] = register.registers[i]
 
-        print(registry)
+        print("registry len: " + str(len(registry)))
         return registry
 
     def process_registery(self, registry : dict ) -> dict[str,str]:
