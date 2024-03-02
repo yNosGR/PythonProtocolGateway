@@ -1,4 +1,4 @@
-variable name;data_type;register;documented name;unit;value;note;;;;;;;;;;;;
+variable name;data_type;register;documented name;unit;values;note;;;;;;;;;;;;
 ;;0;State;;0-65535;For more information;see the definition of the operation mode of off-grid-connected energy storage all- in-one file;;;;;;;;;;;
 ;;1;Vpv1;0.1V;0-65535;PV1 voltage; the AC energy storage system does not have this variable;;;;;;;;;;;
 ;;2;Vpv2;0.1V;0-65535;PV2 voltage; the AC energy storage system does not have this variable;;;;;;;;;;;

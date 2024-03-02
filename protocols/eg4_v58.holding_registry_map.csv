@@ -1,8 +1,8 @@
-variable name;data type;register;documented name;unit;value;note;;;;
-;8bit;7;FWCode0;;A'-'Z' 'a'-'z';For more information of the model code; see Software Version Definition file;;;
-;8bit;7.b8;FWCode1;;A'-'Z' 'a'-'z';For more information of the code name for the derived model; see the software version definition file;;;
-;8bit;8;FWCode2;;A'-'Z' 'a'-'z';For more information of the ODM code;see Software Version Definition;;;
-;8bit;8.b8;FWCode3;;A'-'Z' 'a'-'z';For more information of the region code; see Software Version Definition file;;;
+variable name;data type;register;documented name;unit;values;note;;;;
+;8bit;7;FWCode0;;[a-zA-Z];For more information of the model code; see Software Version Definition file;;;
+;8bit;7.b8;FWCode1;;[a-zA-Z];For more information of the code name for the derived model; see the software version definition file;;;
+;8bit;8;FWCode2;;[a-zA-Z];For more information of the ODM code;see Software Version Definition;;;
+;8bit;8.b8;FWCode3;;[a-zA-Z];For more information of the region code; see Software Version Definition file;;;
 ;8bit;9;Slave Ver;;0-255;For more information of the software version number for redundant CPU; see Software version definition file;;;
 ;8bit;9.b8;Com Ver;;0-255;For Communication CPU software version number; see software version definition file;;;
 ;8bit;10;Cntl Ver;;0-255;For Control CPU software version number; see software version definition file;;;

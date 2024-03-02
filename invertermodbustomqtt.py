@@ -4,6 +4,7 @@ Main module for Growatt / Inverters ModBus RTU data to MQTT
 """
 import atexit
 import glob
+import re
 import time
 import os
 import json
@@ -18,7 +19,7 @@ from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 
 from inverter import Inverter
 
-from protocol_settings import protocol_settings
+from protocol_settings import protocol_settings,Data_Type
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -370,35 +371,69 @@ class InverterModBusToMQTT:
         self.inverter.modbus_delay = self.inverter.modbus_delay #decrease delay because can probably get away with it due to lots of small reads
         print("read INPUT Registers: ")
         ##batch_size = 1, read registers one by one; if out of bound. it just returns error
-        input_register = self.inverter.read_registers(min=0, max=max_input_register, batch_size=45)
-        holding_register = self.inverter.read_registers(min=0, max=max_holding_register, batch_size=45, register_type="holding")
+        input_registry = self.inverter.read_registers(min=0, max=max_input_register, batch_size=45)
+        holding_registry = self.inverter.read_registers(min=0, max=max_holding_register, batch_size=45, register_type="holding")
 
         #print results for debug
         print("=== START INPUT REGISTER ===")
-        print([(key, value) for key, value in input_register.items()])
+        print([(key, value) for key, value in input_registry.items()])
         print("=== END INPUT REGISTER ===")
         print("=== START HOLDING REGISTER ===")
-        print([(key, value) for key, value in holding_register.items()])
+        print([(key, value) for key, value in holding_registry.items()])
         print("=== END HOLDING REGISTER ===")
 
         #very well possible the registers will be incomplete due to different hardware sizes
         #so dont assume they are set / complete
         #we'll see about the behaviour. if it glitches, this could be a way to determine protocol.
+        
 
         input_register_score : dict[str, int] = {}
         holding_register_score : dict[str, int] = {}
+
+        def evaluate_score(entry: registry_map_entry, val):
+            score = 0
+            if entry.data_type == Data_Type.ASCII:
+                if not re.match('[^a-zA-Z0-9\_\-]', val): #validate ascii
+                    mod = 1
+                    if entry.concatenate:
+                        mod = len(entry.concatenate_registers)
+
+                    if entry.value_regex and re.match(entry.value_regex, val): #regex validation
+                        mod = mod * 2 
+
+                    score = score + (2 * mod) #double points for ascii
+                pass
+            else: #default type
+                if isinstance(val, str):
+                    #likely to be a code
+                    score = score + 2
+                elif val != 0:
+                    if val >= entry.value_min and val <= entry.value_max:
+                        score = score + 1
+
+                        if entry.value_max != 65535: #double points for non-default range
+                            score = score + 1
+
+            return score
 
         for name, protocol in protocols.items():
             input_register_score[name] = 0
             holding_register_score[name] = 0
 
+            #process registry based on protocol
+            input_info = self.inverter.process_registery(input_registry, protocol.input_registry_map)
+            holding_info = self.inverter.process_registery(input_registry, protocol.holding_registry_map)
+            
+
             for entry in protocol.input_registry_map:
-                if entry.register in input_register and input_register[entry.register] > 0: #empty registers appear as 0; so if it is being used it is likely above 0. if the normal state is zero it wont be detected
-                    input_register_score[name] = input_register_score[name] + 1
+                if entry.variable_name in input_info:
+                    val = input_info[entry.variable_name]
+                    input_register_score[name] = input_register_score[name] + evaluate_score(entry, val)
+
 
             for entry in protocol.holding_registry_map:
-                if entry.register in holding_register and holding_register[entry.register] > 0:
-                    holding_register_score[name] = holding_register_score[name] + 1
+                    val = holding_info[entry.variable_name]
+                    holding_register_score[name] = holding_register_score[name] + evaluate_score(entry, val)
 
         
         protocol_scores: dict[str, int] = {}

@@ -86,6 +86,8 @@ class registry_map_entry:
     concatenate : bool
     concatenate_registers : list[int] 
 
+    value_regex : str = ""
+
     value_min : int = 0
     ''' min of value range for protocol analyzing'''
     value_max : int = 65535
@@ -156,6 +158,7 @@ class protocol_settings:
         register_regex = re.compile(r'(?P<register>\d+)\.b(?P<bit>\d{1,2})')
 
         range_regex = re.compile(r'(?P<start>\d+)[\-~](?P<end>\d+)')
+        ascii_value_regex = re.compile(r'(?P<regex>^\[.+\]$)')
 
 
         if not os.path.exists(path): #return empty is file doesnt exist.
@@ -209,6 +212,9 @@ class protocol_settings:
                 data_type = Data_Type.USHORT
 
                
+                if 'values' not in row:
+                    row['values'] = ""
+                    print("WARNING No Value Column : path: " + str(path)) 
 
                 #optional row, only needed for non-default data types
                 if 'data type' in row and row['data type']:
@@ -217,10 +223,17 @@ class protocol_settings:
                 #get value range for protocol analyzer
                 value_min : int = 0
                 value_max : int = 65535 #default - max value for ushort
-                val_match = range_regex.search(row['value'])
+                value_regex : str = ""
+                val_match = range_regex.search(row['values'])
                 if val_match:
-                    value_min = int(range_match.group('start'))
-                    value_max = int(range_match.group('end'))
+                    value_min = int(val_match.group('start'))
+                    value_max = int(val_match.group('end'))
+
+                if data_type == Data_Type.ASCII:
+                    #value_regex
+                    val_match = ascii_value_regex.search(row['values'])
+                    if val_match:
+                        value_regex = val_match.group('regex') 
 
                 concatenate : bool = False
                 concatenate_registers : list[int] = []
@@ -260,7 +273,10 @@ class protocol_settings:
                                                 unit_mod= numeric_part,
                                                 data_type= data_type,
                                                 concatenate = concatenate,
-                                                concatenate_registers = concatenate_registers
+                                                concatenate_registers = concatenate_registers,
+                                                value_min=value_min,
+                                                value_max=value_max,
+                                                value_regex=value_regex
                                             )
                     registry_map.append(item)
                     register = register + 1

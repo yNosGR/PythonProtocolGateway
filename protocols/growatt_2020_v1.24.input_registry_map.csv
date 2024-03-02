@@ -1,4 +1,4 @@
-variable name;data type;register;documented name;description;value;unit;note;;Note;;;;;
+variable name;data type;register;documented name;description;values;unit;note;;Note;;;;;
 ;;0;Inverter Status;Inverter run state;0:waiting 1:normal 3:fault;;;;;;;;;
 PV Watts;;1;Ppv H;Input power (high);;0.1W;;;;;;;;
 ;;2;Ppv L;Input power (low);;0.1W;;;;;;;;
