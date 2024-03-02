@@ -85,6 +85,12 @@ class registry_map_entry:
     unit_mod : float
     concatenate : bool
     concatenate_registers : list[int] 
+
+    value_min : int = 0
+    ''' min of value range for protocol analyzing'''
+    value_max : int = 65535
+    ''' max of value range for protocol analyzing'''
+
     ''' if value needs to be concatenated with other registers'''
     data_type : Data_Type = Data_Type.USHORT
 
@@ -149,7 +155,7 @@ class protocol_settings:
         registry_map : list[registry_map_entry] = []
         register_regex = re.compile(r'(?P<register>\d+)\.b(?P<bit>\d{1,2})')
 
-        range_regex = re.compile(r'(?P<start>\d+)\-(?P<end>\d+)')
+        range_regex = re.compile(r'(?P<start>\d+)[\-~](?P<end>\d+)')
 
 
         if not os.path.exists(path): #return empty is file doesnt exist.
@@ -202,9 +208,19 @@ class protocol_settings:
 
                 data_type = Data_Type.USHORT
 
+               
+
                 #optional row, only needed for non-default data types
                 if 'data type' in row and row['data type']:
                     data_type = Data_Type.fromString(row['data type'])
+
+                #get value range for protocol analyzer
+                value_min : int = 0
+                value_max : int = 65535 #default - max value for ushort
+                val_match = range_regex.search(row['value'])
+                if val_match:
+                    value_min = int(range_match.group('start'))
+                    value_max = int(range_match.group('end'))
 
                 concatenate : bool = False
                 concatenate_registers : list[int] = []
@@ -222,7 +238,7 @@ class protocol_settings:
                         register = int(row['register'])
                     else:
                         start = int(range_match.group('start'))
-                        end = int(range_match.group('start'))
+                        end = int(range_match.group('end'))
                         register = start
                         if end > start:
                             concatenate = True
