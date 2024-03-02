@@ -458,7 +458,7 @@ class InverterModBusToMQTT:
         
         self.__mqtt_client.publish(disc_payload['availability_topic'],"online",qos=0, retain=True)
         print()
-        self.__log.info("Published HA Discovery Topics")
+        self.__log.info("Published HA "+str(count)+"x Discovery Topics")
 
 
 def strtobool (val):
