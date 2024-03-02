@@ -250,7 +250,7 @@ class Inverter:
                         concatenated_value = concatenated_value + str(concatenate_registry[key])
                         del concatenate_registry[key]
 
-                    info[item.variable_name] = value
+                    info[item.variable_name] = concatenated_value
             else:
                 info[item.variable_name] = value
 
