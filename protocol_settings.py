@@ -283,7 +283,7 @@ class protocol_settings:
                                 for i in range(end, start, -1):
                                     concatenate_registers.append(i-1)
                             else:
-                                for i in range(start, end):
+                                for i in range(start, end+1):
                                     concatenate_registers.append(i)
                        
                 if concatenate_registers:
