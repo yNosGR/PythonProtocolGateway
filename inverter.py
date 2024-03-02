@@ -249,7 +249,8 @@ class Inverter:
                     info[item.variable_name] = value
             else:
                 info[item.variable_name] = value
-
+                
+        return info
 
     def read_input_registry(self) -> dict[str,str]:
         ''' reads input registers and returns as clean dict object inverters '''
