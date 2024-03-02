@@ -247,7 +247,7 @@ class Inverter:
                 if all(key in concatenate_registry for key in item.concatenate_registers):
                     concatenated_value = ""
                     for key in item.concatenate_registers:
-                        concatenated_value = concatenated_value + concatenate_registry[key]
+                        concatenated_value = concatenated_value + str(concatenate_registry[key])
                         del concatenate_registry[key]
 
                     info[item.variable_name] = value
