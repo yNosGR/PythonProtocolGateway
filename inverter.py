@@ -146,7 +146,7 @@ class Inverter:
             if retry < 0:
                 retry = 0
             #combine registers into "registry"
-            print("combine results, " + len(register.registers))
+            print("combine results, " + str(len(register.registers)))
             i = -1
             while(i := i + 1 ) < range[1]:
                 #print(str(i) + " => " + str(i+range[0]))
