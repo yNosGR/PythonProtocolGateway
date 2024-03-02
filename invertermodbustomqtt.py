@@ -495,7 +495,7 @@ class InverterModBusToMQTT:
         for name in sorted(protocol_scores, key=protocol_scores.get, reverse=True):
             print("=== "+str(name)+" - "+str(protocol_scores[name])+" ===")
             print("input register score: " + str(input_register_score[name]) + "; valid registers: "+str(input_valid_count[name])+" of " + str(len(protocols[name].input_registry_map)))
-            print("holding register score : " + str(holding_register_score[name]) + "; valid registers: "+str(holding_valid_count[name])+" " + str(len(protocols[name].holding_registry_map)))
+            print("holding register score : " + str(holding_register_score[name]) + "; valid registers: "+str(holding_valid_count[name])+" of " + str(len(protocols[name].holding_registry_map)))
         
                     
                     
