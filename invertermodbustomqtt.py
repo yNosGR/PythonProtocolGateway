@@ -454,7 +454,9 @@ class InverterModBusToMQTT:
             discovery_topic = self.__mqtt_discovery_topic+"/sensor/inverter-" + self.__device_serial_number  + "/" + disc_payload['name'].replace(' ', '_') + "/config"
             
             self.__mqtt_client.publish(discovery_topic,
-                                       json.dumps(disc_payload),qos=0, retain=True)
+                                       json.dumps(disc_payload),qos=1, retain=True)
+            
+            time.sleep(0.01) #slow down for better reliability
         
         self.__mqtt_client.publish(disc_payload['availability_topic'],"online",qos=0, retain=True)
         print()
