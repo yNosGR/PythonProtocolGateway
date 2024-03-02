@@ -386,6 +386,10 @@ class InverterModBusToMQTT:
 
             with open(holding_save_path, "r") as file:
                 holding_registry = json.load(file)
+
+            # Convert keys to integers
+            input_registry = {int(key): value for key, value in input_registry.items()}
+            holding_registry = {int(key): value for key, value in holding_registry.items()}
         else:
             #perform registry scan
             ##batch_size = 1, read registers one by one; if out of bound. it just returns error
