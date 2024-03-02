@@ -220,7 +220,7 @@ class Inverter:
                     value = flags
             elif item.data_type == Data_Type.ASCII:
                 value = registry[item.register].to_bytes((16 + 7) // 8, byteorder='big') #convert to ushort to bytes
-                value = value.decode("ascii") #convert bytes to ascii
+                value = value.decode("utf-8") #convert bytes to ascii
             else: #default, Data_Type.BYTE
                 value = float(registry[item.register])
 
