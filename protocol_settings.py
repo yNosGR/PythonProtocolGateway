@@ -157,7 +157,7 @@ class protocol_settings:
         registry_map : list[registry_map_entry] = []
         register_regex = re.compile(r'(?P<register>\d+)\.b(?P<bit>\d{1,2})')
 
-        range_regex = re.compile(r'(?P<start>\d+)[\-~](?P<end>\d+)')
+        range_regex = re.compile(r'(?P<reverse>r|)(?P<start>\d+)[\-~](?P<end>\d+)')
         ascii_value_regex = re.compile(r'(?P<regex>^\[.+\]$)')
 
 
@@ -250,13 +250,18 @@ class protocol_settings:
                     if not range_match:
                         register = int(row['register'])
                     else:
+                        reverse = range_match.group('reverse')
                         start = int(range_match.group('start'))
                         end = int(range_match.group('end'))
                         register = start
                         if end > start:
                             concatenate = True
-                            for i in range(start, end):
-                                concatenate_registers.append(i)
+                            if reverse:
+                                for i in range(end, start, -1):
+                                    concatenate_registers.append(i)
+                            else:
+                                for i in range(start, end):
+                                    concatenate_registers.append(i)
                        
                 if concatenate_registers:
                     r = range(len(concatenate_registers))

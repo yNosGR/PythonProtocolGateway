@@ -8,8 +8,8 @@ variable name;data type;register;documented name;description;customer write;valu
 ;;6;UtiChargeEnd;Uti Charge End Time;W;0-23;;H(hour);0;;;
 ;;7;PVModel;PV Input Mode;W;0:Independent 1: Parallel;;;;;0;
 ;;8;ACInModel;AC Input Mode;W;"0: APL,90-280VAC;1: UPS,170-280VAC;2: GEN";;;0;;;
-;ASCII;9~11;Fw version;Firmware version (high);;;;ASCII;;;;
-;ASCII;12~14;Fw version2;Control Firmware version (high);;;;ASCII;;;;
+;ASCII;r9~11;Fw version;Firmware version (high);;;;ASCII;;;;
+;ASCII;r12~14;Fw version2;Control Firmware version (high);;;;ASCII;;;;
 ;;15;LCD language;LCD language;W;0-1;1;English;;;;
 ;;16;GridV_Adj;;;;;;;;;
 ;;17;InvV_Adj;;;;;;;;;
