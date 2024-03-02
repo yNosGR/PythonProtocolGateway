@@ -306,7 +306,7 @@ class InverterModBusToMQTT:
                     new_info = self.inverter.read_input_registry()
                     if self.__input_register_prefix:
                         new_info = {self.__input_register_prefix + key: value for key, value in new_info.items()}
-                        
+
                     info.update(new_info)
 
                 if self.__send_holding_register:
@@ -405,7 +405,7 @@ class InverterModBusToMQTT:
             #perform registry scan
             ##batch_size = 1, read registers one by one; if out of bound. it just returns error
             input_registry = self.inverter.read_registers(min=0, max=max_input_register, batch_size=45)
-            holding_registry = self.inverter.read_registers(min=0, max=max_holding_register, batch_size=45, register_type="holding")
+            holding_registry = self.inverter.read_registers(min=0, max=max_holding_register, batch_size=45, registry="holding")
 
             if self.__analyze_protocol_save_load: #save results if enabled
                 with open(input_save_path, "w") as file:

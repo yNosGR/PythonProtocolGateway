@@ -18,11 +18,7 @@ variable name;data type;register;documented name;description;customer write;valu
 ;;20;OverLoadRestart;Over Load Restart;W;"{""0"": ""Yes"", ""1"": ""No"", ""2"": ""Swith to UTI""}";;0;Yes(over 1mins restart; Load to after over Load three times to stop output); ;
 ;;21;OverTempRestart;Over Temperature Restart;W;"{""0"": ""Yes"", ""1"": ""No""}";;0;Yes(over  Temperature to restart ; after over Temperature  three times to stop output)  ;;
 ;;22;BuzzerEN;Buzzer on/off enable;W;"{""1"": ""Enable"", ""0"": ""Disable""}";;;1;;;
-;ASCII;23;Serial No 5;Serial number 5;W;[A-Z0-9];;;;;;
-;ASCII;24;Serial No 4;Serial number 4;W;[A-Z0-9];;;;;;
-;ASCII;25;Serial No 3;Serial number 3;W;[A-Z0-9];;;;;;
-;ASCII;26;Serial No 2;Serial number 2;W;[A-Z0-9];;;;;;
-;ASCII;27;Serial No 1;Serial number 1;W;[A-Z0-9];;;;;;
+Serial Number;ASCII;23-27;Serial No;Serial number 5;W;[A-Z0-9];;;;;;
 ;;28;Moudle H;Inverter Moudle (high);W;;;Can be set at standy state Only	 		 		 		 ;;;;
 ;;29;Moudle L;Inverter Moudle (low);W;P-battery type: 0: Lead_Acid 1: Lithium 2: CustomLead_Acid U-user type: ;;Can be set at;;;;
 ;;30;Com Address;Communicate address;W;1~254;;;1;;;
