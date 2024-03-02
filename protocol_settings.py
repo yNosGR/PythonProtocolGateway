@@ -18,6 +18,7 @@ class Data_Type(Enum):
     INT = 5
     '''32 bit signed int'''
     _16BIT_FLAGS = 7
+    _8BIT_FLAGS = 8
 
     _1BIT = 11,
     _2BIT = 12, 

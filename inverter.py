@@ -150,17 +150,10 @@ class Inverter:
 
         return registry
 
-
-    def read_input_register(self) -> dict[str,str]:
-        """ this function reads based on the given ModBus RTU protocol version the ModBus data from ModBus inverters"""
-        #read input register
-        #batch_size = 45 #see manual; says max batch is 45
-
-        registry = self.read_registers(self.protocolSettings.input_registry_ranges)
-
-        info = {}
-        info['StatusCode'] = registry[0]
+    def process_registery(self, registry : dict ) -> dict[str,str]:
+        '''process registry into appropriate datatypes and names'''
         
+        info = {}
         for item in self.protocolSettings.input_registry_map:
 
             if item.register not in registry:
@@ -192,13 +185,16 @@ class Inverter:
                 bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
                 bit_index = item.register_bit
                 value = (registry[item.register] >> bit_index) & bit_mask
-            elif item.data_type == Data_Type._16BIT_FLAGS:
+            elif item.data_type == Data_Type._16BIT_FLAGS or item.data_type == Data_Type._8BIT_FLAGS:
                 val = registry[item.register]
                 #16 bit flags
+                start_bit : int = 0
+                if item.data_type == Data_Type._8BIT_FLAGS:
+                    start_bit = 8
                 
                 if item.documented_name+'_codes' in self.protocolSettings.codes:
                     flags : list[str] = []
-                    for i in range(16):  # Iterate over each bit position (0 to 15)
+                    for i in range(start_bit, 16):  # Iterate over each bit position (0 to 15)
                         # Check if the i-th bit is set
                         if (val >> i) & 1:
                             flag_index = "b"+str(i)
@@ -208,7 +204,7 @@ class Inverter:
                     value = ",".join(flags)
                 else:
                     flags : str = ""
-                    for i in range(16):  # Iterate over each bit position (0 to 15)
+                    for i in range(start_bit, 16):  # Iterate over each bit position (0 to 15)
                         # Check if the i-th bit is set
                         if (val >> i) & 1:
                             flags = flags + "1"
@@ -241,6 +237,20 @@ class Inverter:
 
             info[item.variable_name] = value
 
+
+    def read_input_registry(self) -> dict[str,str]:
+        ''' reads input registers and returns as clean dict object inverters '''
+
+        registry = self.read_registers(self.protocolSettings.input_registry_ranges)
+        info = self.process_registery(registry)
+        info['StatusCode'] = registry[0]
+        return info
+    
+    def read_holding_registry(self) -> dict[str,str]:
+        ''' reads holding registers and returns as clean dict object inverters '''
+
+        registry = self.read_registers(self.protocolSettings.holding_registry_ranges, register_type="holding")
+        info = self.process_registery(registry)
         return info
 
 

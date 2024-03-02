@@ -67,7 +67,6 @@ class InverterModBusToMQTT:
 
     __mqtt_reconnect_delay : int = 7
 
-    
     __mqtt_reconnect_attempts : int = 21
     ''' max number of reconnects during a disconnect '''
 
@@ -86,6 +85,13 @@ class InverterModBusToMQTT:
 
     __analyze_protocol : bool = False
     ''' enable / disable analyze mode'''
+
+    __send_holding_register : bool = False
+    ''' send holding register over mqtt '''
+
+    __send_input_register : bool = True
+    ''' send input register over mqtt '''
+
     
     inverter : Inverter
     measurement : str
@@ -112,12 +118,11 @@ class InverterModBusToMQTT:
             cfg = newcfg
 
         self.__settings.read(cfg)
-        self.__interval = self.__settings.getint(
-            'time', 'interval', fallback=1)
-        self.__offline_interval = self.__settings.getint(
-            'time', 'offline_interval', fallback=60)
-        self.__error_interval = self.__settings.getint(
-            'time', 'error_interval', fallback=60)
+
+        ##[TIME]
+        self.__interval = self.__settings.getint('time', 'interval', fallback=1)
+        self.__offline_interval = self.__settings.getint('time', 'offline_interval', fallback=60)
+        self.__error_interval = self.__settings.getint('time', 'error_interval', fallback=60)
         
         self.__log_level = self.__settings.get('general','log_level', fallback='DEBUG')
         self.__max_precision = self.__settings.getint('general','max_precision', fallback=-1)
@@ -152,17 +157,19 @@ class InverterModBusToMQTT:
         if not isinstance( self.__mqtt_reconnect_attempts , int) or self.__mqtt_reconnect_attempts < 0: #minimum 0
             self.__mqtt_reconnect_attempts = 0
 
-
+        # inverter / device
         #this is kinda dumb, overcomplicates things, let's stick to 1 inverter at a time, can always run multiple instances of script
         #keep this loop for backwards compatability
         for section in self.__settings.sections():
-            if not section.startswith('inverter'):
+            if not section.startswith('inverter') and not section.startswith('device'):
                 continue
 
             name = self.__settings.get(section, 'name', fallback="NO NAME")
             unit = int(self.__settings.get(section, 'unit'))
             protocol_version = str(self.__settings.get(section, 'protocol_version'))
             self.__analyze_protocol = self.__settings.getboolean(section, 'analyze_protocol', fallback=False)
+            self.__send_holding_register = self.__settings.getboolean(section, 'send_holding_register', fallback=False)
+            self.__send_input_register = self.__settings.getboolean(section, 'send_input_register', fallback=True)
             self.measurement = self.__settings.get(section, 'measurement')
             self.inverter = Inverter(self.__client, name, unit, protocol_version, self.__max_precision, self.__log)
             self.inverter.print_info()
@@ -266,8 +273,13 @@ class InverterModBusToMQTT:
                 continue
 
             try:
-                
-                info = self.inverter.read_input_register()
+                info = {}
+
+                if self.__send_input_register:
+                    info.update(self.inverter.read_input_registry())
+
+                if self.__send_holding_register:
+                    info.update(self.inverter.read_holding_registry())
 
                 if info is None:
                     self.__log.info("Register is None; modbus busy?")
