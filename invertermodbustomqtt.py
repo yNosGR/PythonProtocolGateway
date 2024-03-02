@@ -20,6 +20,10 @@ from inverter import Inverter
 
 from protocol_settings import protocol_settings
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from protocol_settings import registry_map_entry
+
 __logo = """
    ____                        _   _   ____  __  __  ___ _____ _____ 
   / ___|_ __ _____      ____ _| |_| |_|___ \|  \/  |/ _ \_   _|_   _|
@@ -417,11 +421,20 @@ class InverterModBusToMQTT:
         device['identifiers'] = "hotnoob_" + self.__device_serial_number
         device['name'] = self.__settings.get('mqtt_device', 'device_name', fallback='Solar Inverter')
 
-        length = len(self.inverter.protocolSettings.input_registry_map)
+        registry_map : list[registry_map_entry] = []
+        if self.__send_input_register:
+            registry_map.extend(self.inverter.protocolSettings.input_registry_map)
+
+        if self.__send_holding_register:
+            registry_map.extend(self.inverter.protocolSettings.holding_registry_map)
+
+        length = len(registry_map)
         count = 0
-        for item in self.inverter.protocolSettings.input_registry_map:
+        for item in registry_map:
             count = count + 1
 
+            if item.concatenate and item.register != item.concatenate_registers[0]:
+                continue #skip all except the first register so no duplicates
 
             clean_name = item.variable_name.lower().replace(' ', '_')
             print('Publishing Topic '+str(count)+' of ' + str(length) + ' "'+str(clean_name)+'"', end='\r', flush=True)
