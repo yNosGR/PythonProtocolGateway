@@ -19,11 +19,8 @@ from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 
 from inverter import Inverter
 
-from protocol_settings import protocol_settings,Data_Type
+from protocol_settings import protocol_settings,Data_Type,registry_map_entry
 
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from protocol_settings import registry_map_entry
 
 __logo = """
    ____                        _   _   ____  __  __  ___ _____ _____ 
@@ -390,7 +387,10 @@ class InverterModBusToMQTT:
         input_register_score : dict[str, int] = {}
         holding_register_score : dict[str, int] = {}
 
-        def evaluate_score(entry: registry_map_entry, val):
+        input_valid_count : dict[str, int] = {}
+        holding_valid_count  : dict[str, int] = {}
+
+        def evaluate_score(entry : registry_map_entry, val):
             score = 0
             if entry.data_type == Data_Type.ASCII:
                 if not re.match('[^a-zA-Z0-9\_\-]', val): #validate ascii
@@ -398,8 +398,11 @@ class InverterModBusToMQTT:
                     if entry.concatenate:
                         mod = len(entry.concatenate_registers)
 
-                    if entry.value_regex and re.match(entry.value_regex, val): #regex validation
-                        mod = mod * 2 
+                    if entry.value_regex: #regex validation
+                        if re.match(entry.value_regex, val):
+                            mod = mod * 2 
+                        else: 
+                            mod = mod * -2 #regex validation failed, double damage!
 
                     score = score + (2 * mod) #double points for ascii
                 pass
@@ -416,9 +419,14 @@ class InverterModBusToMQTT:
 
             return score
 
+
+        
         for name, protocol in protocols.items():
             input_register_score[name] = 0
             holding_register_score[name] = 0
+            #very rough percentage. tood calc max possible score. 
+            input_valid_count[name] = 0
+            holding_valid_count[name] = 0
 
             #process registry based on protocol
             input_info = self.inverter.process_registery(input_registry, protocol.input_registry_map)
@@ -428,12 +436,21 @@ class InverterModBusToMQTT:
             for entry in protocol.input_registry_map:
                 if entry.variable_name in input_info:
                     val = input_info[entry.variable_name]
-                    input_register_score[name] = input_register_score[name] + evaluate_score(entry, val)
+                    score = evaluate_score(entry, val)
+                    if score > 0:
+                        input_valid_count[name] = input_valid_count[name] + 1
+
+                    input_register_score[name] = input_register_score[name] + score
 
 
             for entry in protocol.holding_registry_map:
                     val = holding_info[entry.variable_name]
-                    holding_register_score[name] = holding_register_score[name] + evaluate_score(entry, val)
+                    score = evaluate_score(entry, val)
+
+                    if score > 0:
+                        holding_valid_count[name] = holding_valid_count[name] + 1
+
+                    holding_register_score[name] = holding_register_score[name] + score
 
         
         protocol_scores: dict[str, int] = {}
@@ -444,8 +461,8 @@ class InverterModBusToMQTT:
         #print scores
         for name in sorted(protocol_scores, key=protocol_scores.get, reverse=True):
             print("=== "+str(name)+" - "+str(protocol_scores[name])+" ===")
-            print("input register : " + str(input_register_score[name]) + " of " + str(len(protocols[name].input_registry_map)))
-            print("holding register : " + str(holding_register_score[name]) + " of " + str(len(protocols[name].holding_registry_map)))
+            print("input register score: " + str(input_register_score[name]) + "; valid registers: "+str(input_valid_count[name])+" of " + str(len(protocols[name].input_registry_map)))
+            print("holding register score : " + str(holding_register_score[name]) + "; valid registers: "+str(holding_valid_count[name])+" " + str(len(protocols[name].holding_registry_map)))
         
                     
                     
