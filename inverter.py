@@ -97,7 +97,7 @@ class Inverter:
             while( min := min + batch_size ) < max:
                 ranges.append((min, batch_size)) ##APPEND TUPLE
 
-        registry : dict = {}
+        registry : dict[int,] = {}
         retries = 7
         retry = 0
         total_retries = 0
@@ -155,12 +155,12 @@ class Inverter:
         print("registry len: " + str(len(registry)))
         return registry
 
-    def process_registery(self, registry : dict ) -> dict[str,str]:
+    def process_registery(self, registry : dict, map : list[registry_map_entry]) -> dict[str,str]:
         '''process registry into appropriate datatypes and names'''
         
         concatenate_registry : dict = {}
         info = {}
-        for item in self.protocolSettings.input_registry_map:
+        for item in map:
 
             if item.register not in registry:
                 continue
@@ -259,7 +259,7 @@ class Inverter:
         ''' reads input registers and returns as clean dict object inverters '''
 
         registry = self.read_registers(self.protocolSettings.input_registry_ranges)
-        info = self.process_registery(registry)
+        info = self.process_registery(registry, self.protocolSettings.input_registry_map)
         info['StatusCode'] = registry[0]
         return info
     
@@ -267,7 +267,7 @@ class Inverter:
         ''' reads holding registers and returns as clean dict object inverters '''
 
         registry = self.read_registers(self.protocolSettings.holding_registry_ranges, register_type="holding")
-        info = self.process_registery(registry)
+        info = self.process_registery(registry, self.protocolSettings.holding_registry_map)
         return info
 
 
