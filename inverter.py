@@ -19,6 +19,7 @@ class Inverter:
     protocolSettings : protocol_settings
     max_precision : int
     modbus_delay : float = 0.85
+    modbus_version = ""
     
     '''time inbetween requests'''
 
@@ -73,6 +74,7 @@ class Inverter:
 
     def read_info(self):
         """ reads holding registers from ModBus register inverters -- needs to be updated to support protocol csv """
+        return None
         row = self.client.read_holding_registers(73, unit=self.unit)
         if row.isError():
             raise ModbusIOException
@@ -95,7 +97,7 @@ class Inverter:
             while( min := min + batch_size ) < max:
                 ranges.append((min, batch_size)) ##APPEND TUPLE
 
-        registry : dict = {}
+        registry : dict[int,] = {}
         retries = 7
         retry = 0
         total_retries = 0
@@ -112,7 +114,9 @@ class Inverter:
                 if register_type == "input":
                     register = self.client.read_input_registers(range[0], range[1], unit=self.unit)
                 else:
+                    print("get holding")
                     register = self.client.read_holding_registers(range[0], range[1], unit=self.unit)
+                    #register.addCallback
 
             except ModbusIOException as e: 
                 print("ModbusIOException : ", e.error_code)
@@ -143,25 +147,21 @@ class Inverter:
             if retry < 0:
                 retry = 0
             #combine registers into "registry"
+            print("combine results, " + str(len(register.registers)))
             i = -1
             while(i := i + 1 ) < range[1]:
                 #print(str(i) + " => " + str(i+range[0]))
                 registry[i+range[0]] = register.registers[i]
 
+        print("registry len: " + str(len(registry)))
         return registry
 
-
-    def read_input_register(self) -> dict[str,str]:
-        """ this function reads based on the given ModBus RTU protocol version the ModBus data from ModBus inverters"""
-        #read input register
-        #batch_size = 45 #see manual; says max batch is 45
-
-        registry = self.read_registers(self.protocolSettings.input_registry_ranges)
-
-        info = {}
-        info['StatusCode'] = registry[0]
+    def process_registery(self, registry : dict, map : list[registry_map_entry]) -> dict[str,str]:
+        '''process registry into appropriate datatypes and names'''
         
-        for item in self.protocolSettings.input_registry_map:
+        concatenate_registry : dict = {}
+        info = {}
+        for item in map:
 
             if item.register not in registry:
                 continue
@@ -192,30 +192,34 @@ class Inverter:
                 bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
                 bit_index = item.register_bit
                 value = (registry[item.register] >> bit_index) & bit_mask
-            elif item.data_type == Data_Type._16BIT_FLAGS:
+            elif item.data_type == Data_Type._16BIT_FLAGS or item.data_type == Data_Type._8BIT_FLAGS:
                 val = registry[item.register]
                 #16 bit flags
+                start_bit : int = 0
+                if item.data_type == Data_Type._8BIT_FLAGS:
+                    start_bit = 8
                 
                 if item.documented_name+'_codes' in self.protocolSettings.codes:
                     flags : list[str] = []
-                    for i in range(16):  # Iterate over each bit position (0 to 15)
+                    for i in range(start_bit, 16):  # Iterate over each bit position (0 to 15)
                         # Check if the i-th bit is set
                         if (val >> i) & 1:
                             flag_index = "b"+str(i)
                             if flag_index in self.protocolSettings.codes[item.documented_name+'_codes']:
-                                flags.append[self.protocolSettings.codes[item.documented_name+'_codes'][flag_index]]
+                                flags.append(self.protocolSettings.codes[item.documented_name+'_codes'][flag_index])
                             
                     value = ",".join(flags)
                 else:
                     flags : str = ""
-                    for i in range(16):  # Iterate over each bit position (0 to 15)
+                    for i in range(start_bit, 16):  # Iterate over each bit position (0 to 15)
                         # Check if the i-th bit is set
                         if (val >> i) & 1:
                             flags = flags + "1"
                         else:
                             flags = flags + "0"
                     value = flags
-                
+            elif item.data_type == Data_Type.ASCII:
+                value = registry[item.register].to_bytes((16 + 7) // 8, byteorder='big')
             else: #default, Data_Type.BYTE
                 value = float(registry[item.register])
 
@@ -238,9 +242,33 @@ class Inverter:
             
             #if item.unit:
             #    value = str(value) + item.unit
+            if item.concatenate:
+                concatenate_registry[item.register] = value
+                if all(key in concatenate_registry for key in item.concatenate_registers):
+                    concatenated_value = ""
+                    for key in item.concatenate_registers:
+                        concatenated_value = concatenated_value + concatenate_registry[key]
+                        del concatenate_registry[key]
 
-            info[item.variable_name] = value
+                    info[item.variable_name] = value
+            else:
+                info[item.variable_name] = value
 
+        return info
+
+    def read_input_registry(self) -> dict[str,str]:
+        ''' reads input registers and returns as clean dict object inverters '''
+
+        registry = self.read_registers(self.protocolSettings.input_registry_ranges)
+        info = self.process_registery(registry, self.protocolSettings.input_registry_map)
+        info['StatusCode'] = registry[0]
+        return info
+    
+    def read_holding_registry(self) -> dict[str,str]:
+        ''' reads holding registers and returns as clean dict object inverters '''
+
+        registry = self.read_registers(self.protocolSettings.holding_registry_ranges, register_type="holding")
+        info = self.process_registery(registry, self.protocolSettings.holding_registry_map)
         return info
 
 

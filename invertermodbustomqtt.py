@@ -20,6 +20,10 @@ from inverter import Inverter
 
 from protocol_settings import protocol_settings
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from protocol_settings import registry_map_entry
+
 __logo = """
    ____                        _   _   ____  __  __  ___ _____ _____ 
   / ___|_ __ _____      ____ _| |_| |_|___ \|  \/  |/ _ \_   _|_   _|
@@ -67,7 +71,6 @@ class InverterModBusToMQTT:
 
     __mqtt_reconnect_delay : int = 7
 
-    
     __mqtt_reconnect_attempts : int = 21
     ''' max number of reconnects during a disconnect '''
 
@@ -86,6 +89,13 @@ class InverterModBusToMQTT:
 
     __analyze_protocol : bool = False
     ''' enable / disable analyze mode'''
+
+    __send_holding_register : bool = False
+    ''' send holding register over mqtt '''
+
+    __send_input_register : bool = True
+    ''' send input register over mqtt '''
+
     
     inverter : Inverter
     measurement : str
@@ -97,6 +107,12 @@ class InverterModBusToMQTT:
         formatter = logging.Formatter('[%(asctime)s]  {%(filename)s:%(lineno)d}  %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
         self.__log.addHandler(handler)
+
+        #logging.basicConfig()
+        #pymodbus_log = logging.getLogger('pymodbus')
+        #pymodbus_log.setLevel(logging.DEBUG)
+        #pymodbus_log.addHandler(handler)
+
         return None
 
     def init_invertermodbustomqtt(self):
@@ -112,25 +128,31 @@ class InverterModBusToMQTT:
             cfg = newcfg
 
         self.__settings.read(cfg)
-        self.__interval = self.__settings.getint(
-            'time', 'interval', fallback=1)
-        self.__offline_interval = self.__settings.getint(
-            'time', 'offline_interval', fallback=60)
-        self.__error_interval = self.__settings.getint(
-            'time', 'error_interval', fallback=60)
+
+        ##[TIME]
+        self.__interval = self.__settings.getint('time', 'interval', fallback=1)
+        self.__offline_interval = self.__settings.getint('time', 'offline_interval', fallback=60)
+        self.__error_interval = self.__settings.getint('time', 'error_interval', fallback=60)
         
         self.__log_level = self.__settings.get('general','log_level', fallback='DEBUG')
         self.__max_precision = self.__settings.getint('general','max_precision', fallback=-1)
 
         if (self.__log_level != 'DEBUG'):
             self.__log.setLevel(logging.getLevelName(self.__log_level))
+
+
+
         self.__log.info('Setup Serial Connection... ')
         self.__port = self.__settings.get(
             'serial', 'port', fallback='/dev/ttyUSB0')
         self.__baudrate = self.__settings.get(
             'serial', 'baudrate', fallback=9600)
-        self.__client = ModbusClient(method='rtu', port=self.__port, baudrate=int(
-            self.__baudrate), stopbits=1, parity='N', bytesize=8, timeout=1)
+        
+        
+        self.__client = ModbusClient(method='rtu', port=self.__port, 
+                                     baudrate=int(self.__baudrate), 
+                                     stopbits=1, parity='N', bytesize=8, timeout=2
+                                     )
         self.__client.connect()
         self.__log.info('Serial connection established...')
 
@@ -152,20 +174,23 @@ class InverterModBusToMQTT:
         if not isinstance( self.__mqtt_reconnect_attempts , int) or self.__mqtt_reconnect_attempts < 0: #minimum 0
             self.__mqtt_reconnect_attempts = 0
 
-
+        # inverter / device
         #this is kinda dumb, overcomplicates things, let's stick to 1 inverter at a time, can always run multiple instances of script
         #keep this loop for backwards compatability
         for section in self.__settings.sections():
-            if not section.startswith('inverter'):
+            if not section.startswith('inverter') and not section.startswith('device'):
                 continue
 
             name = self.__settings.get(section, 'name', fallback="NO NAME")
             unit = int(self.__settings.get(section, 'unit'))
             protocol_version = str(self.__settings.get(section, 'protocol_version'))
             self.__analyze_protocol = self.__settings.getboolean(section, 'analyze_protocol', fallback=False)
-            self.measurement = self.__settings.get(section, 'measurement')
+            self.__send_holding_register = self.__settings.getboolean(section, 'send_holding_register', fallback=False)
+            self.__send_input_register = self.__settings.getboolean(section, 'send_input_register', fallback=True)
+            self.measurement = self.__settings.get(section, 'measurement', fallback="")
             self.inverter = Inverter(self.__client, name, unit, protocol_version, self.__max_precision, self.__log)
             self.inverter.print_info()
+
 
         
 
@@ -266,8 +291,17 @@ class InverterModBusToMQTT:
                 continue
 
             try:
-                
-                info = self.inverter.read_input_register()
+                info = {}
+
+                if self.__send_input_register:
+                    new_info = self.inverter.read_input_registry()
+                    info.update(new_info)
+
+                if self.__send_holding_register:
+                    print("read holding registers")
+                    new_info = self.inverter.read_holding_registry()
+                    print(new_info)
+                    info.update(new_info)
 
                 if info is None:
                     self.__log.info("Register is None; modbus busy?")
@@ -390,13 +424,22 @@ class InverterModBusToMQTT:
         device['manufacturer'] = self.__settings.get('mqtt_device', 'manufacturer', fallback='HotNoob')
         device['model'] = self.__settings.get('mqtt_device', 'model', fallback='HotNoob Was Here 2024')
         device['identifiers'] = "hotnoob_" + self.__device_serial_number
-        device['name'] = self.__settings.get('mqtt_device', 'device_name', fallback='Solar Inverter')
+        device['name'] = self.__settings.get('mqtt_device', 'name', fallback='Solar Inverter')
 
-        length = len(self.inverter.protocolSettings.input_registry_map)
+        registry_map : list[registry_map_entry] = []
+        if self.__send_input_register:
+            registry_map.extend(self.inverter.protocolSettings.input_registry_map)
+
+        if self.__send_holding_register:
+            registry_map.extend(self.inverter.protocolSettings.holding_registry_map)
+
+        length = len(registry_map)
         count = 0
-        for item in self.inverter.protocolSettings.input_registry_map:
+        for item in registry_map:
             count = count + 1
 
+            if item.concatenate and item.register != item.concatenate_registers[0]:
+                continue #skip all except the first register so no duplicates
 
             clean_name = item.variable_name.lower().replace(' ', '_')
             print('Publishing Topic '+str(count)+' of ' + str(length) + ' "'+str(clean_name)+'"', end='\r', flush=True)
@@ -416,11 +459,13 @@ class InverterModBusToMQTT:
             discovery_topic = self.__mqtt_discovery_topic+"/sensor/inverter-" + self.__device_serial_number  + "/" + disc_payload['name'].replace(' ', '_') + "/config"
             
             self.__mqtt_client.publish(discovery_topic,
-                                       json.dumps(disc_payload),qos=0, retain=True)
+                                       json.dumps(disc_payload),qos=1, retain=True)
+            
+            time.sleep(0.01) #slow down for better reliability
         
         self.__mqtt_client.publish(disc_payload['availability_topic'],"online",qos=0, retain=True)
         print()
-        self.__log.info("Published HA Discovery Topics")
+        self.__log.info("Published HA "+str(count)+"x Discovery Topics")
 
 
 def strtobool (val):
