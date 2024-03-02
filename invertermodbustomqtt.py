@@ -88,6 +88,9 @@ class InverterModBusToMQTT:
     __analyze_protocol : bool = False
     ''' enable / disable analyze mode'''
 
+    __analyze_protocol_save_load : bool = False
+    ''' if enabled, saves registry scan; but if found loads registry from file'''
+
     __send_holding_register : bool = False
     ''' send holding register over mqtt '''
 
@@ -182,7 +185,10 @@ class InverterModBusToMQTT:
             name = self.__settings.get(section, 'name', fallback="NO NAME")
             unit = int(self.__settings.get(section, 'unit'))
             protocol_version = str(self.__settings.get(section, 'protocol_version'))
+
             self.__analyze_protocol = self.__settings.getboolean(section, 'analyze_protocol', fallback=False)
+            self.__analyze_protocol_save_load = self.__settings.getboolean(section, 'analyze_protocol_save_load', fallback=False)
+
             self.__send_holding_register = self.__settings.getboolean(section, 'send_holding_register', fallback=False)
             self.__send_input_register = self.__settings.getboolean(section, 'send_input_register', fallback=True)
             self.measurement = self.__settings.get(section, 'measurement', fallback="")
@@ -367,9 +373,31 @@ class InverterModBusToMQTT:
 
         self.inverter.modbus_delay = self.inverter.modbus_delay #decrease delay because can probably get away with it due to lots of small reads
         print("read INPUT Registers: ")
-        ##batch_size = 1, read registers one by one; if out of bound. it just returns error
-        input_registry = self.inverter.read_registers(min=0, max=max_input_register, batch_size=45)
-        holding_registry = self.inverter.read_registers(min=0, max=max_holding_register, batch_size=45, register_type="holding")
+
+    
+
+        input_save_path = "input_registry.json"
+        holding_save_path = "holding_registry.json"
+
+        #load previous scan if enabled and exists
+        if self.__analyze_protocol_save_load and os.path.exists(input_save_path) and os.path.exists(holding_save_path):
+            with open(input_save_path, "r") as file:
+                input_registry = json.load(file)
+
+            with open(holding_save_path, "r") as file:
+                holding_registry = json.load(file)
+        else:
+            #perform registry scan
+            ##batch_size = 1, read registers one by one; if out of bound. it just returns error
+            input_registry = self.inverter.read_registers(min=0, max=max_input_register, batch_size=45)
+            holding_registry = self.inverter.read_registers(min=0, max=max_holding_register, batch_size=45, register_type="holding")
+
+            if self.__analyze_protocol_save_load: #save results if enabled
+                with open(input_save_path, "w") as file:
+                    json.dump(input_registry, file)
+
+                with open(holding_save_path, "w") as file:
+                    json.dump(holding_registry, file)
 
         #print results for debug
         print("=== START INPUT REGISTER ===")

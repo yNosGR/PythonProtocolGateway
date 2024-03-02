@@ -10,3 +10,6 @@ invertermodbustomqtt.service
 variable_mask.txt
 .~lock.*
 protocols/*custom*
+
+input_registry.json
+holding_registry.json
