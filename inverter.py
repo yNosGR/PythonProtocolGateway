@@ -220,7 +220,11 @@ class Inverter:
                     value = flags
             elif item.data_type == Data_Type.ASCII:
                 value = registry[item.register].to_bytes((16 + 7) // 8, byteorder='big') #convert to ushort to bytes
-                value = value.decode("utf-8") #convert bytes to ascii
+                try:
+                    value = value.decode("utf-8") #convert bytes to ascii
+                except UnicodeDecodeError as e:
+                    print("UnicodeDecodeError:", e)
+                    
             else: #default, Data_Type.BYTE
                 value = float(registry[item.register])
 
@@ -245,7 +249,7 @@ class Inverter:
             #    value = str(value) + item.unit
             if item.concatenate:
                 concatenate_registry[item.register] = value
-                
+
                 all_exist = True
                 for key in item.concatenate_registers:
                     if key not in concatenate_registry:
