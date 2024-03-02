@@ -116,6 +116,7 @@ class Inverter:
                 else:
                     print("get holding")
                     register = self.client.read_holding_registers(range[0], range[1], unit=self.unit)
+                    print(register)
 
             except ModbusIOException as e: 
                 print("ModbusIOException : ", e.error_code)
