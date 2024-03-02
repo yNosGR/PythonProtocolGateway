@@ -119,7 +119,7 @@ class Inverter:
                 end = max(entry.concatenate_registers)
             
             registers = self.read_registers(start=start, end=end, registry=registry)
-            results = self.process_registery(registers, [entry])
+            results = self.process_registery(registers, registry_map)
             return results[entry.variable_name]
             
 
