@@ -1,7 +1,7 @@
 import csv
 import json
 
-path = 'protocols/v0.14.input_registry_map.csv'
+path = 'protocols/growatt_2020_v1.24.input_registry_map.csv'
 
 save_path = 'tools/common_names.json'
 
