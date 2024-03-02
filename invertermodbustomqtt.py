@@ -136,7 +136,7 @@ class InverterModBusToMQTT:
             'serial', 'baudrate', fallback=9600)
         
         
-        self.__client = ModbusClient(method='binary', port=self.__port, 
+        self.__client = ModbusClient(method='ascii', port=self.__port, 
                                      baudrate=int(self.__baudrate), 
                                      stopbits=1, parity='N', bytesize=8, timeout=1
                                      )
