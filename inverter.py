@@ -150,6 +150,7 @@ class Inverter:
                 #print(str(i) + " => " + str(i+range[0]))
                 registry[i+range[0]] = register.registers[i]
 
+        print(registry)
         return registry
 
     def process_registery(self, registry : dict ) -> dict[str,str]:
@@ -249,7 +250,7 @@ class Inverter:
                     info[item.variable_name] = value
             else:
                 info[item.variable_name] = value
-                
+
         return info
 
     def read_input_registry(self) -> dict[str,str]:
