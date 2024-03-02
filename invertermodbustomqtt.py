@@ -134,6 +134,7 @@ class InverterModBusToMQTT:
         if (self.__log_level != 'DEBUG'):
             self.__log.setLevel(logging.getLevelName(self.__log_level))
 
+            logging.basicConfig()
             pymodbus_log = logging.getLogger('pymodbus')
             pymodbus_log.setLevel(logging.DEBUG)
 
@@ -146,7 +147,7 @@ class InverterModBusToMQTT:
         
         self.__client = ModbusClient(method='rtu', port=self.__port, 
                                      baudrate=int(self.__baudrate), 
-                                     stopbits=1, parity='N', bytesize=8, timeout=7
+                                     stopbits=1, parity='N', bytesize=8, timeout=2
                                      )
         self.__client.connect()
         self.__log.info('Serial connection established...')
