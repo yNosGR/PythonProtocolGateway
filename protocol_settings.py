@@ -291,7 +291,7 @@ class protocol_settings:
         
     def calculate_registry_ranges(self, map : list[registry_map_entry], max_register : int) -> list[tuple]:
         ''' read optimization; calculate which ranges to read'''
-        max_batch_size = 45 #see manual; says max batch is 45
+        max_batch_size = 21 #see manual; says max batch is 45
         start = -max_batch_size
         ranges : list[tuple] = []
 
