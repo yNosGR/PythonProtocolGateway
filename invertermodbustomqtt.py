@@ -129,6 +129,10 @@ class InverterModBusToMQTT:
 
         if (self.__log_level != 'DEBUG'):
             self.__log.setLevel(logging.getLevelName(self.__log_level))
+
+            pymodbus_log = logging.getLogger('pymodbus')
+            pymodbus_log.setLevel(logging.DEBUG)
+
         self.__log.info('Setup Serial Connection... ')
         self.__port = self.__settings.get(
             'serial', 'port', fallback='/dev/ttyUSB0')
@@ -170,7 +174,6 @@ class InverterModBusToMQTT:
 
             name = self.__settings.get(section, 'name', fallback="NO NAME")
             unit = int(self.__settings.get(section, 'unit'))
-            unit = 0x01
             protocol_version = str(self.__settings.get(section, 'protocol_version'))
             self.__analyze_protocol = self.__settings.getboolean(section, 'analyze_protocol', fallback=False)
             self.__send_holding_register = self.__settings.getboolean(section, 'send_holding_register', fallback=False)
