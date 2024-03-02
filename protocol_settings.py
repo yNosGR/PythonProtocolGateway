@@ -23,22 +23,22 @@ class Data_Type(Enum):
     ASCII = 84
     ''' 2 characters '''
 
-    _1BIT = 11
-    _2BIT = 12
-    _3BIT = 13
-    _4BIT = 14
-    _5BIT = 15
-    _6BIT = 16
-    _7BIT = 17
-    _8BIT = 18
-    _9BIT = 19
-    _10BIT = 20
-    _11BIT = 21
-    _12BIT = 22
-    _13BIT = 23
-    _14BIT = 24
-    _15BIT = 25
-    _16BIT = 26
+    _1BIT = 201
+    _2BIT = 202
+    _3BIT = 203
+    _4BIT = 204
+    _5BIT = 205
+    _6BIT = 206
+    _7BIT = 207
+    _8BIT = 208
+    _9BIT = 209
+    _10BIT = 210
+    _11BIT = 211
+    _12BIT = 212
+    _13BIT = 213
+    _14BIT = 214
+    _15BIT = 215
+    _16BIT = 216
     @classmethod
     def fromString(cls, name : str):
         name = name.strip().upper()
@@ -71,12 +71,18 @@ class Data_Type(Enum):
         if data_type in sizes:
             return sizes[data_type]
 
-        if data_type.value > 10: 
-            return data_type.value-10
+        if data_type.value > 200: 
+            return data_type.value-200
 
         return -1 #should never happen
+
+class registry_type(Enum):
+    HOLDING = 0x03
+    INPUT = 0x04
+    
 @dataclass
 class registry_map_entry:
+    registry_type : registry_type
     register : int
     register_bit : int
     variable_name : str
@@ -85,6 +91,14 @@ class registry_map_entry:
     unit_mod : float
     concatenate : bool
     concatenate_registers : list[int] 
+
+    value_regex : str = ""
+
+    value_min : int = 0
+    ''' min of value range for protocol analyzing'''
+    value_max : int = 65535
+    ''' max of value range for protocol analyzing'''
+
     ''' if value needs to be concatenated with other registers'''
     data_type : Data_Type = Data_Type.USHORT
 
@@ -115,9 +129,10 @@ class protocol_settings:
 
                     self.variable_mask.append(line.strip().lower())
 
+        self.load__codes() #load first, so priority to json codes
         self.load__input_registry_map()
         self.load__holding_registry_map()
-        self.load__codes()
+
 
     def get_holding_registry_entry(self, name : str):
         return self.get_registry_entry(name, self.holding_registry_map)
@@ -145,11 +160,12 @@ class protocol_settings:
         with open(path) as f:
             self.codes = json.loads(f.read())
 
-    def load__registry(self, path) -> list[registry_map_entry]: 
+    def load__registry(self, path, registry_type : registry_type = registry_type.INPUT) -> list[registry_map_entry]: 
         registry_map : list[registry_map_entry] = []
         register_regex = re.compile(r'(?P<register>\d+)\.b(?P<bit>\d{1,2})')
 
-        range_regex = re.compile(r'(?P<start>\d+)\-(?P<end>\d+)')
+        range_regex = re.compile(r'(?P<reverse>r|)(?P<start>\d+)[\-~](?P<end>\d+)')
+        ascii_value_regex = re.compile(r'(?P<regex>^\[.+\]$)')
 
 
         if not os.path.exists(path): #return empty is file doesnt exist.
@@ -202,9 +218,45 @@ class protocol_settings:
 
                 data_type = Data_Type.USHORT
 
+               
+                if 'values' not in row:
+                    row['values'] = ""
+                    print("WARNING No Value Column : path: " + str(path)) 
+
                 #optional row, only needed for non-default data types
                 if 'data type' in row and row['data type']:
                     data_type = Data_Type.fromString(row['data type'])
+
+
+                #get value range for protocol analyzer
+                value_min : int = 0
+                value_max : int = 65535 #default - max value for ushort
+                value_regex : str = ""
+                value_is_json : bool = False
+
+                #test if value is json.
+                try:
+                    codes_json = json.loads(row['values'])
+                    value_is_json = True
+
+                    name = item.documented_name+'_codes'
+                    if name not in self.codes:
+                        self.codes[name] = codes_json
+
+                except ValueError:
+                    value_is_json = False
+
+                if not value_is_json:
+                    val_match = range_regex.search(row['values'])
+                    if val_match:
+                        value_min = int(val_match.group('start'))
+                        value_max = int(val_match.group('end'))
+
+                    if data_type == Data_Type.ASCII:
+                        #value_regex
+                        val_match = ascii_value_regex.search(row['values'])
+                        if val_match:
+                            value_regex = val_match.group('regex') 
 
                 concatenate : bool = False
                 concatenate_registers : list[int] = []
@@ -221,13 +273,18 @@ class protocol_settings:
                     if not range_match:
                         register = int(row['register'])
                     else:
+                        reverse = range_match.group('reverse')
                         start = int(range_match.group('start'))
-                        end = int(range_match.group('start'))
+                        end = int(range_match.group('end'))
                         register = start
                         if end > start:
                             concatenate = True
-                            for i in range(start, end):
-                                concatenate_registers.append(i)
+                            if reverse:
+                                for i in range(end, start, -1):
+                                    concatenate_registers.append(i-1)
+                            else:
+                                for i in range(start, end):
+                                    concatenate_registers.append(i)
                        
                 if concatenate_registers:
                     r = range(len(concatenate_registers))
@@ -236,6 +293,7 @@ class protocol_settings:
                 
                 for i in r:
                     item = registry_map_entry( 
+                                                registry_type = registry_type,
                                                 register= register,
                                                 register_bit=register_bit,
                                                 variable_name= variable_name,
@@ -244,7 +302,10 @@ class protocol_settings:
                                                 unit_mod= numeric_part,
                                                 data_type= data_type,
                                                 concatenate = concatenate,
-                                                concatenate_registers = concatenate_registers
+                                                concatenate_registers = concatenate_registers,
+                                                value_min=value_min,
+                                                value_max=value_max,
+                                                value_regex=value_regex
                                             )
                     registry_map.append(item)
                     register = register + 1
@@ -319,7 +380,7 @@ class protocol_settings:
 
         path = settings_dir + '/' + file
 
-        self.input_registry_map = self.load__registry(path)
+        self.input_registry_map = self.load__registry(path, registry_type.INPUT)
 
         #get max register size
         for item in self.input_registry_map:
@@ -337,7 +398,7 @@ class protocol_settings:
 
         path = settings_dir + '/' + file
 
-        self.holding_registry_map = self.load__registry(path)
+        self.holding_registry_map = self.load__registry(path, registry_type.HOLDING)
 
         #get max register size
         for item in self.holding_registry_map:

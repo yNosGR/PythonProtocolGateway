@@ -4,6 +4,7 @@ Main module for Growatt / Inverters ModBus RTU data to MQTT
 """
 import atexit
 import glob
+import re
 import time
 import os
 import json
@@ -18,11 +19,8 @@ from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 
 from inverter import Inverter
 
-from protocol_settings import protocol_settings
+from protocol_settings import protocol_settings,Data_Type,registry_map_entry,registry_type
 
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from protocol_settings import registry_map_entry
 
 __logo = """
    ____                        _   _   ____  __  __  ___ _____ _____ 
@@ -90,11 +88,17 @@ class InverterModBusToMQTT:
     __analyze_protocol : bool = False
     ''' enable / disable analyze mode'''
 
+    __analyze_protocol_save_load : bool = False
+    ''' if enabled, saves registry scan; but if found loads registry from file'''
+
     __send_holding_register : bool = False
     ''' send holding register over mqtt '''
 
     __send_input_register : bool = True
     ''' send input register over mqtt '''
+
+    __holding_register_prefix : str = ""
+    __input_register_prefix : str = ""
 
     
     inverter : Inverter
@@ -169,10 +173,12 @@ class InverterModBusToMQTT:
         if not isinstance( self.__mqtt_reconnect_delay , int) or self.__mqtt_reconnect_delay < 1: #minumum 1 second
             self.__mqtt_reconnect_delay = 1
 
-
         self.__mqtt_reconnect_attempts = self.__settings.getint('mqtt', 'reconnect_attempts', fallback=21)
         if not isinstance( self.__mqtt_reconnect_attempts , int) or self.__mqtt_reconnect_attempts < 0: #minimum 0
             self.__mqtt_reconnect_attempts = 0
+
+        self.__holding_register_prefix = self.__settings.get("mqtt", "holding_register_prefix", fallback="")
+        self.__input_register_prefix = self.__settings.get("mqtt", "input_register_prefix", fallback="")
 
         # inverter / device
         #this is kinda dumb, overcomplicates things, let's stick to 1 inverter at a time, can always run multiple instances of script
@@ -184,7 +190,10 @@ class InverterModBusToMQTT:
             name = self.__settings.get(section, 'name', fallback="NO NAME")
             unit = int(self.__settings.get(section, 'unit'))
             protocol_version = str(self.__settings.get(section, 'protocol_version'))
+
             self.__analyze_protocol = self.__settings.getboolean(section, 'analyze_protocol', fallback=False)
+            self.__analyze_protocol_save_load = self.__settings.getboolean(section, 'analyze_protocol_save_load', fallback=False)
+
             self.__send_holding_register = self.__settings.getboolean(section, 'send_holding_register', fallback=False)
             self.__send_input_register = self.__settings.getboolean(section, 'send_input_register', fallback=True)
             self.measurement = self.__settings.get(section, 'measurement', fallback="")
@@ -295,12 +304,18 @@ class InverterModBusToMQTT:
 
                 if self.__send_input_register:
                     new_info = self.inverter.read_input_registry()
+                    if self.__input_register_prefix:
+                        new_info = {self.__input_register_prefix + key: value for key, value in new_info.items()}
+                        
                     info.update(new_info)
 
                 if self.__send_holding_register:
                     print("read holding registers")
                     new_info = self.inverter.read_holding_registry()
-                    print(new_info)
+
+                    if self.__holding_register_prefix:
+                        new_info = {self.__holding_register_prefix + key: value for key, value in new_info.items()}
+
                     info.update(new_info)
 
                 if info is None:
@@ -369,36 +384,117 @@ class InverterModBusToMQTT:
 
         self.inverter.modbus_delay = self.inverter.modbus_delay #decrease delay because can probably get away with it due to lots of small reads
         print("read INPUT Registers: ")
-        ##batch_size = 1, read registers one by one; if out of bound. it just returns error
-        input_register = self.inverter.read_registers(min=0, max=max_input_register, batch_size=45)
-        holding_register = self.inverter.read_registers(min=0, max=max_holding_register, batch_size=45, register_type="holding")
+
+    
+
+        input_save_path = "input_registry.json"
+        holding_save_path = "holding_registry.json"
+
+        #load previous scan if enabled and exists
+        if self.__analyze_protocol_save_load and os.path.exists(input_save_path) and os.path.exists(holding_save_path):
+            with open(input_save_path, "r") as file:
+                input_registry = json.load(file)
+
+            with open(holding_save_path, "r") as file:
+                holding_registry = json.load(file)
+
+            # Convert keys to integers
+            input_registry = {int(key): value for key, value in input_registry.items()}
+            holding_registry = {int(key): value for key, value in holding_registry.items()}
+        else:
+            #perform registry scan
+            ##batch_size = 1, read registers one by one; if out of bound. it just returns error
+            input_registry = self.inverter.read_registers(min=0, max=max_input_register, batch_size=45)
+            holding_registry = self.inverter.read_registers(min=0, max=max_holding_register, batch_size=45, register_type="holding")
+
+            if self.__analyze_protocol_save_load: #save results if enabled
+                with open(input_save_path, "w") as file:
+                    json.dump(input_registry, file)
+
+                with open(holding_save_path, "w") as file:
+                    json.dump(holding_registry, file)
 
         #print results for debug
         print("=== START INPUT REGISTER ===")
-        print([(key, value) for key, value in input_register.items()])
+        print([(key, value) for key, value in input_registry.items()])
         print("=== END INPUT REGISTER ===")
         print("=== START HOLDING REGISTER ===")
-        print([(key, value) for key, value in holding_register.items()])
+        print([(key, value) for key, value in holding_registry.items()])
         print("=== END HOLDING REGISTER ===")
 
         #very well possible the registers will be incomplete due to different hardware sizes
         #so dont assume they are set / complete
         #we'll see about the behaviour. if it glitches, this could be a way to determine protocol.
+        
 
         input_register_score : dict[str, int] = {}
         holding_register_score : dict[str, int] = {}
 
+        input_valid_count : dict[str, int] = {}
+        holding_valid_count  : dict[str, int] = {}
+
+        def evaluate_score(entry : registry_map_entry, val):
+            score = 0
+            if entry.data_type == Data_Type.ASCII:
+                if val and not re.match('[^a-zA-Z0-9\_\-]', val): #validate ascii
+                    mod = 1
+                    if entry.concatenate:
+                        mod = len(entry.concatenate_registers)
+
+                    if entry.value_regex: #regex validation
+                        if re.match(entry.value_regex, val):
+                            mod = mod * 2 
+                        else: 
+                            mod = mod * -2 #regex validation failed, double damage!
+
+                    score = score + (2 * mod) #double points for ascii
+                pass
+            else: #default type
+                if isinstance(val, str):
+                    #likely to be a code
+                    score = score + 2
+                elif val != 0:
+                    if val >= entry.value_min and val <= entry.value_max:
+                        score = score + 1
+
+                        if entry.value_max != 65535: #double points for non-default range
+                            score = score + 1
+
+            return score
+
+
+        
         for name, protocol in protocols.items():
             input_register_score[name] = 0
             holding_register_score[name] = 0
+            #very rough percentage. tood calc max possible score. 
+            input_valid_count[name] = 0
+            holding_valid_count[name] = 0
+
+            #process registry based on protocol
+            input_info = self.inverter.process_registery(input_registry, protocol.input_registry_map)
+            holding_info = self.inverter.process_registery(input_registry, protocol.holding_registry_map)
+            
 
             for entry in protocol.input_registry_map:
-                if entry.register in input_register and input_register[entry.register] > 0: #empty registers appear as 0; so if it is being used it is likely above 0. if the normal state is zero it wont be detected
-                    input_register_score[name] = input_register_score[name] + 1
+                if entry.variable_name in input_info:
+                    val = input_info[entry.variable_name]
+                    score = evaluate_score(entry, val)
+                    if score > 0:
+                        input_valid_count[name] = input_valid_count[name] + 1
+
+                    input_register_score[name] = input_register_score[name] + score
+
 
             for entry in protocol.holding_registry_map:
-                if entry.register in holding_register and holding_register[entry.register] > 0:
-                    holding_register_score[name] = holding_register_score[name] + 1
+                if entry.variable_name in holding_info:
+                    val = holding_info[entry.variable_name]
+                    score = evaluate_score(entry, val)
+
+                    if score > 0:
+                        holding_valid_count[name] = holding_valid_count[name] + 1
+
+                    holding_register_score[name] = holding_register_score[name] + score
 
         
         protocol_scores: dict[str, int] = {}
@@ -409,8 +505,8 @@ class InverterModBusToMQTT:
         #print scores
         for name in sorted(protocol_scores, key=protocol_scores.get, reverse=True):
             print("=== "+str(name)+" - "+str(protocol_scores[name])+" ===")
-            print("input register : " + str(input_register_score[name]) + " of " + str(len(protocols[name].input_registry_map)))
-            print("holding register : " + str(holding_register_score[name]) + " of " + str(len(protocols[name].holding_registry_map)))
+            print("input register score: " + str(input_register_score[name]) + "; valid registers: "+str(input_valid_count[name])+" of " + str(len(protocols[name].input_registry_map)))
+            print("holding register score : " + str(holding_register_score[name]) + "; valid registers: "+str(holding_valid_count[name])+" of " + str(len(protocols[name].holding_registry_map)))
         
                     
                     
@@ -440,8 +536,17 @@ class InverterModBusToMQTT:
 
             if item.concatenate and item.register != item.concatenate_registers[0]:
                 continue #skip all except the first register so no duplicates
+            
 
             clean_name = item.variable_name.lower().replace(' ', '_')
+
+            if self.__input_register_prefix and item.registry_type == registry_type.INPUT:
+                clean_name = self.__input_register_prefix + clean_name
+
+            if self.__holding_register_prefix and item.registry_type == registry_type.HOLDING:
+                clean_name = self.__holding_register_prefix + clean_name
+
+
             print('Publishing Topic '+str(count)+' of ' + str(length) + ' "'+str(clean_name)+'"', end='\r', flush=True)
 
             #device['sw_version'] = bms_version

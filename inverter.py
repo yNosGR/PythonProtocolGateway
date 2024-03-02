@@ -187,11 +187,6 @@ class Inverter:
                 value = -value
                 #value = struct.unpack('<h', bytes([min(max(registry[item.register], 0), 255), min(max(registry[item.register+1], 0), 255)]))[0]
                 #value = int.from_bytes(bytes([registry[item.register], registry[item.register + 1]]), byteorder='little', signed=True)
-            elif item.data_type.value > 10:
-                bit_size = Data_Type.getSize(item.data_type)
-                bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
-                bit_index = item.register_bit
-                value = (registry[item.register] >> bit_index) & bit_mask
             elif item.data_type == Data_Type._16BIT_FLAGS or item.data_type == Data_Type._8BIT_FLAGS:
                 val = registry[item.register]
                 #16 bit flags
@@ -209,6 +204,11 @@ class Inverter:
                                 flags.append(self.protocolSettings.codes[item.documented_name+'_codes'][flag_index])
                             
                     value = ",".join(flags)
+                elif item.data_type.value > 200: #bit types
+                    bit_size = Data_Type.getSize(item.data_type)
+                    bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
+                    bit_index = item.register_bit
+                    value = (registry[item.register] >> bit_index) & bit_mask
                 else:
                     flags : str = ""
                     for i in range(start_bit, 16):  # Iterate over each bit position (0 to 15)
@@ -219,7 +219,12 @@ class Inverter:
                             flags = flags + "0"
                     value = flags
             elif item.data_type == Data_Type.ASCII:
-                value = registry[item.register].to_bytes((16 + 7) // 8, byteorder='big')
+                value = registry[item.register].to_bytes((16 + 7) // 8, byteorder='big') #convert to ushort to bytes
+                try:
+                    value = value.decode("utf-8") #convert bytes to ascii
+                except UnicodeDecodeError as e:
+                    print("UnicodeDecodeError:", e)
+                    
             else: #default, Data_Type.BYTE
                 value = float(registry[item.register])
 
@@ -244,13 +249,20 @@ class Inverter:
             #    value = str(value) + item.unit
             if item.concatenate:
                 concatenate_registry[item.register] = value
-                if all(key in concatenate_registry for key in item.concatenate_registers):
+
+                all_exist = True
+                for key in item.concatenate_registers:
+                    if key not in concatenate_registry:
+                        all_exist = False
+                        break
+                if all_exist:
+                #if all(key in concatenate_registry for key in item.concatenate_registers):
                     concatenated_value = ""
                     for key in item.concatenate_registers:
-                        concatenated_value = concatenated_value + concatenate_registry[key]
+                        concatenated_value = concatenated_value + str(concatenate_registry[key])
                         del concatenate_registry[key]
 
-                    info[item.variable_name] = value
+                    info[item.variable_name] = concatenated_value
             else:
                 info[item.variable_name] = value
 

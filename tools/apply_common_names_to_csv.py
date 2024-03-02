@@ -2,7 +2,7 @@ import csv
 import json
 
 path = 'protocols/growatt_2020_v1.24.input_registry_map.csv'
-save_path = 'protocols/growatt_2020_v1.24.input_registry_map.common_names.csv'
+save_path = 'protocols/growatt_2020_v1.24.input_registry_map.common_name.csv'
 
 common_path = 'tools/common_names.json'
 
@@ -31,6 +31,8 @@ with open(path, newline='') as csvfile:
                 row['variable name'] = common_names[row['documented name']] 
                 print(row['documented name'] + ' -> ' + common_names[row['documented name']])
                 new_csv.append(row)
+                continue
+        new_csv.append(row)
 
 # Write data to the output CSV
 with open(save_path, 'w', newline='') as outfile:

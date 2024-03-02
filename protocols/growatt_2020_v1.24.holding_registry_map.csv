@@ -1,4 +1,4 @@
-variable name;data type;register;documented name;description;write;value;unit;Initial value;note;;;;;;;
+variable name;data type;register;documented name;description;write;values;unit;Initial value;note;;;;;;;
 ;;0;OnOff;"Remote On/Off . On(1);Of(f 0)Inverter On(3);Off(2)BDC";W;0;1;2;3;;1;The inverter can be switched on and off; and the BDC can be switched on and off for the batt ready function.;;;
 ;;1;SaftyFuncEn;Bit0: SPI enable Bit1: AutoTestStart Bit2: LVFRT enable Bit3:FreqDerating Enable Bit4: Softstart enable Bit5: DRMS enable Bit6:PowerVoltFunc Enable Bit7: HVFRT enable Bit8:ROCOF enable Bit9: Recover FreqDeratingMode Enable Bit10:Split phase enable Bit10~15:??;W;0 :Disable1: enable;;;SPI: systemprotectioninterfaceBit0~3:for CEI0-21Bit4~6:for SAA;;;;;;;
 ;;2;PF CMDmemoryState;Set Holding register3;4;5;99 CMD will be memory or not(1/0); if not; these settings are the initial value. ;W;0or1;;0;Means these settings will beacting or not whennextpower on ;;

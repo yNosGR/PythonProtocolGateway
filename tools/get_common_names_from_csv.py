@@ -1,12 +1,18 @@
 import csv
 import json
 
-path = 'protocols/v0.14.input_registry_map.csv'
+path = 'protocols/growatt_2020_v1.24.input_registry_map.csv'
 
 save_path = 'tools/common_names.json'
 
 
 common_names = {}
+common_path = 'tools/common_names.json' #load existing names
+common_names : dict[str,str] = {}
+
+# Open the file and load the JSON data
+with open(common_path, 'r') as file:
+    common_names = json.load(file)
 
 with open(path, newline='') as csvfile:
     # Create a CSV reader object
