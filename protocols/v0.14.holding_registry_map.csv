@@ -51,7 +51,7 @@ variable name;data type;register;documented name;description;customer write;valu
 ;;54;uwAcFreqHighL;;;;;;;;;
 ;;55;uwAcFreqLowL;;;;;;;;;
 ;ASCII;59-66;Manufacturer Info;Manufacturer information (high);;ASCII;;;;;;
-;ASCII;67;FW Build No_ 4;Control FW Build No. 2;;;;;;;;
+;;67;FW Build No_ 4;Control FW Build No. 2;;;;;;;;
 ;;68;FW Build No_ 3;Control FW Build No. 1;;;;;;;;
 ;;69;FW Build No_ 2;COM FW Build No. 2;;;;;;;;
 ;;70;FW Build No_ 1;COM FW Build No. 1;;;;;;;;
