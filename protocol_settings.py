@@ -258,7 +258,7 @@ class protocol_settings:
                             concatenate = True
                             if reverse:
                                 for i in range(end, start, -1):
-                                    concatenate_registers.append(i)
+                                    concatenate_registers.append(i-1)
                             else:
                                 for i in range(start, end):
                                     concatenate_registers.append(i)
