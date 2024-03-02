@@ -109,28 +109,28 @@ class Inverter:
                 break
 
         if entry:
-            min : int = 0
-            max : int = 0
+            start : int = 0
+            end : int = 0
             if not entry.concatenate:
-                min = entry.register
-                max = entry.register
+                start = entry.register
+                end = entry.register
             else:
-                min = entry.register
-                max = max(entry.concatenate_registers)
+                start = entry.register
+                end = max(entry.concatenate_registers)
             
-            registers = self.read_registers(min=min, max=max, registry=registry)
+            registers = self.read_registers(start=start, end=end, registry=registry)
             results = self.process_registery(registers, [entry])
             return results[entry.variable_name]
             
 
-    def read_registers(self, ranges : list[tuple] = None, min : int = 0, max : int = None, batch_size : int = 45, registry : registry_type = registry_type.INPUT ) -> dict:
+    def read_registers(self, ranges : list[tuple] = None, start : int = 0, end : int = None, batch_size : int = 45, registry : registry_type = registry_type.INPUT ) -> dict:
         
 
         if not ranges: #ranges is empty, use min max
             ranges = []
-            min = -batch_size
-            while( min := min + batch_size ) < max:
-                ranges.append((min, batch_size)) ##APPEND TUPLE
+            start = -batch_size
+            while( start := start + batch_size ) < end:
+                ranges.append((start, batch_size)) ##APPEND TUPLE
 
         registry : dict[int,] = {}
         retries = 7
