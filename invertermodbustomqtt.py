@@ -109,9 +109,9 @@ class InverterModBusToMQTT:
         self.__log.addHandler(handler)
 
         #logging.basicConfig()
-        pymodbus_log = logging.getLogger('pymodbus')
-        pymodbus_log.setLevel(logging.DEBUG)
-        pymodbus_log.addHandler(handler)
+        #pymodbus_log = logging.getLogger('pymodbus')
+        #pymodbus_log.setLevel(logging.DEBUG)
+        #pymodbus_log.addHandler(handler)
 
         return None
 
