@@ -114,6 +114,7 @@ class Inverter:
                 if register_type == "input":
                     register = self.client.read_input_registers(range[0], range[1], unit=self.unit)
                 else:
+                    print("get holding")
                     register = self.client.read_holding_registers(range[0], range[1], unit=self.unit)
 
             except ModbusIOException as e: 
