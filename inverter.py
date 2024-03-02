@@ -212,7 +212,8 @@ class Inverter:
                         else:
                             flags = flags + "0"
                     value = flags
-                
+            elif item.data_type == Data_Type.ASCII:
+                value = registry[item.register].to_bytes((16 + 7) // 8, byteorder='big')
             else: #default, Data_Type.BYTE
                 value = float(registry[item.register])
 
@@ -242,7 +243,7 @@ class Inverter:
                     for key in item.concatenate_registers:
                         concatenated_value = concatenated_value + concatenate_registry[key]
                         del concatenate_registry[key]
-                        
+
                     info[item.variable_name] = value
             else:
                 info[item.variable_name] = value

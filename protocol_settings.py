@@ -20,6 +20,9 @@ class Data_Type(Enum):
     _16BIT_FLAGS = 7
     _8BIT_FLAGS = 8
 
+    ASCII = 84
+    ''' 2 characters '''
+
     _1BIT = 11,
     _2BIT = 12, 
     _3BIT = 13,
