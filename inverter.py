@@ -187,11 +187,6 @@ class Inverter:
                 value = -value
                 #value = struct.unpack('<h', bytes([min(max(registry[item.register], 0), 255), min(max(registry[item.register+1], 0), 255)]))[0]
                 #value = int.from_bytes(bytes([registry[item.register], registry[item.register + 1]]), byteorder='little', signed=True)
-            elif item.data_type.value > 10:
-                bit_size = Data_Type.getSize(item.data_type)
-                bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
-                bit_index = item.register_bit
-                value = (registry[item.register] >> bit_index) & bit_mask
             elif item.data_type == Data_Type._16BIT_FLAGS or item.data_type == Data_Type._8BIT_FLAGS:
                 val = registry[item.register]
                 #16 bit flags
@@ -209,6 +204,11 @@ class Inverter:
                                 flags.append(self.protocolSettings.codes[item.documented_name+'_codes'][flag_index])
                             
                     value = ",".join(flags)
+                elif item.data_type.value > 200: #bit types
+                    bit_size = Data_Type.getSize(item.data_type)
+                    bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
+                    bit_index = item.register_bit
+                    value = (registry[item.register] >> bit_index) & bit_mask
                 else:
                     flags : str = ""
                     for i in range(start_bit, 16):  # Iterate over each bit position (0 to 15)

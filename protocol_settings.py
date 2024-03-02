@@ -23,22 +23,22 @@ class Data_Type(Enum):
     ASCII = 84
     ''' 2 characters '''
 
-    _1BIT = 11
-    _2BIT = 12
-    _3BIT = 13
-    _4BIT = 14
-    _5BIT = 15
-    _6BIT = 16
-    _7BIT = 17
-    _8BIT = 18
-    _9BIT = 19
-    _10BIT = 20
-    _11BIT = 21
-    _12BIT = 22
-    _13BIT = 23
-    _14BIT = 24
-    _15BIT = 25
-    _16BIT = 26
+    _1BIT = 201
+    _2BIT = 202
+    _3BIT = 203
+    _4BIT = 204
+    _5BIT = 205
+    _6BIT = 206
+    _7BIT = 207
+    _8BIT = 208
+    _9BIT = 209
+    _10BIT = 210
+    _11BIT = 211
+    _12BIT = 212
+    _13BIT = 213
+    _14BIT = 214
+    _15BIT = 215
+    _16BIT = 216
     @classmethod
     def fromString(cls, name : str):
         name = name.strip().upper()
@@ -71,8 +71,8 @@ class Data_Type(Enum):
         if data_type in sizes:
             return sizes[data_type]
 
-        if data_type.value > 10: 
-            return data_type.value-10
+        if data_type.value > 200: 
+            return data_type.value-200
 
         return -1 #should never happen
 @dataclass
