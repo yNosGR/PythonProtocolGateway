@@ -136,7 +136,7 @@ class InverterModBusToMQTT:
             'serial', 'baudrate', fallback=9600)
         
         
-        self.__client = ModbusClient(method='ascii', port=self.__port, 
+        self.__client = ModbusClient(method='rtu', port=self.__port, 
                                      baudrate=int(self.__baudrate), 
                                      stopbits=1, parity='N', bytesize=8, timeout=1
                                      )
@@ -177,6 +177,7 @@ class InverterModBusToMQTT:
             self.measurement = self.__settings.get(section, 'measurement', fallback="")
             self.inverter = Inverter(self.__client, name, unit, protocol_version, self.__max_precision, self.__log)
             self.inverter.print_info()
+            self.unit = 0x01
 
         
 
@@ -283,6 +284,7 @@ class InverterModBusToMQTT:
                     info.update(self.inverter.read_input_registry())
 
                 if self.__send_holding_register:
+                    print("read holding registers")
                     info.update(self.inverter.read_holding_registry())
 
                 if info is None:
