@@ -19,6 +19,7 @@ class Inverter:
     protocolSettings : protocol_settings
     max_precision : int
     modbus_delay : float = 0.85
+    modbus_version = ""
     
     '''time inbetween requests'''
 
