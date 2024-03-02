@@ -170,7 +170,7 @@ class InverterModBusToMQTT:
             self.__analyze_protocol = self.__settings.getboolean(section, 'analyze_protocol', fallback=False)
             self.__send_holding_register = self.__settings.getboolean(section, 'send_holding_register', fallback=False)
             self.__send_input_register = self.__settings.getboolean(section, 'send_input_register', fallback=True)
-            self.measurement = self.__settings.get(section, 'measurement')
+            self.measurement = self.__settings.get(section, 'measurement', fallback="")
             self.inverter = Inverter(self.__client, name, unit, protocol_version, self.__max_precision, self.__log)
             self.inverter.print_info()
 
