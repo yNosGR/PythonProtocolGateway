@@ -205,7 +205,7 @@ class Inverter:
                         if (val >> i) & 1:
                             flag_index = "b"+str(i)
                             if flag_index in self.protocolSettings.codes[item.documented_name+'_codes']:
-                                flags.append[self.protocolSettings.codes[item.documented_name+'_codes'][flag_index]]
+                                flags.append(self.protocolSettings.codes[item.documented_name+'_codes'][flag_index])
                             
                     value = ",".join(flags)
                 else:
