@@ -44,7 +44,7 @@ class Inverter:
     def read_serial_number(self) -> str:
         
 
-        serial_number = str(self.read_variable("Serial Number"))
+        serial_number = str(self.read_variable("Serial Number", registry_type.HOLDING))
         print("read SN: " +serial_number)
         if serial_number:
             return serial_number
