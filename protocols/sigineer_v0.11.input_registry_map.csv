@@ -1,5 +1,5 @@
 variable name;data_type;register;documented name;description;values;unit;note;;;;;;;;;;
-;;0;System Status;System run state;0: Standby; 1;  (No Use) 2: Discharge; 3: Fault; 4: Flash; 5: PV charge; 6: AC charge; 7: Combine charge; 8:    Combine    charge and Bypass; 9:    PV    charge    and Bypass; 10:    AC    charge    and Bypass; 11: Bypass; 12:    PV    charge    and Discharge
+;;0;System Status;System run state;"{""0"": ""Standby"", ""1"": ""(No Use)"", ""2"": ""Discharge"", ""3"": ""Fault"", ""4"": ""Flash"", ""5"": ""PV charge"", ""6"": ""AC charge"", ""7"": ""Combine charge"", ""8"": ""Combine charge and Bypass"", ""9"": ""PV charge and Bypass"", ""10"": ""AC charge and Bypass"", ""11"": ""Bypass"", ""12"": ""PV charge and Discharge""}";;  (No Use) 2: Discharge; 12:    PV    charge    and Discharge; 12:    PV    charge    and Discharge; 12:    PV    charge    and Discharge; 12:    PV    charge    and Discharge; 12:    PV    charge    and Discharge; 12:    PV    charge    and Discharge; 12:    PV    charge    and Discharge; 12:    PV    charge    and Discharge; 12:    PV    charge    and Discharge; 12:    PV    charge    and Discharge
 PV1 Voltage;;1;Vpv1;PV1 voltage;;0.1V;;;;;;;;;;;
 PV2 Voltage;;2;Vpv2;PV2 voltage;;0.1V;;;;;;;;;;;
 PV1 Watts;;3;Ppv1 H;PV1 charge power (high);;0.1W;;;;;;;;;;;
@@ -44,9 +44,9 @@ AC Input VA;;38;AC_InVA H;;;0.1VA;;;;;;;;;;;
 ;;42;fault value;fault value;;;;;;;;;;;;;
 ;;43;warning value;warning value;;;;;;;;;;;;;
 ;;44;DTC;Device Type Code;&*6;;;;;;;;;;;;
-;;45;Check Step;Product check step;1:PV1   charge   power check; 2:PV2   charge   power check; 3:AC    charge    Power check;;;;;;;;;;
-;;46;Production Line Mode;Production Line Mode;0:  Not  at  Production Line Mode; 1:     Production     Line Mode; 2:     Production     Line Clear Fault Mode;;;;;;;;;;
-;;47;ConstantPowerOKFlag;Constant Power OK Flag;0: Not OK; 1: OK;;;;;;;;;;;
+;;45;Check Step;Product check step;"{""1"": ""PV1 charge powercheck"", ""2"": ""PV2 charge powercheck"", ""3"": ""AC charge Powercheck""}";;;;;;;;;;;;
+;;46;Production Line Mode;Production Line Mode;"{""0"": ""Not at ProductionLine Mode"", ""1"": ""Production LineMode"", ""2"": ""Production Line Clear Fault Mode""}";; 2:     Production     Line Clear Fault Mode;;;;;;;;;;
+;;47;ConstantPowerOKFlag;Constant Power OK Flag;"{""0"": ""Not OK"", ""1"": ""OK""}";;;;;;;;;;;;
 PV1 KWH Today;;48;Epv1_today H;PV Energy today;;;;;;;;;;;;;
 ;;49;Epv1_today L;PV Energy today;;0.1kW h;;;;;;;;;;;
 PV1 KWH Total;;50;Epv1_total H;PV Energy total;;;;;;;;;;;;;
@@ -76,10 +76,10 @@ Battery Discharge Watts;;73;Bat_DisChrWatt H;Bat discharge watt (high);;0.1W;;;;
 ;;74;Bat_DisChrWatt L;Bat discharge watt (low);;0.1W;;;;;;;;;;;
 Battery Discharge VA;;75;Bat_DisChrVA H;Bat discharge apparent power (high);;0.1VA;;;;;;;;;;;
 ;;76;Bat_DisChrVA L;Bat discharge apparent power (low);;0.1VA;;;;;;;;;;;
-Battery Input Watts;INT;77;Bat_Watt H;Bat watt (high);(signed int 32) Positive:Battery Discharge Power; Negative:          Battery Charge Power;;0.1W;;;;;;;;;
-;INT;78;Bat_Watt L;Bat watt (low);;0.1W;;;;;;;;;;;
+Battery Input Watts;INT;77;Bat_Watt H;Bat watt (high);(signed int 32) Positive:Battery Discharge Power  Negative:          Battery Charge Power;;;;;;;;;;;;
+;INT;78;Bat_Watt L;Bat watt (low);;;;;;;;;;;;;
 ;;79;Reserved;Not Used;;;;;;;;;;;;;
-;;80;BatOverCharge;Battery Over Charge Flag;0:Battery     not     over charge; 1:Battery over charge;;;;;;;;;;;
+;;80;BatOverCharge;Battery Over Charge Flag;"{""0"": ""Battery not over charge"", ""1"": ""Battery over charge""}";;;;;;;;;;;;
 ;;81;MpptFanSpeed;Fan speed of MPPT Charger;0~100;1.00%;;;;;;;;;;;
 ;;82;InvFanSpeed;Fan speed of Inverter;0~100;1.00%;;;;;;;;;;;
 ;;90;BMS_Status;Status from BMS;"Detail    information,    refer    to document:  Sigineer  xxSxxP  ESS Protocol;";;;;;;;;;;;;
@@ -150,10 +150,10 @@ Battery Input Watts;INT;77;Bat_Watt H;Bat watt (high);(signed int 32) Positive:B
 ;;217;Solar2_Epv1_total L;Solar Charger2 PV1 Energy total Low 16 bit;;0.1k Wh;;;;;;;;;;;
 ;;218;Solar2_Epv2_total H;Solar Charger2 PV2 Energy total High 16 bit;;0.1k Wh;;;;;;;;;;;
 ;;219;Solar2_Epv2_total L;Solar Charger2 PV2 Energy total Low 16 bit;;0.1k Wh;;;;;;;;;;;
-;;220;Solar_ConnectOKFlag;Slave Solar Connect OK Flag;1:Solar Charger1; 2:Solar Charger2; 3:Solar Charger1 2;;;;;;;;;;
-;;221;Solar_BatVoltConsistFl ag;Check Slave Solar Battery Voltage Consist OK Flag;1:Check Solar Charger1 OK; 2:Check Solar Charger2 OK; 3:Check Solar Charger1 and 2  OK;;;;;;;;;;
-;;222;Solar_TypeSwState ;Solar Charger Type Swtich State;0:Master SolarCharger; 1:Slaver SolarCharger;;;;;;;;;;;
-;;223;Solar_ModeSwState ;Solar Charger Mode Swtich State;0: Parallel Mode; 1:Single Mode;;;;;;;;;;;
+;;220;Solar_ConnectOKFlag;Slave Solar Connect OK Flag;"{""1"": ""Solar Charger1"", ""2"": ""Solar Charger2"", ""3"": ""Solar Charger1 and 2""}";;;;;;;;;;;;
+;;221;Solar_BatVoltConsistFl ag;Check Slave Solar Battery Voltage Consist OK Flag;"{""1"": ""Check Solar Charger1battery voltage OK"", ""2"": ""Check Solar Charger2battery voltage OK"", ""3"": ""Check Solar Charger1 and 2 battery voltage OK""}";;;;;;;;;;;;
+;;222;Solar_TypeSwState ;Solar Charger Type Swtich State;"{""0"": ""Master SolarCharger"", ""1"": ""Slaver SolarCharger""}";;;;;;;;;;;;
+;;223;Solar_ModeSwState ;Solar Charger Mode Swtich State;"{""0"": ""Parallel Mode"", ""1"": ""Single Mode""}";;;;;;;;;;;;
 ;;224;Solar_AddrSwState ;Solar Charger Addr Swtich State;2~3;;;;;;;;;;;;
 ;;360;BMS_ GaugeRM ;Gauge RM from BMS ;"Detail         information, refer     to     document: Sigineer     xxSxxP     ESS Protocol;";;;;;;;;;;;;
 ;;361;BMS_GaugeFCC;Gauge FCC from BMS ;"Detail         information, refer     to     document: Sigineer     xxSxxP     ESS Protocol;";;;;;;;;;;;;

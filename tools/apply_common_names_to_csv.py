@@ -1,8 +1,8 @@
 import csv
 import json
 
-path = 'protocols/growatt_2020_v1.24.input_registry_map.csv'
-save_path = 'protocols/growatt_2020_v1.24.input_registry_map.common_name.csv'
+path = 'protocols/sigineer_v0.11.holding_registry_map.csv'
+save_path = 'protocols/sigineer_v0.11.holding_registry_map.csv'
 
 common_path = 'tools/common_names.json'
 
