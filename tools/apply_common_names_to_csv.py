@@ -1,8 +1,8 @@
 import csv
 import json
 
-path = 'protocols/sigineer_v0.11.holding_registry_map.csv'
-save_path = 'protocols/sigineer_v0.11.holding_registry_map.csv'
+path = 'protocols/eg4_v58.holding_registry_map.csv'
+save_path = 'protocols/eg4_v58.holding_registry_map.csv'
 
 common_path = 'tools/common_names.json'
 
