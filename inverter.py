@@ -245,14 +245,14 @@ class Inverter:
                     bit_index = item.register_bit
                     value = (registry[item.register] >> bit_index) & bit_mask
                 else:
-                    flags : str = ""
+                    flags : list[str] = []
                     for i in range(start_bit, 16):  # Iterate over each bit position (0 to 15)
                         # Check if the i-th bit is set
                         if (val >> i) & 1:
-                            flags = flags + "1"
+                            flags.append("1")
                         else:
-                            flags = flags + "0"
-                    value = flags
+                            flags.append("0")
+                    value = ''.join(flags)
             elif item.data_type == Data_Type.ASCII:
                 value = registry[item.register].to_bytes((16 + 7) // 8, byteorder='big') #convert to ushort to bytes
                 try:
@@ -269,7 +269,7 @@ class Inverter:
             if  isinstance(value, float) and self.max_precision > -1:
                 value = round(value, self.max_precision)
 
-            if (item.data_type is not Data_Type._16BIT_FLAGS and
+            if (item.data_type != Data_Type._16BIT_FLAGS and
                 item.documented_name+'_codes' in self.protocolSettings.codes):
                 try:
                     cleanval = str(int(value))
