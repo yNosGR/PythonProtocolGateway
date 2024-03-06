@@ -76,7 +76,7 @@ class InverterModBusToMQTT:
     __mqtt_reconnecting : float = 0
     ''' keep track of if reconnecting. so we can determine if mqtt event bugged out'''
 
-    __mqtt_connected = bool = False
+    __mqtt_connected : bool = False
     ''' flag to keep track of if mqtt is connected because mqtt events / functions are unreliable '''
 
     # mqtt error topic in case the growatt2mqtt runs in error moder or inverter is powered off

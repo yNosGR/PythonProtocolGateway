@@ -94,12 +94,12 @@ class Inverter:
         self.__log.info('\tUnit: %s\n', str(self.unit))
         self.__log.info('\tModbus Version: %s\n', str(self.modbus_version))
 
-    def read_variable(self, variable_name : str, registry : Registry_Type):
+    def read_variable(self, variable_name : str, registry_type : Registry_Type):
         ##clean for convinecne  
         variable_name = variable_name.strip().lower().replace(' ', '_')
-        if registry == Registry_Type.INPUT:
+        if registry_type == Registry_Type.INPUT:
             registry_map = self.protocolSettings.input_registry_map
-        elif registry == Registry_Type.HOLDING:
+        elif registry_type == Registry_Type.HOLDING:
             registry_map = self.protocolSettings.holding_registry_map
 
         entry : registry_map_entry = None 
@@ -118,7 +118,7 @@ class Inverter:
                 start = entry.register
                 end = max(entry.concatenate_registers)
             
-            registers = self.read_registers(start=start, end=end, registry=registry)
+            registers = self.read_registers(start=start, end=end, registry_type=registry_type)
             results = self.process_registery(registers, registry_map)
             return results[entry.variable_name]
             
