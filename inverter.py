@@ -146,7 +146,7 @@ class Inverter:
 
             isError = False
             try:
-                if registry_type == registry_type.INPUT:
+                if registry_type == Registry_Type.INPUT:
                     register = self.client.read_input_registers(range[0], range[1], unit=self.unit)
                 else:
                     print("get holding")
