@@ -20,7 +20,7 @@ from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 
 from inverter import Inverter
 
-from protocol_settings import protocol_settings,Data_Type,registry_map_entry,registry_type
+from protocol_settings import protocol_settings,Data_Type,registry_map_entry,Registry_Type
 
 
 __logo = """
@@ -440,8 +440,8 @@ class InverterModBusToMQTT:
         else:
             #perform registry scan
             ##batch_size = 1, read registers one by one; if out of bound. it just returns error
-            input_registry = self.inverter.read_registers(min=0, max=max_input_register, batch_size=45)
-            holding_registry = self.inverter.read_registers(min=0, max=max_holding_register, batch_size=45, registry="holding")
+            input_registry = self.inverter.read_registers(min=0, max=max_input_register, batch_size=45, registry=Registry_Type.INPUT)
+            holding_registry = self.inverter.read_registers(min=0, max=max_holding_register, batch_size=45, registry=Registry_Type.HOLDING)
 
             if self.__analyze_protocol_save_load: #save results if enabled
                 with open(input_save_path, "w") as file:
@@ -576,10 +576,10 @@ class InverterModBusToMQTT:
 
             clean_name = item.variable_name.lower().replace(' ', '_')
 
-            if self.__input_register_prefix and item.registry_type == registry_type.INPUT:
+            if self.__input_register_prefix and item.registry_type == Registry_Type.INPUT:
                 clean_name = self.__input_register_prefix + clean_name
 
-            if self.__holding_register_prefix and item.registry_type == registry_type.HOLDING:
+            if self.__holding_register_prefix and item.registry_type == Registry_Type.HOLDING:
                 clean_name = self.__holding_register_prefix + clean_name
 
 

@@ -76,13 +76,13 @@ class Data_Type(Enum):
 
         return -1 #should never happen
 
-class registry_type(Enum):
+class Registry_Type(Enum):
     HOLDING = 0x03
     INPUT = 0x04
     
 @dataclass
 class registry_map_entry:
-    registry_type : registry_type
+    registry_type : Registry_Type
     register : int
     register_bit : int
     variable_name : str
@@ -160,7 +160,7 @@ class protocol_settings:
         with open(path) as f:
             self.codes = json.loads(f.read())
 
-    def load__registry(self, path, registry_type : registry_type = registry_type.INPUT) -> list[registry_map_entry]: 
+    def load__registry(self, path, registry_type : Registry_Type = Registry_Type.INPUT) -> list[registry_map_entry]: 
         registry_map : list[registry_map_entry] = []
         register_regex = re.compile(r'(?P<register>\d+)\.b(?P<bit>\d{1,2})')
 
@@ -380,7 +380,7 @@ class protocol_settings:
 
         path = settings_dir + '/' + file
 
-        self.input_registry_map = self.load__registry(path, registry_type.INPUT)
+        self.input_registry_map = self.load__registry(path, Registry_Type.INPUT)
 
         #get max register size
         for item in self.input_registry_map:
@@ -398,7 +398,7 @@ class protocol_settings:
 
         path = settings_dir + '/' + file
 
-        self.holding_registry_map = self.load__registry(path, registry_type.HOLDING)
+        self.holding_registry_map = self.load__registry(path, Registry_Type.HOLDING)
 
         #get max register size
         for item in self.holding_registry_map:

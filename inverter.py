@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 
-from protocol_settings import Data_Type, registry_map_entry, protocol_settings, registry_type
+from protocol_settings import Data_Type, registry_map_entry, protocol_settings, Registry_Type
 
 class Inverter:
     """ Class Inverter implements ModBus RTU protocol for modbus based inverters """
@@ -44,7 +44,7 @@ class Inverter:
     def read_serial_number(self) -> str:
         
 
-        serial_number = str(self.read_variable("Serial Number", registry_type.HOLDING))
+        serial_number = str(self.read_variable("Serial Number", Registry_Type.HOLDING))
         print("read SN: " +serial_number)
         if serial_number:
             return serial_number
@@ -94,12 +94,12 @@ class Inverter:
         self.__log.info('\tUnit: %s\n', str(self.unit))
         self.__log.info('\tModbus Version: %s\n', str(self.modbus_version))
 
-    def read_variable(self, variable_name : str, registry : registry_type):
+    def read_variable(self, variable_name : str, registry : Registry_Type):
         ##clean for convinecne  
         variable_name = variable_name.strip().lower().replace(' ', '_')
-        if registry == registry_type.INPUT:
+        if registry == Registry_Type.INPUT:
             registry_map = self.protocolSettings.input_registry_map
-        elif registry == registry_type.HOLDING:
+        elif registry == Registry_Type.HOLDING:
             registry_map = self.protocolSettings.holding_registry_map
 
         entry : registry_map_entry = None 
@@ -123,7 +123,7 @@ class Inverter:
             return results[entry.variable_name]
             
 
-    def read_registers(self, ranges : list[tuple] = None, start : int = 0, end : int = None, batch_size : int = 45, registry : registry_type = registry_type.INPUT ) -> dict:
+    def read_registers(self, ranges : list[tuple] = None, start : int = 0, end : int = None, batch_size : int = 45, registry_type : Registry_Type = Registry_Type.INPUT ) -> dict:
         
 
         if not ranges: #ranges is empty, use min max
@@ -146,7 +146,7 @@ class Inverter:
 
             isError = False
             try:
-                if registry == registry_type.INPUT:
+                if registry_type == registry_type.INPUT:
                     register = self.client.read_input_registers(range[0], range[1], unit=self.unit)
                 else:
                     print("get holding")
@@ -306,7 +306,7 @@ class Inverter:
     def read_input_registry(self) -> dict[str,str]:
         ''' reads input registers and returns as clean dict object inverters '''
 
-        registry = self.read_registers(self.protocolSettings.input_registry_ranges)
+        registry = self.read_registers(self.protocolSettings.input_registry_ranges, registry_type=Registry_Type.INPUT)
         info = self.process_registery(registry, self.protocolSettings.input_registry_map)
         info['StatusCode'] = registry[0]
         return info
@@ -314,7 +314,7 @@ class Inverter:
     def read_holding_registry(self) -> dict[str,str]:
         ''' reads holding registers and returns as clean dict object inverters '''
 
-        registry = self.read_registers(self.protocolSettings.holding_registry_ranges, registry="holding")
+        registry = self.read_registers(self.protocolSettings.holding_registry_ranges, registry_type=Registry_Type.HOLDING)
         info = self.process_registery(registry, self.protocolSettings.holding_registry_map)
         return info
 
