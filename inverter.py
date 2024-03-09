@@ -181,14 +181,13 @@ class Inverter:
             retry -= 1
             if retry < 0:
                 retry = 0
+
             #combine registers into "registry"
-            print("combine results, " + str(len(register.registers)))
             i = -1
             while(i := i + 1 ) < range[1]:
                 #print(str(i) + " => " + str(i+range[0]))
                 registry[i+range[0]] = register.registers[i]
 
-        print("registry len: " + str(len(registry)))
         return registry
 
     def process_registery(self, registry : dict, map : list[registry_map_entry]) -> dict[str,str]:
