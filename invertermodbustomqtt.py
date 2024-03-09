@@ -4,6 +4,7 @@ Main module for Growatt / Inverters ModBus RTU data to MQTT
 """
 import atexit
 import glob
+import random
 import re
 import time
 import os
@@ -19,7 +20,7 @@ from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 
 from inverter import Inverter
 
-from protocol_settings import protocol_settings,Data_Type,registry_map_entry,registry_type
+from protocol_settings import protocol_settings,Data_Type,registry_map_entry,Registry_Type
 
 
 __logo = """
@@ -72,6 +73,12 @@ class InverterModBusToMQTT:
     __mqtt_reconnect_attempts : int = 21
     ''' max number of reconnects during a disconnect '''
 
+    __mqtt_reconnecting : float = 0
+    ''' keep track of if reconnecting. so we can determine if mqtt event bugged out'''
+
+    __mqtt_connected : bool = False
+    ''' flag to keep track of if mqtt is connected because mqtt events / functions are unreliable '''
+
     # mqtt error topic in case the growatt2mqtt runs in error moder or inverter is powered off
     __mqtt_error_topic = ""
     # mqtt properties handle for publishing data
@@ -99,6 +106,11 @@ class InverterModBusToMQTT:
 
     __holding_register_prefix : str = ""
     __input_register_prefix : str = ""
+
+    __running : bool = False
+    ''' controls main loop'''
+
+
 
     
     inverter : Inverter
@@ -209,7 +221,14 @@ class InverterModBusToMQTT:
         self.__log.info("mqtt host %s\n", self.__mqtt_host)
         self.__log.info("mqtt port %s\n", self.__mqtt_port)
         self.__log.info("mqtt_topic %s\n", self.__mqtt_topic)
-        self.__mqtt_client = mqtt.Client()
+
+        #compatability with newer lib
+        
+        if hasattr(mqtt, "CallbackAPIVersion"):
+            self.__mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
+        else:
+            self.__mqtt_client = mqtt.Client()
+
         self.__mqtt_client.on_connect = self.on_connect
         self.__mqtt_client.on_message = self.on_message
         self.__mqtt_client.on_disconnect = self.on_disconnect
@@ -236,28 +255,44 @@ class InverterModBusToMQTT:
         return
 
 
-    def on_disconnect(self, client, userdata, rc):
+    def mqtt_reconnect(self):
         self.__log.info("Disconnected from MQTT Broker!")
+        if self.__mqtt_reconnecting != 0: #stop double calls
+            return
         # Attempt to reconnect
         for attempt in range(0, self.__mqtt_reconnect_attempts):
+            self.__mqtt_reconnecting = time.time()
             try:
                 self.__log.warning("Attempting to reconnect("+str(attempt)+")...")
-                self.__mqtt_client.reconnect()
-                #self.__mqtt_client.loop_stop()
-                #self.__mqtt_client.connect(str(self.__mqtt_host), int(self.__mqtt_port), 60)
-                #self.__mqtt_client.loop_start()
-                return
+                if random.randint(0,1): #alternate between methods because built in reconnect might be unreliable. 
+                    self.__mqtt_client.reconnect()
+                else:
+                    self.__mqtt_client.loop_stop()
+                    self.__mqtt_client.connect(str(self.__mqtt_host), int(self.__mqtt_port), 60)
+                    self.__mqtt_client.loop_start()
+
+                #sleep to give a chance to reconnect. 
+                time.sleep(self.__mqtt_reconnect_delay)    
+                if self.__mqtt_connected:
+                    self.__mqtt_reconnecting = 0
+                    return
             except:
                 self.__log.warning("Reconnection failed. Retrying in "+str(self.__mqtt_reconnect_delay)+" second(s)...")
                 time.sleep(self.__mqtt_reconnect_delay)
         
         #failed to reonnect
         self.__log.critical("Failed to Reconnect, Too many attempts")
-        exit() #exit, service should restart entire script
+        self.__running = False
+        self.__mqtt_reconnecting = 0
+        quit() #exit, service should restart entire script
+
+    def on_disconnect(self, client, userdata, rc):
+       self.mqtt_reconnect()
 
     def on_connect(self, client, userdata, flags, rc):
         """ The callback for when the client receives a CONNACK response from the server. """
         self.__log.info("Connected with result code %s\n",str(rc))
+        self.__mqtt_connected = True
 
 
     def on_message(self, client, userdata, msg):
@@ -268,6 +303,8 @@ class InverterModBusToMQTT:
         """
         run method, starts ModBus connection and mqtt connection
         """
+
+        self.__running = True
 
         if self.__analyze_protocol:
             self.analyze_protocol()
@@ -285,13 +322,17 @@ class InverterModBusToMQTT:
             self.mqtt_discovery()
 
         error_sleep = 0
-        while True:
+        while self.__running:
             if not self.__mqtt_client.is_connected(): ##mqtt not connected. 
+                if self.__mqtt_reconnecting == 0 or time.time() - self.__mqtt_reconnecting > 15*60:
+                    self.mqtt_reconnect() #on disconnect event might have failed. manually reconnect
+
                 print('MQTT is not connected')
                 time.sleep(self.__mqtt_reconnect_delay)
                 continue
-
-
+            
+            self.__mqtt_connected = True
+            
 
             online = False
             # If this inverter errored then we wait a bit before trying again
@@ -306,7 +347,7 @@ class InverterModBusToMQTT:
                     new_info = self.inverter.read_input_registry()
                     if self.__input_register_prefix:
                         new_info = {self.__input_register_prefix + key: value for key, value in new_info.items()}
-                        
+
                     info.update(new_info)
 
                 if self.__send_holding_register:
@@ -342,6 +383,10 @@ class InverterModBusToMQTT:
                 else:
                     for key, val in info.items():
                         self.__mqtt_client.publish(str(self.__mqtt_topic+'/'+key).lower(), str(val))
+
+                #if it makes it here, mqtt should be connected. 
+                self.__mqtt_reconnect_attempts = 0
+                self.__mqtt_reconnecting = 0
 
             except Exception as err:
                 traceback.print_exc()
@@ -385,8 +430,6 @@ class InverterModBusToMQTT:
         self.inverter.modbus_delay = self.inverter.modbus_delay #decrease delay because can probably get away with it due to lots of small reads
         print("read INPUT Registers: ")
 
-    
-
         input_save_path = "input_registry.json"
         holding_save_path = "holding_registry.json"
 
@@ -404,8 +447,8 @@ class InverterModBusToMQTT:
         else:
             #perform registry scan
             ##batch_size = 1, read registers one by one; if out of bound. it just returns error
-            input_registry = self.inverter.read_registers(min=0, max=max_input_register, batch_size=45)
-            holding_registry = self.inverter.read_registers(min=0, max=max_holding_register, batch_size=45, register_type="holding")
+            input_registry = self.inverter.read_registers(min=0, max=max_input_register, batch_size=45, registry=Registry_Type.INPUT)
+            holding_registry = self.inverter.read_registers(min=0, max=max_holding_register, batch_size=45, registry=Registry_Type.HOLDING)
 
             if self.__analyze_protocol_save_load: #save results if enabled
                 with open(input_save_path, "w") as file:
@@ -540,10 +583,10 @@ class InverterModBusToMQTT:
 
             clean_name = item.variable_name.lower().replace(' ', '_')
 
-            if self.__input_register_prefix and item.registry_type == registry_type.INPUT:
+            if self.__input_register_prefix and item.registry_type == Registry_Type.INPUT:
                 clean_name = self.__input_register_prefix + clean_name
 
-            if self.__holding_register_prefix and item.registry_type == registry_type.HOLDING:
+            if self.__holding_register_prefix and item.registry_type == Registry_Type.HOLDING:
                 clean_name = self.__holding_register_prefix + clean_name
 
 

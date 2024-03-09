@@ -10,12 +10,27 @@ while True:
     user_input  = re.sub(r'\s+\:', ":", user_input)
 
     # Split the string into key-value pairs
-    pairs = user_input.split()
+
+    if user_input.find(";") != -1:
+        pairs = user_input.split(";")
+    elif user_input.find("；") != -1:
+        pairs = user_input.split("；")
+    else:
+        pairs = user_input.split()
+    
 
     # Create a dictionary from the key-value pairs
     result = {}
     for pair in pairs:
-        key, value = pair.split(":")
+        if not pair:
+            continue
+
+        if pair.find("：") != -1:
+            key, value = pair.split("：")
+        else:
+            key, value = pair.split(":")
+
+        
         result[key.strip()] = value.strip()
 
     # Convert the dictionary to JSON

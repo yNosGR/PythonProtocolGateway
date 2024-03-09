@@ -2,6 +2,7 @@
 *.pyc
 .vscode
 settings.json
+virtualenv/*
 
 growatt2mqtt.cfg
 growatt2mqtt.service

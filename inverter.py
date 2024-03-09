@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 
-from protocol_settings import Data_Type, registry_map_entry, protocol_settings
+from protocol_settings import Data_Type, registry_map_entry, protocol_settings, Registry_Type
 
 class Inverter:
     """ Class Inverter implements ModBus RTU protocol for modbus based inverters """
@@ -42,7 +42,13 @@ class Inverter:
         self.read_info()
 
     def read_serial_number(self) -> str:
-        serial_number = ""
+        
+
+        serial_number = str(self.read_variable("Serial Number", Registry_Type.HOLDING))
+        print("read SN: " +serial_number)
+        if serial_number:
+            return serial_number
+        
         sn2 = ""
         sn3 = ""
         fields = ['Serial No 1', 'Serial No 2', 'Serial No 3', 'Serial No 4', 'Serial No 5']
@@ -88,14 +94,43 @@ class Inverter:
         self.__log.info('\tUnit: %s\n', str(self.unit))
         self.__log.info('\tModbus Version: %s\n', str(self.modbus_version))
 
-    def read_registers(self, ranges : list[tuple] = None, min : int = 0, max : int = None, batch_size : int = 45, register_type : str = "input" ) -> dict:
+    def read_variable(self, variable_name : str, registry_type : Registry_Type):
+        ##clean for convinecne  
+        variable_name = variable_name.strip().lower().replace(' ', '_')
+        if registry_type == Registry_Type.INPUT:
+            registry_map = self.protocolSettings.input_registry_map
+        elif registry_type == Registry_Type.HOLDING:
+            registry_map = self.protocolSettings.holding_registry_map
+
+        entry : registry_map_entry = None 
+        for e in registry_map:
+            if e.variable_name == variable_name:
+                entry = e
+                break
+
+        if entry:
+            start : int = 0
+            end : int = 0
+            if not entry.concatenate:
+                start = entry.register
+                end = entry.register
+            else:
+                start = entry.register
+                end = max(entry.concatenate_registers)
+            
+            registers = self.read_registers(start=start, end=end, registry_type=registry_type)
+            results = self.process_registery(registers, registry_map)
+            return results[entry.variable_name]
+            
+
+    def read_registers(self, ranges : list[tuple] = None, start : int = 0, end : int = None, batch_size : int = 45, registry_type : Registry_Type = Registry_Type.INPUT ) -> dict:
         
 
         if not ranges: #ranges is empty, use min max
             ranges = []
-            min = -batch_size
-            while( min := min + batch_size ) < max:
-                ranges.append((min, batch_size)) ##APPEND TUPLE
+            start = -batch_size
+            while( start := start + batch_size ) < end:
+                ranges.append((start, batch_size)) ##APPEND TUPLE
 
         registry : dict[int,] = {}
         retries = 7
@@ -111,7 +146,7 @@ class Inverter:
 
             isError = False
             try:
-                if register_type == "input":
+                if registry_type == Registry_Type.INPUT:
                     register = self.client.read_input_registers(range[0], range[1], unit=self.unit)
                 else:
                     print("get holding")
@@ -210,21 +245,21 @@ class Inverter:
                     bit_index = item.register_bit
                     value = (registry[item.register] >> bit_index) & bit_mask
                 else:
-                    flags : str = ""
+                    flags : list[str] = []
                     for i in range(start_bit, 16):  # Iterate over each bit position (0 to 15)
                         # Check if the i-th bit is set
                         if (val >> i) & 1:
-                            flags = flags + "1"
+                            flags.append("1")
                         else:
-                            flags = flags + "0"
-                    value = flags
+                            flags.append("0")
+                    value = ''.join(flags)
             elif item.data_type == Data_Type.ASCII:
                 value = registry[item.register].to_bytes((16 + 7) // 8, byteorder='big') #convert to ushort to bytes
                 try:
                     value = value.decode("utf-8") #convert bytes to ascii
                 except UnicodeDecodeError as e:
                     print("UnicodeDecodeError:", e)
-                    
+
             else: #default, Data_Type.BYTE
                 value = float(registry[item.register])
 
@@ -234,7 +269,7 @@ class Inverter:
             if  isinstance(value, float) and self.max_precision > -1:
                 value = round(value, self.max_precision)
 
-            if (item.data_type is not Data_Type._16BIT_FLAGS and
+            if (item.data_type != Data_Type._16BIT_FLAGS and
                 item.documented_name+'_codes' in self.protocolSettings.codes):
                 try:
                     cleanval = str(int(value))
@@ -271,7 +306,7 @@ class Inverter:
     def read_input_registry(self) -> dict[str,str]:
         ''' reads input registers and returns as clean dict object inverters '''
 
-        registry = self.read_registers(self.protocolSettings.input_registry_ranges)
+        registry = self.read_registers(self.protocolSettings.input_registry_ranges, registry_type=Registry_Type.INPUT)
         info = self.process_registery(registry, self.protocolSettings.input_registry_map)
         info['StatusCode'] = registry[0]
         return info
@@ -279,7 +314,7 @@ class Inverter:
     def read_holding_registry(self) -> dict[str,str]:
         ''' reads holding registers and returns as clean dict object inverters '''
 
-        registry = self.read_registers(self.protocolSettings.holding_registry_ranges, register_type="holding")
+        registry = self.read_registers(self.protocolSettings.holding_registry_ranges, registry_type=Registry_Type.HOLDING)
         info = self.process_registery(registry, self.protocolSettings.holding_registry_map)
         return info
 
