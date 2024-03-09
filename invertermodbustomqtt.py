@@ -221,7 +221,14 @@ class InverterModBusToMQTT:
         self.__log.info("mqtt host %s\n", self.__mqtt_host)
         self.__log.info("mqtt port %s\n", self.__mqtt_port)
         self.__log.info("mqtt_topic %s\n", self.__mqtt_topic)
-        self.__mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
+
+        #compatability with newer lib
+        
+        if hasattr(mqtt, "CallbackAPIVersion"):
+            self.__mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
+        else:
+            self.__mqtt_client = mqtt.Client()
+
         self.__mqtt_client.on_connect = self.on_connect
         self.__mqtt_client.on_message = self.on_message
         self.__mqtt_client.on_disconnect = self.on_disconnect
