@@ -2,11 +2,25 @@
 """
 Main module for Growatt / Inverters ModBus RTU data to MQTT
 """
+
+
+import sys
+import time
+
+# Check if Python version is greater than 3.9
+if sys.version_info < (3, 9):
+    print("==================================================")
+    print("WARNING: python version 3.9 or higher is recommended")
+    print("Current version: " + sys.version)
+    print("Please upgrade your python version to 3.9")
+    print("==================================================")
+    time.sleep(4)
+
 import atexit
 import glob
 import random
 import re
-import time
+
 import os
 import json
 import logging
