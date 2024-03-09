@@ -140,7 +140,7 @@ class protocol_settings:
     def get_input_registry_entry(self, name : str):
         return self.get_registry_entry(name, self.input_registry_map)
 
-    def get_registry_entry(self, name : str, map : list[registry_map_entry]) -> registry_map_entry | None:
+    def get_registry_entry(self, name : str, map : list[registry_map_entry]) -> registry_map_entry:
         name = name.strip().lower().replace(' ', '_') #clean name
         for item in map:
             if item.documented_name == name:
