@@ -36,7 +36,6 @@ from inverter import Inverter
 
 from protocol_settings import protocol_settings,Data_Type,registry_map_entry,Registry_Type
 
-
 __logo = """
    ____                        _   _   ____  __  __  ___ _____ _____ 
   / ___|_ __ _____      ____ _| |_| |_|___ \|  \/  |/ _ \_   _|_   _|

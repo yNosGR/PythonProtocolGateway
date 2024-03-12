@@ -103,4 +103,4 @@ variable name;data type;register;documented name;length;writeable;unit;values;no
 ;UINT8;114;Charging OC-2 protection delay time;2byte;RW;0.025S;1~255;;
 ;;0150-0159;Version information;20byte;R;ASCII;;;
 ;;0160-0169;Model SN;20byte;RW;ASCII;;BMS Manufacturer;
-;;0170-0179;PACK SN;20byte;RW;ASCII;;PACK Manufacturer;
+Serial Number ;ASCII;0170-0179;PACK SN;20byte;RW;ASCII;;PACK Manufacturer;
