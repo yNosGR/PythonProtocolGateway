@@ -245,7 +245,7 @@ class protocol_settings:
                     codes_json = json.loads(row['values'])
                     value_is_json = True
 
-                    name = item.documented_name+'_codes'
+                    name = row['documented name']+'_codes'
                     if name not in self.codes:
                         self.codes[name] = codes_json
 
