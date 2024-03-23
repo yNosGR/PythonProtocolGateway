@@ -208,8 +208,8 @@ class protocol_settings:
                 row['documented name'] = row['documented name'].strip().lower().replace(' ', '_')
 
                 variable_name = row['variable name'] if row['variable name'] else row['documented name']
-                variable_name = variable_name.lower().replace(' ', '_').replace('__', '_') #clean name
-
+                variable_name = variable_name = variable_name.strip().lower().replace(' ', '_').replace('__', '_') #clean name
+                
                 if re.search("[^a-zA-Z0-9\_]", variable_name) :
                     print("WARNING Invalid Name : " + str(variable_name) + " reg: " + str(row['register']) + " doc name: " + str(row['documented name']) + " path: " + str(path))
 
