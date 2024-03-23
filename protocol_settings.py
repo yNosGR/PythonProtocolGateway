@@ -105,6 +105,7 @@ class registry_map_entry:
 
 class protocol_settings:
     protocol : str
+    reader : str
     settings_dir : str
     variable_mask : list[str]
     input_registry_map : list[registry_map_entry]
@@ -130,6 +131,11 @@ class protocol_settings:
                     self.variable_mask.append(line.strip().lower())
 
         self.load__codes() #load first, so priority to json codes
+        if "reader" in self.codes:
+            self.reader = self.codes["reader"]
+        else:
+            self.reader = "modbus_rtu"
+
         self.load__input_registry_map()
         self.load__holding_registry_map()
 

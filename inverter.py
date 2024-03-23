@@ -5,12 +5,14 @@ Python Module to implement ModBus RTU connection to ModBus Based Inverters
 import logging
 import re
 import time
-import struct
+import importlib
+
 from pymodbus.exceptions import ModbusIOException
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pymodbus.client.sync import ModbusSerialClient as ModbusClient
+    from readers.reader_base import reader_base
 
 from protocol_settings import Data_Type, registry_map_entry, protocol_settings, Registry_Type
 
@@ -20,15 +22,18 @@ class Inverter:
     max_precision : int
     modbus_delay : float = 0.85
     modbus_version = ""
+    reader : reader_base
+    settings : dict[str, str]
     
     '''time inbetween requests'''
 
-    def __init__(self, client, name, unit, protocol_version, max_precision : int = -1, log = None):
-        self.client : ModbusClient = client
+    def __init__(self, name, unit, protocol_version, settings : dict[str,str], max_precision : int = -1, log = None):
         self.name = name
         self.unit = unit
         self.protocol_version = protocol_version
         self.max_precision = max_precision
+        self.settings = settings
+
         print("max_precision: " + str(self.max_precision))
         if (log is None):
             self.__log = log
@@ -38,6 +43,16 @@ class Inverter:
 
         #load protocol settings
         self.protocolSettings = protocol_settings(self.protocol_version)
+
+        #load reader
+        # Import the module
+        module = importlib.import_module(self.protocolSettings.reader)
+        
+        # Get the class from the module
+        cls = getattr(module, self.protocolSettings.reader)
+
+        self.reader : reader_base = cls(self.protocolSettings, self.settings)
+        self.reader.connect()
 
         self.read_info()
 
@@ -57,7 +72,7 @@ class Inverter:
             registry_entry = self.protocolSettings.get_holding_registry_entry(field)
             if registry_entry is not None:
                 self.__log.info("Reading " + field + "("+str(registry_entry.register)+")")
-                data = self.client.read_holding_registers(registry_entry.register)
+                data = self.reader.read_registers(registry_entry.register, registry_type=Registry_Type.HOLDING)
                 if not hasattr(data, 'registers') or data.registers is None:
                     self.__log.critical("Failed to get serial number register ("+field+") ; exiting")
                     exit()
@@ -146,12 +161,7 @@ class Inverter:
 
             isError = False
             try:
-                if registry_type == Registry_Type.INPUT:
-                    register = self.client.read_input_registers(range[0], range[1], unit=self.unit)
-                else:
-                    print("get holding")
-                    register = self.client.read_holding_registers(range[0], range[1], unit=self.unit)
-                    #register.addCallback
+                register = self.reader.read_registers(range[0], range[1], registry_type=registry_type, unit=self.unit)
 
             except ModbusIOException as e: 
                 print("ModbusIOException : ", e.error_code)
@@ -316,50 +326,3 @@ class Inverter:
         registry = self.read_registers(self.protocolSettings.holding_registry_ranges, registry_type=Registry_Type.HOLDING)
         info = self.process_registery(registry, self.protocolSettings.holding_registry_map)
         return info
-
-
-    # def read_fault_table(self, name, base_index, count):
-    #     fault_table = {}
-    #     for i in range(0, count):
-    #         fault_table[name + '_' + str(i)] = self.read_fault_record(base_index + i * 5)
-    #     return fault_table
-    #
-    # def read_fault_record(self, index):
-    #     row = self.client.read_input_registers(index, 5, unit=self.unit)
-    #     # TODO: Figure out how to read the date for these records?
-    #     print(row.registers[0],
-    #             ErrorCodes[row.registers[0]],
-    #             '\n',
-    #             row.registers[1],
-    #             row.registers[2],
-    #             row.registers[3],
-    #             '\n',
-    #             2000 + (row.registers[1] >> 8),
-    #             row.registers[1] & 0xFF,
-    #             row.registers[2] >> 8,
-    #             row.registers[2] & 0xFF,
-    #             row.registers[3] >> 8,
-    #             row.registers[3] & 0xFF,
-    #             row.registers[4],
-    #             '\n',
-    #             2000 + (row.registers[1] >> 4),
-    #             row.registers[1] & 0xF,
-    #             row.registers[2] >> 4,
-    #             row.registers[2] & 0xF,
-    #             row.registers[3] >> 4,
-    #             row.registers[3] & 0xF,
-    #             row.registers[4]
-    #           )
-    #     return {
-    #         'FaultCode': row.registers[0],
-    #         'Fault': ErrorCodes[row.registers[0]],
-    #         #'Time': int(datetime.datetime(
-    #         #    2000 + (row.registers[1] >> 8),
-    #         #    row.registers[1] & 0xFF,
-    #         #    row.registers[2] >> 8,
-    #         #    row.registers[2] & 0xFF,
-    #         #    row.registers[3] >> 8,
-    #         #    row.registers[3] & 0xFF
-    #         #).timestamp()),
-    #         'Value': row.registers[4]
-    #     }

@@ -30,7 +30,6 @@ from configparser import RawConfigParser
 import paho.mqtt.client as mqtt
 from paho.mqtt.properties import Properties
 from paho.mqtt.packettypes import PacketTypes
-from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 
 from inverter import Inverter
 
@@ -63,8 +62,6 @@ class InverterModBusToMQTT:
     __port = None
     # baudrate to access modbus connection
     __baudrate = -1
-    # modbus client handle
-    __client = None
     # mqtt server host address
     __mqtt_host = None
     # mqtt client handle
@@ -170,21 +167,6 @@ class InverterModBusToMQTT:
             self.__log.setLevel(logging.getLevelName(self.__log_level))
 
 
-
-        self.__log.info('Setup Serial Connection... ')
-        self.__port = self.__settings.get(
-            'serial', 'port', fallback='/dev/ttyUSB0')
-        self.__baudrate = self.__settings.get(
-            'serial', 'baudrate', fallback=9600)
-        
-        
-        self.__client = ModbusClient(method='rtu', port=self.__port, 
-                                     baudrate=int(self.__baudrate), 
-                                     stopbits=1, parity='N', bytesize=8, timeout=2
-                                     )
-        self.__client.connect()
-        self.__log.info('Serial connection established...')
-
         self.__log.info("start connection mqtt ...")
         self.__mqtt_host = self.__settings.get(
             'mqtt', 'host', fallback='mqtt.eclipseprojects.io')
@@ -222,7 +204,12 @@ class InverterModBusToMQTT:
             self.__send_holding_register = self.__settings.getboolean(section, 'send_holding_register', fallback=False)
             self.__send_input_register = self.__settings.getboolean(section, 'send_input_register', fallback=True)
             self.measurement = self.__settings.get(section, 'measurement', fallback="")
-            self.inverter = Inverter(self.__client, name, unit, protocol_version, self.__max_precision, self.__log)
+
+            reader_settings : dict[str, object] = {} 
+            reader_settings["port"] = self.__settings.get('serial', 'port', fallback='/dev/ttyUSB0')
+            reader_settings["baudrate"] = self.__settings.getint('serial', 'baudrate', fallback=9600)
+
+            self.inverter = Inverter(name, unit, protocol_version, settings=reader_settings, max_precision=self.__max_precision, log=self.__log)
             self.inverter.print_info()
 
 
