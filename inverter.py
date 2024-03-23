@@ -12,8 +12,8 @@ from pymodbus.exceptions import ModbusIOException
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pymodbus.client.sync import ModbusSerialClient as ModbusClient
-    from readers.reader_base import reader_base
 
+from readers.reader_base import reader_base
 from protocol_settings import Data_Type, registry_map_entry, protocol_settings, Registry_Type
 
 class Inverter:
@@ -46,12 +46,12 @@ class Inverter:
 
         #load reader
         # Import the module
-        module = importlib.import_module(self.protocolSettings.reader)
+        module = importlib.import_module('readers.'+self.protocolSettings.reader)
         
         # Get the class from the module
         cls = getattr(module, self.protocolSettings.reader)
 
-        self.reader : reader_base = cls(self.protocolSettings, self.settings)
+        self.reader : reader_base = cls(self.settings)
         self.reader.connect()
 
         self.read_info()

@@ -1,6 +1,7 @@
+import logging
 from protocol_settings import Registry_Type
 from pymodbus.client.sync import ModbusSerialClient as ModbusClient
-from reader_base import reader_base
+from .reader_base import reader_base
 
 class modbus_rtu(reader_base):
     port : str = "/dev/ttyUSB0"
@@ -8,6 +9,8 @@ class modbus_rtu(reader_base):
     client : ModbusClient 
 
     def __init__(self, settings : dict[str,str]):
+        #logger = logging.getLogger(__name__)
+        #logging.basicConfig(level=logging.DEBUG)
 
         if "port" in settings:
             self.port = settings["port"]
@@ -15,8 +18,8 @@ class modbus_rtu(reader_base):
         if "buadrate" in settings:
             self.baudrate = settings["buadrate"]
 
-        self.client = ModbusClient(method='rtu', port=self.__port, 
-                                     baudrate=int(self.__baudrate), 
+        self.client = ModbusClient(method='rtu', port=self.port, 
+                                     baudrate=int(self.baudrate), 
                                      stopbits=1, parity='N', bytesize=8, timeout=2
                                      )
         
