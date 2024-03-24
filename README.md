@@ -35,7 +35,7 @@ protocol_version = {{version}}
 ```
 v0.14 = growatt inverters 2020+
 growatt_2020_v1.24 = alt protocol for growatt inverters 2020+ - currently untested
-sigineer_v0.11 = sigineer inverters - currently untested
+sigineer_v0.11 = sigineer inverters - working but variable names need to be cleaned up
 eg4_v58 = eg4 inverters ( EG4-6000XP ) - implemented but untested
 ```
 
