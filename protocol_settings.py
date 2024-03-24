@@ -1,6 +1,7 @@
 import csv
 from dataclasses import dataclass
 from enum import Enum
+import itertools
 import json
 import re
 import os
@@ -105,6 +106,7 @@ class registry_map_entry:
 
 class protocol_settings:
     protocol : str
+    reader : str
     settings_dir : str
     variable_mask : list[str]
     input_registry_map : list[registry_map_entry]
@@ -130,6 +132,11 @@ class protocol_settings:
                     self.variable_mask.append(line.strip().lower())
 
         self.load__codes() #load first, so priority to json codes
+        if "reader" in self.codes:
+            self.reader = self.codes["reader"]
+        else:
+            self.reader = "modbus_rtu"
+
         self.load__input_registry_map()
         self.load__holding_registry_map()
 
@@ -171,10 +178,21 @@ class protocol_settings:
         if not os.path.exists(path): #return empty is file doesnt exist.
             return registry_map
         
+        def clean_header(iterator):
+            # Lowercase and strip whitespace from each item in the first row
+            first_row = next(iterator).lower().replace('_', ' ')
+            first_row = re.sub(r"\s+;|;\s+", ";", first_row) #trim values
+            return itertools.chain([first_row], iterator)
+
+                
         with open(path, newline='', encoding='latin-1') as csvfile:
+
+            #clean column names before passing to csv dict reader
+            csvfile = clean_header(csvfile)
+
             # Create a CSV reader object
-            reader = csv.DictReader(csvfile, delimiter=';') #compensate for openoffice
-            
+            reader = csv.DictReader(clean_header(csvfile), delimiter=';') #compensate for openoffice
+
             # Iterate over each row in the CSV file
             for row in reader:
 
@@ -202,8 +220,8 @@ class protocol_settings:
                 row['documented name'] = row['documented name'].strip().lower().replace(' ', '_')
 
                 variable_name = row['variable name'] if row['variable name'] else row['documented name']
-                variable_name = variable_name.lower().replace(' ', '_').replace('__', '_') #clean name
-
+                variable_name = variable_name = variable_name.strip().lower().replace(' ', '_').replace('__', '_') #clean name
+                
                 if re.search("[^a-zA-Z0-9\_]", variable_name) :
                     print("WARNING Invalid Name : " + str(variable_name) + " reg: " + str(row['register']) + " doc name: " + str(row['documented name']) + " path: " + str(path))
 
@@ -239,7 +257,7 @@ class protocol_settings:
                     codes_json = json.loads(row['values'])
                     value_is_json = True
 
-                    name = item.documented_name+'_codes'
+                    name = row['documented name']+'_codes'
                     if name not in self.codes:
                         self.codes[name] = codes_json
 
@@ -280,8 +298,8 @@ class protocol_settings:
                         if end > start:
                             concatenate = True
                             if reverse:
-                                for i in range(end, start, -1):
-                                    concatenate_registers.append(i-1)
+                                for i in range(end, start-1, -1):
+                                    concatenate_registers.append(i)
                             else:
                                 for i in range(start, end+1):
                                     concatenate_registers.append(i)

@@ -1,4 +1,5 @@
 {
+    "reader" : "pace",
     "warning_flag_codes": 
     {
         "b0" : "battery cell overvoltage alarm",

@@ -1,4 +1,4 @@
-variable name;data_type;register;documented name;description;values;unit;note;;;;;;;;;;
+variable name;data type;register;documented name;description;values;unit;note;;;;;;;;;;
 ;;0;System Status;System run state;"{""0"": ""Standby"", ""1"": ""(No Use)"", ""2"": ""Discharge"", ""3"": ""Fault"", ""4"": ""Flash"", ""5"": ""PV charge"", ""6"": ""AC charge"", ""7"": ""Combine charge"", ""8"": ""Combine charge and Bypass"", ""9"": ""PV charge and Bypass"", ""10"": ""AC charge and Bypass"", ""11"": ""Bypass"", ""12"": ""PV charge and Discharge""}";;  (No Use) 2: Discharge; 12:    PV    charge    and Discharge; 12:    PV    charge    and Discharge; 12:    PV    charge    and Discharge; 12:    PV    charge    and Discharge; 12:    PV    charge    and Discharge; 12:    PV    charge    and Discharge; 12:    PV    charge    and Discharge; 12:    PV    charge    and Discharge; 12:    PV    charge    and Discharge; 12:    PV    charge    and Discharge
 PV1 Voltage;;1;Vpv1;PV1 voltage;;0.1V;;;;;;;;;;;
 PV2 Voltage;;2;Vpv2;PV2 voltage;;0.1V;;;;;;;;;;;
