@@ -127,6 +127,11 @@ variable1
 variable2
 ```
 
+### Any ModBus RTU Device
+As i dive deeper into solar monitoring and general automation, i've come to the realization that ModBus RTU is the "standard" and basically... everything uses it. With how this is setup, it can be used with basically anything running ModBus RTU so long as you have the documentation. 
+
+So... don't mind me as i may add other devices such as battery bms' and... i have a home energy monitor on the way! so i'll be adding that when it arrives.
+
 ### donate
 this took me a while to make; and i had to make it because there werent any working solutions. 
 donations would be appreciated.
