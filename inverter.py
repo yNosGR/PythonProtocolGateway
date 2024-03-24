@@ -143,9 +143,12 @@ class Inverter:
 
         if not ranges: #ranges is empty, use min max
             ranges = []
-            start = -batch_size
+            start = start - batch_size
             while( start := start + batch_size ) < end:
-                ranges.append((start, batch_size)) ##APPEND TUPLE
+                count = batch_size
+                if start + batch_size > end:
+                    count = end - start + 1
+                ranges.append((start, count)) ##APPEND TUPLE
 
         registry : dict[int,] = {}
         retries = 7
