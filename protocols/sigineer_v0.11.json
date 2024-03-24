@@ -49,5 +49,54 @@
     {
         "0" : "Parallel Mode",
         "1" : "Single Mode"
+    },
+    "fault_bit_codes":
+    {
+        "b0" : "Unknown", 
+        "b1" : "CPU A to B Communication error", 
+        "b2" : "Battery sample inconsistent", 
+        "b3" : "BUCK over current", 
+        "b4" : "BMS communication fault", 
+        "b5" : "Battery abnormal", 
+        "b6" : "Unknown", 
+        "b7" : "Battery voltage high", 
+        "b8" : "Over temperature", 
+        "b9" : "Over load", 
+        "b10" : "Unknown", 
+        "b11" : "Unknown", 
+        "b12" : "Unknown", 
+        "b13" : "Unknown", 
+        "b14" : "Unknown", 
+        "b15" : "Unknown", 
+        "b16" : "Unknown"
+    },
+    "warning_bit_codes":
+    {
+        "b0" : "Battery voltage low warning", 
+        "b1" : "Over temperature warning", 
+        "b2" : "Over load warning", 
+        "b3" : "Fail to read EEPROM", 
+        "b4" : "Firmware version mismatch", 
+        "b5" : "Fail to write EEPROM.", 
+        "b6" : "BMS warning", 
+        "b7" : "Li-Battery over load warning", 
+        "b8" : "Li-Battery aging warning", 
+        "b9" : "Fan lock warning", 
+        "b10" : "Unknown", 
+        "b11" : "Unknown", 
+        "b12" : "Unknown", 
+        "b13" : "Unknown", 
+        "b14" : "Unknown", 
+        "b15" : "Unknown", 
+        "b16" : "Unknown"
+    },
+    "fault_value_codes":
+    {
+        "8" : "Bat Voltage High",
+        "9" : "Over Temperature",
+        "10" : "Over Load",
+        "25" : "MOV Break",
+        "26" : "Over Current",
+        "27" : "Li-Bat Over Load"
     }
 }
