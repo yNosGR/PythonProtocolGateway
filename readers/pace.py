@@ -1,7 +1,21 @@
 import time
+import struct
 import logging
 from protocol_settings import Registry_Type
 from pymodbus.client.sync import ModbusSerialClient
+from pymodbus.transaction import ModbusRtuFramer 
+
+from pymodbus.exceptions import ModbusIOException
+from pymodbus.exceptions import InvalidMessageReceivedException
+from pymodbus.utilities import checkCRC, computeCRC
+from pymodbus.utilities import hexlify_packets, ModbusTransactionState
+from pymodbus.compat import byte2int
+from pymodbus.framer import ModbusFramer, FRAME_HEADER, BYTE_ORDER
+
+import logging
+_logger = logging.getLogger(__name__)
+
+RTU_FRAME_HEADER = BYTE_ORDER + FRAME_HEADER
 
 
 auchCRCHi = (
@@ -89,17 +103,49 @@ def calculate_crc(puchMsg, usDataLen):
         puchMsg += 1
     return (uchCRCHi << 8 | uchCRCLo)
 
-# Subclass ModbusSerialClient
-class CustomModbusSerialClient(ModbusSerialClient):
-    def _calculate_crc(self, message):
-        # Implement your custom CRC calculation here
-        return calculate_crc(message, len(message))
+class CustomFramer(ModbusRtuFramer):
+    def buildPacket(self, message):
+        """
+        Creates a ready to send modbus packet
 
+        :param message: The populated request/response to send
+        """
+        data = message.encode()
+        packet = struct.pack(RTU_FRAME_HEADER,
+                             message.unit_id,
+                             message.function_code) + data
+        packet += struct.pack(">H", computeCRC(packet))
+        message.transaction_id = message.unit_id  # Ensure that transaction is actually the unit id for serial comms
+        return packet
+    
+    def checkFrame(self):
+        """
+        Check if the next frame is available.
+        Return True if we were successful.
+
+        1. Populate header
+        2. Discard frame if UID does not match
+        """
+        try:
+            self.populateHeader()
+            frame_size = self._header['len']
+            data = self._buffer[:frame_size - 2]
+            crc = self._buffer[frame_size - 2:frame_size]
+            crc_val = (byte2int(crc[0]) << 8) + byte2int(crc[1])
+            if checkCRC(data, crc_val):
+                return True
+            else:
+                _logger.debug("CRC invalid, discarding header!!")
+                self.resetFrame()
+                return False
+        except (IndexError, KeyError, struct.error):
+            return False
+    
 class pace:
 
     port : str = "/dev/ttyUSB0"
     baudrate : int = 9600
-    client : CustomModbusSerialClient 
+    client : ModbusSerialClient 
 
     def __init__(self, settings : dict[str,str]):
         #logger = logging.getLogger(__name__)
@@ -111,9 +157,9 @@ class pace:
         if "buadrate" in settings:
             self.baudrate = settings["buadrate"]
 
-        self.client = CustomModbusSerialClient(method='rtu', port=self.port, 
+        self.client = ModbusSerialClient(method='rtu', port=self.port, 
                                 baudrate=int(self.baudrate), 
-                                stopbits=1, parity='N', bytesize=8, timeout=2
+                                stopbits=1, parity='N', bytesize=8, timeout=2, framer=CustomFramer
                                 )
 
     def read_registers(self, start, count=1, registry_type : Registry_Type = Registry_Type.INPUT, **kwargs):
