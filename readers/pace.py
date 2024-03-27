@@ -2,8 +2,11 @@ import time
 import struct
 import logging
 from protocol_settings import Registry_Type
-from pymodbus.client.sync import ModbusSerialClient
+from pymodbus.client.sync import ModbusSerialClient, BaseModbusClient
 from pymodbus.transaction import ModbusRtuFramer 
+
+from pymodbus.factory import ClientDecoder
+from pymodbus.constants import Defaults
 
 from pymodbus.exceptions import ModbusIOException
 from pymodbus.exceptions import InvalidMessageReceivedException
@@ -96,12 +99,15 @@ auchCRCLo = (
 def calculate_crc(puchMsg, usDataLen):
     uchCRCHi = 0xFF
     uchCRCLo = 0xFF
-    for _ in range(usDataLen):
-        uIndex = uchCRCLo ^ puchMsg
+
+    for i in range(usDataLen):
+        uIndex = uchCRCLo ^ puchMsg[i]
         uchCRCLo = uchCRCHi ^ auchCRCHi[uIndex]
         uchCRCHi = auchCRCLo[uIndex]
-        puchMsg += 1
+
     return (uchCRCHi << 8 | uchCRCLo)
+
+
 
 class CustomFramer(ModbusRtuFramer):
     def buildPacket(self, message):
@@ -114,7 +120,7 @@ class CustomFramer(ModbusRtuFramer):
         packet = struct.pack(RTU_FRAME_HEADER,
                              message.unit_id,
                              message.function_code) + data
-        packet += struct.pack(">H", computeCRC(packet))
+        packet += struct.pack(">H", calculate_crc(data, len(data)))
         message.transaction_id = message.unit_id  # Ensure that transaction is actually the unit id for serial comms
         return packet
     
@@ -132,6 +138,7 @@ class CustomFramer(ModbusRtuFramer):
             data = self._buffer[:frame_size - 2]
             crc = self._buffer[frame_size - 2:frame_size]
             crc_val = (byte2int(crc[0]) << 8) + byte2int(crc[1])
+
             if checkCRC(data, crc_val):
                 return True
             else:
@@ -141,15 +148,68 @@ class CustomFramer(ModbusRtuFramer):
         except (IndexError, KeyError, struct.error):
             return False
     
+class CustomModbusSerialClient(ModbusSerialClient): 
+
+    def __init__(self, method='ascii', **kwargs):
+        """ Initialize a serial client instance
+
+        The methods to connect are::
+
+          - ascii
+          - rtu
+          - binary
+
+        :param method: The method to use for connection
+        :param port: The serial port to attach to
+        :param stopbits: The number of stop bits to use
+        :param bytesize: The bytesize of the serial messages
+        :param parity: Which kind of parity to use
+        :param baudrate: The baud rate to use for the serial device
+        :param timeout: The timeout between serial requests (default 3s)
+        :param strict:  Use Inter char timeout for baudrates <= 19200 (adhere
+        to modbus standards)
+        """
+        self.method = method
+        self.socket = None
+        BaseModbusClient.__init__(self, CustomFramer(ClientDecoder(), self),
+                                  **kwargs)
+
+        self.port = kwargs.get('port', 0)
+        self.stopbits = kwargs.get('stopbits', Defaults.Stopbits)
+        self.bytesize = kwargs.get('bytesize', Defaults.Bytesize)
+        self.parity = kwargs.get('parity',   Defaults.Parity)
+        self.baudrate = kwargs.get('baudrate', Defaults.Baudrate)
+        self.timeout = kwargs.get('timeout',  Defaults.Timeout)
+        self._strict = kwargs.get("strict", True)
+        self.last_frame_end = None
+        if self.method == "rtu":
+            if self.baudrate > 19200:
+                self.silent_interval = 1.75 / 1000  # ms
+            else:
+                self._t0 = float((1 + 8 + 2)) / self.baudrate
+                self.inter_char_timeout = 1.5 * self._t0
+                self.silent_interval = 3.5 * self._t0
+            self.silent_interval = round(self.silent_interval, 6)
+
+    @staticmethod
+    def __implementation(method, client):
+        """ Returns the requested framer
+
+        :method: The serial framer to instantiate
+        :returns: The requested serial framer
+        """
+        return CustomFramer(ClientDecoder(), client)
+
+
 class pace:
 
     port : str = "/dev/ttyUSB0"
     baudrate : int = 9600
-    client : ModbusSerialClient 
+    client : CustomModbusSerialClient 
 
     def __init__(self, settings : dict[str,str]):
-        #logger = logging.getLogger(__name__)
-        #logging.basicConfig(level=logging.DEBUG)
+        logger = logging.getLogger(__name__)
+        logging.basicConfig(level=logging.DEBUG)
         
         if "port" in settings:
             self.port = settings["port"]
@@ -157,9 +217,9 @@ class pace:
         if "buadrate" in settings:
             self.baudrate = settings["buadrate"]
 
-        self.client = ModbusSerialClient(method='rtu', port=self.port, 
+        self.client = CustomModbusSerialClient(method='', port=self.port, 
                                 baudrate=int(self.baudrate), 
-                                stopbits=1, parity='N', bytesize=8, timeout=2, framer=CustomFramer
+                                stopbits=1, parity='N', bytesize=8, timeout=2
                                 )
 
     def read_registers(self, start, count=1, registry_type : Registry_Type = Registry_Type.INPUT, **kwargs):

@@ -9,8 +9,8 @@ class modbus_rtu(reader_base):
     client : ModbusClient 
 
     def __init__(self, settings : dict[str,str]):
-        #logger = logging.getLogger(__name__)
-        #logging.basicConfig(level=logging.DEBUG)
+        logger = logging.getLogger(__name__)
+        logging.basicConfig(level=logging.DEBUG)
 
         if "port" in settings:
             self.port = settings["port"]

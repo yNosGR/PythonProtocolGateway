@@ -1,5 +1,5 @@
 {
-    "reader" : "pace",
+    "reader" : "modbus_rtu",
     "warning_flag_codes": 
     {
         "b0" : "battery cell overvoltage alarm",
