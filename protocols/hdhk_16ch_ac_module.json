@@ -1,3 +1,4 @@
 {
-    "reader" : "modbus_rtu"
+    "reader" : "modbus_rtu",
+    "batch_size": 7
 }

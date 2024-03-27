@@ -117,6 +117,8 @@ class protocol_settings:
     holding_registry_ranges : list[tuple]
 
     codes : dict[str, str]
+    settings : dict[str, str]
+    ''' default settings provided by protocol json '''
 
     def __init__(self, protocol : str, settings_dir : str = 'protocols'):
         self.protocol = protocol
@@ -131,9 +133,9 @@ class protocol_settings:
 
                     self.variable_mask.append(line.strip().lower())
 
-        self.load__codes() #load first, so priority to json codes
-        if "reader" in self.codes:
-            self.reader = self.codes["reader"]
+        self.load__json() #load first, so priority to json codes
+        if "reader" in self.settings:
+            self.reader = self.settings["reader"]
         else:
             self.reader = "modbus_rtu"
 
@@ -155,7 +157,7 @@ class protocol_settings:
         
         return None
 
-    def load__codes(self, file : str = '', settings_dir : str = ''):
+    def load__json(self, file : str = '', settings_dir : str = ''):
         if not settings_dir:
             settings_dir = self.settings_dir
 
@@ -166,6 +168,14 @@ class protocol_settings:
 
         with open(path) as f:
             self.codes = json.loads(f.read())
+
+        self.settings = {}
+
+        # Iterate over the keys and add entries not ending with "_codes" to self.settings
+        for key, value in self.codes.items():
+            if not key.endswith("_codes"):
+                self.settings[key] = value
+
 
     def load__registry(self, path, registry_type : Registry_Type = Registry_Type.INPUT) -> list[registry_map_entry]: 
         registry_map : list[registry_map_entry] = []
@@ -371,6 +381,13 @@ class protocol_settings:
     def calculate_registry_ranges(self, map : list[registry_map_entry], max_register : int) -> list[tuple]:
         ''' read optimization; calculate which ranges to read'''
         max_batch_size = 45 #see manual; says max batch is 45
+
+        if "batch_size" in self.settings:
+            try:
+                max_batch_size = int(self.settings['batch_size'])
+            except ValueError:
+                pass
+
         start = -max_batch_size
         ranges : list[tuple] = []
 

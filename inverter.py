@@ -326,7 +326,6 @@ class Inverter:
 
         registry = self.read_registers(self.protocolSettings.input_registry_ranges, registry_type=Registry_Type.INPUT)
         info = self.process_registery(registry, self.protocolSettings.input_registry_map)
-        info['StatusCode'] = registry[0]
         return info
     
     def read_holding_registry(self) -> dict[str,str]:
