@@ -6,7 +6,7 @@ variable name;data type;writable;register;documented name;description;values;uni
 ;4bit;;3.b4;check bit; and the high byte has a high four-bit check bit (0-3).;"{""0"" : ""N, 8, 1"", ""1"" : ""E, 8, 1"", ""2"" : ""O, 8, 1"", ""3"": ""N, 8, 2""}";;values are wrong
 ;byte;;3.b8;address;Low byte is setThe standby address (01H-FFH)  00 is the broadcast address.;1~255;;
 ;8bit;;4;factory date year;Factory date (high byte year);;;
-;8bit;;4.b8;factory date month;Factory date ( low byte month);;;
+;byte;;4.b8;factory date month;Factory date ( low byte month);;;
 ;;;5;Reserved;Reserved;;;
 ;;WD;6;frequency division coefficient;Default 0005H, frequency division coefficient (value 1-5). Working frequency range=[10Hz*5/frequency dividing coefficient]-400Hz;1~5;;
 ;byte;WD;7;measurement result threshold;High byte measurement result threshold (directly set to 0 when the original measurement result is less than this value). ;;;

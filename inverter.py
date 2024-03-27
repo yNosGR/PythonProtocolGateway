@@ -266,7 +266,7 @@ class Inverter:
                         else:
                             flags.append("0")
                     value = ''.join(flags)
-            elif item.data_type.value > 200: #bit types
+            elif item.data_type.value > 200 or item.data_type == Data_Type.BYTE: #bit types
                     bit_size = Data_Type.getSize(item.data_type)
                     bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
                     bit_index = item.register_bit
