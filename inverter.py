@@ -257,11 +257,6 @@ class Inverter:
                                 flags.append(self.protocolSettings.codes[item.documented_name+'_codes'][flag_index])
                             
                     value = ",".join(flags)
-                elif item.data_type.value > 200: #bit types
-                    bit_size = Data_Type.getSize(item.data_type)
-                    bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
-                    bit_index = item.register_bit
-                    value = (registry[item.register] >> bit_index) & bit_mask
                 else:
                     flags : list[str] = []
                     for i in range(start_bit, 16):  # Iterate over each bit position (0 to 15)
@@ -271,6 +266,11 @@ class Inverter:
                         else:
                             flags.append("0")
                     value = ''.join(flags)
+            elif item.data_type.value > 200: #bit types
+                    bit_size = Data_Type.getSize(item.data_type)
+                    bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
+                    bit_index = item.register_bit
+                    value = (registry[item.register] >> bit_index) & bit_mask
             elif item.data_type == Data_Type.ASCII:
                 value = registry[item.register].to_bytes((16 + 7) // 8, byteorder='big') #convert to ushort to bytes
                 try:
@@ -278,7 +278,7 @@ class Inverter:
                 except UnicodeDecodeError as e:
                     print("UnicodeDecodeError:", e)
 
-            else: #default, Data_Type.BYTE
+            else: #default, Data_Type.USHORT
                 value = float(registry[item.register])
 
             if item.unit_mod != float(1):
