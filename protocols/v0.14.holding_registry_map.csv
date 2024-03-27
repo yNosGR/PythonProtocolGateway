@@ -1,4 +1,4 @@
-variable name;data type;register;documented name;description;customer write;values;unit;initial value;note;;;
+variable name;data type;register;documented name;description;writable;values;unit;initial value;note;;;
 ;;0;On_Off;"The Standby On/Off state and the AC output DisEN/EN state; The low byte is the Standby on/off(1/0), the high byte is the AC output disable/enable (1/0). ";;0x0000: Output enable 0x0100: Output disable;;;;;0;
 ;;1;OutputConfig;AC output set;W;"{""0"": ""BAT First"", ""1"":""PV First""}";; 2: UTI First; 3: PV&UTI First;;;0
 ;;2;ChargeConfig;Charge source set;W;"{""0"":""PV first"",""1"": ""PV&UTI""}";; 2: PV Only;;;;0
@@ -36,12 +36,12 @@ Serial Number;ASCII;23-27;Serial No;Serial number 5;W;[A-Z0-9];;;;;;
 ;1bit;41.b1;Pv ISO Check enable;;;;;;;;;
 ;;42;Safety Type;;W;"{""1"": ""standard"", ""2"": ""ETL"", ""3"": ""AS4777"", ""4"": ""CQC"", ""5"": ""VDE4105""}";1;;;;;
 ;;43;DTC;Device Type Code;&*6;;;;;;;
-;;45;Sys Year;System time-year;W;Year offset is 2000;;;;;;
-;;46;Sys Month;System time- Month;W;;;;;;;
-;;47;Sys Day;System time- Day;W;;;;;;;
-;;48;Sys Hour;System time- Hour;W;;;;;;;
-;;49;Sys Min;System time- Min;W;;;;;;;
-;;50;Sys Sec;System time- Second;W;;;;;;;
+System Year;;45;Sys Year;System time-year;W;Year offset is 2000;;;;;;
+System Month;;46;Sys Month;System time- Month;W;;;;;;;
+System Day;;47;Sys Day;System time- Day;W;;;;;;;
+System Hour;;48;Sys Hour;System time- Hour;W;;;;;;;
+System Minute;;49;Sys Min;System time- Min;W;;;;;;;
+System Second;;50;Sys Sec;System time- Second;W;;;;;;;
 ;;52;uwAcVoltHighL;;;;;;;;;
 ;;53;uwAcVoltLowL;;;;;;;;;
 ;;54;uwAcFreqHighL;;;;;;;;;
@@ -79,8 +79,8 @@ Serial Number;ASCII;23-27;Serial No;Serial number 5;W;[A-Z0-9];;;;;;
 ;;102;ManualStartEn;;;;;;;;;
 ;;103;SciLossChkEn;;;;;;;;;
 ;;104;BlightEn;;;;;;;;;
-;;105;ParaMaxChgCurr;Parallel Maximum current;System charge;;;;;;;
-;;106;LiProtocolType;Protocol battery;type;for;;1~99;;1;;
+;;105;ParaMaxChgCurr;Parallel Maximum current;;;;;;;;
+;;106;LiProtocolType;Protocol battery;;for;;1~99;;1;;
 ;;107;AudioAlarmEn;;;;;;;;;
 ;;108;uwEqEn;;;;;;;;;
 ;;109;uwEqChgVolt;;;;;;;;;
