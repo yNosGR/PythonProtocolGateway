@@ -205,9 +205,18 @@ class InverterModBusToMQTT:
             self.__send_input_register = self.__settings.getboolean(section, 'send_input_register', fallback=True)
             self.measurement = self.__settings.get(section, 'measurement', fallback="")
 
+            reader_section = 'serial'
+            if self.__settings.has_section('reader'):
+                reader_section = 'reader'
+                
             reader_settings : dict[str, object] = {} 
-            reader_settings["port"] = self.__settings.get('serial', 'port', fallback='/dev/ttyUSB0')
-            reader_settings["baudrate"] = self.__settings.getint('serial', 'baudrate', fallback=9600)
+            reader_settings["reader"] = self.__settings.get(reader_section, 'reader', fallback='')
+            reader_settings["port"] = self.__settings.get(reader_section, 'port', fallback='/dev/ttyUSB0')
+            reader_settings["baudrate"] = self.__settings.getint(reader_section, 'baudrate', fallback=9600)
+            reader_settings["certfile"] = self.__settings.get(reader_section, 'certfile', fallback='')
+            reader_settings["keyfile"] = self.__settings.get(reader_section, 'keyfile', fallback='')
+            reader_settings["host"] = self.__settings.get(reader_section, 'host', fallback='')
+            reader_settings["hostname"] = self.__settings.get(reader_section, 'hostname', fallback='')
 
             self.inverter = Inverter(name, unit, protocol_version, settings=reader_settings, max_precision=self.__max_precision, log=self.__log)
             self.inverter.print_info()

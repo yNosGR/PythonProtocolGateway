@@ -43,10 +43,16 @@ class Inverter:
 
         #load protocol settings
         self.protocolSettings = protocol_settings(self.protocol_version)
-
+        
+        #override reader if set
+        if settings["reader"]:
+            self.protocolSettings.reader = settings["reader"]
         #load reader
         # Import the module
         module = importlib.import_module('readers.'+self.protocolSettings.reader)
+
+
+            
         
         # Get the class from the module
         cls = getattr(module, self.protocolSettings.reader)
