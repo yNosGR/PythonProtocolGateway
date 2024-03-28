@@ -33,7 +33,7 @@ from paho.mqtt.packettypes import PacketTypes
 
 from inverter import Inverter
 
-from protocol_settings import protocol_settings,Data_Type,registry_map_entry,Registry_Type
+from protocol_settings import protocol_settings,Data_Type,registry_map_entry,Registry_Type,WriteMode
 
 __logo = """
    ____                        _   _   ____  __  __  ___ _____ _____ 
@@ -101,6 +101,9 @@ class InverterModBusToMQTT:
     __device_serial_number = "hotnoob"
 
     __max_precision : int = -1
+
+    __write : bool = False
+    ''' enable / disable write mode - setting'''
 
     __analyze_protocol : bool = False
     ''' enable / disable analyze mode'''
@@ -199,6 +202,7 @@ class InverterModBusToMQTT:
             protocol_version = str(self.__settings.get(section, 'protocol_version'))
 
             self.__analyze_protocol = self.__settings.getboolean(section, 'analyze_protocol', fallback=False)
+            self.__write = self.__settings.getboolean(section, 'write', fallback=False)
             self.__analyze_protocol_save_load = self.__settings.getboolean(section, 'analyze_protocol_save_load', fallback=False)
 
            
@@ -317,9 +321,17 @@ class InverterModBusToMQTT:
         self.__mqtt_connected = True
 
 
+    __write_topics : dict[str, registry_map_entry] = {}
+
     def on_message(self, client, userdata, msg):
         """ The callback for when a PUBLISH message is received from the server. """
-        self.__log.info(msg.topic+" "+str(msg.payload))
+        self.__log.info(msg.topic+" "+str(msg.payload.decode('utf-8')))
+
+        #self.inverter.protocolSettings.validate_registry_entry
+        if msg.topic in self.__write_topics:
+            entry = self.__write_topics[msg.topic]
+            self.inverter.write_variable(entry, value=str(msg.payload.decode('utf-8')))
+
 
     def run(self):
         """
@@ -339,6 +351,9 @@ class InverterModBusToMQTT:
             self.__device_serial_number = self.inverter.read_serial_number()
                     
         print("using serial number: " + self.__device_serial_number)
+
+        if self.__write:
+            self.enable_write()
 
         if self.__mqtt_discovery_enabled:
             self.mqtt_discovery()
@@ -423,6 +438,55 @@ class InverterModBusToMQTT:
             else:
                 # If all the inverters are not online because no power is being generated then we sleep for 1 min
                 time.sleep(self.__offline_interval)
+
+
+    def enable_write(self):
+        """
+        enable write to modbus; must pass tests.
+        """
+        print("Validating Protocol for Writing")
+        self.__write = False
+        score_percent = self.validate_protocol(Registry_Type.HOLDING)
+        if(score_percent > 90):
+            self.__write = True
+            print("enable write - validation passed")
+            
+            self.__write_topics = {}
+            #subscribe to write topics
+            for entry in self.inverter.protocolSettings.holding_registry_map:
+                if entry.write_mode == WriteMode.WRITE:
+                    #__write_topics
+                    topic : str = self.__mqtt_topic + "/write/" + entry.variable_name.lower().replace(' ', '_')
+                    self.__write_topics[topic] = entry
+                    self.__mqtt_client.subscribe(topic)
+    
+    def validate_protocol(self, registry_type : Registry_Type = Registry_Type.INPUT) -> float:
+        """
+        validate protocol
+        """
+
+        score : float = 0
+        info = {}
+        registry_map : list[registry_map_entry] = self.inverter.protocolSettings.get_registry_map(registry_type)
+        info = self.inverter.read_registry(registry_type)
+
+        for value in registry_map:
+            if value.variable_name in info:
+                evaluate = True
+
+                if value.concatenate and value.register != value.concatenate_registers[0]: #only eval concated values once
+                    evaluate = False
+                  
+                if evaluate:
+                    score = score + self.inverter.protocolSettings.validate_registry_entry(value, info[value.variable_name])
+
+        maxScore = len(registry_map)
+        percent = score*100/maxScore
+        print("validation score: " + str(score) + " of " + str(maxScore) + " : " + str(round(percent)) + "%")
+        return percent
+
+
+    
 
     def analyze_protocol(self, settings_dir : str = 'protocols'):
         print("=== PROTOCOL ANALYZER ===")
@@ -602,6 +666,8 @@ class InverterModBusToMQTT:
             if item.concatenate and item.register != item.concatenate_registers[0]:
                 continue #skip all except the first register so no duplicates
             
+            if item.write_mode == WriteMode.READDISABLED: #disabled
+                continue
 
             clean_name = item.variable_name.lower().replace(' ', '_')
 
@@ -620,13 +686,18 @@ class InverterModBusToMQTT:
             disc_payload['device'] = device
             disc_payload['name'] = clean_name
             disc_payload['unique_id'] = "hotnoob_" + self.__device_serial_number + "_"+clean_name
-            disc_payload['state_topic'] = self.__mqtt_topic + "/"+clean_name
+
+            writePrefix = ""
+            if self.__write and item.write_mode == WriteMode.WRITE:
+                writePrefix = "" #home assistant doesnt like write prefix
+
+            disc_payload['state_topic'] = self.__mqtt_topic +writePrefix+ "/"+clean_name
             
             if item.unit:
                 disc_payload['unit_of_measurement'] = item.unit
 
 
-            discovery_topic = self.__mqtt_discovery_topic+"/sensor/inverter-" + self.__device_serial_number  + "/" + disc_payload['name'].replace(' ', '_') + "/config"
+            discovery_topic = self.__mqtt_discovery_topic+"/sensor/inverter-" + self.__device_serial_number  + writePrefix + "/" + disc_payload['name'].replace(' ', '_') + "/config"
             
             self.__mqtt_client.publish(discovery_topic,
                                        json.dumps(disc_payload),qos=1, retain=True)

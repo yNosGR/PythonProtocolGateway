@@ -115,19 +115,81 @@ class Inverter:
         self.__log.info('\tUnit: %s\n', str(self.unit))
         self.__log.info('\tModbus Version: %s\n', str(self.modbus_version))
 
-    def read_variable(self, variable_name : str, registry_type : Registry_Type):
-        ##clean for convinecne  
-        variable_name = variable_name.strip().lower().replace(' ', '_')
-        if registry_type == Registry_Type.INPUT:
-            registry_map = self.protocolSettings.input_registry_map
-        elif registry_type == Registry_Type.HOLDING:
-            registry_map = self.protocolSettings.holding_registry_map
+    def write_variable(self, entry : registry_map_entry, value : str, registry_type : Registry_Type = Registry_Type.HOLDING):
+        """ writes a value to a ModBus register; todo: registry_type to handle other write functions"""
 
-        entry : registry_map_entry = None 
-        for e in registry_map:
-            if e.variable_name == variable_name:
-                entry = e
-                break
+        #read current value
+        current_registers = self.read_registers(start=entry.register, end=entry.register, registry_type=registry_type)
+        results = self.process_registery(current_registers, self.protocolSettings.get_registry_map(registry_type))
+        current_value = current_registers[entry.register]
+
+      
+        if not self.protocolSettings.validate_registry_entry(entry, current_value):
+            raise ValueError("Invalid value in register. unsafe to write")
+        
+        if not self.protocolSettings.validate_registry_entry(entry, value):
+            raise ValueError("Invalid new value. unsafe to write")
+        
+        #handle codes
+        if entry.variable_name+"_codes" in self.protocolSettings.codes:
+            codes = self.protocolSettings.codes[entry.variable_name+"_codes"]
+            for key, val in codes.items():
+                if val == value: #convert "string" to key value
+                    value = key
+                    break
+
+        #results[entry.variable_name]
+        ushortValue : int = None #ushort
+        if entry.data_type == Data_Type.USHORT:
+            ushortValue = int(value)
+            if ushortValue < 0 or ushortValue > 65535:
+                 raise ValueError("Invalid value")
+        elif entry.data_type.value > 200 or entry.data_type == Data_Type.BYTE: #bit types
+            bit_size = Data_Type.getSize(entry.data_type)
+
+            new_val = int(value)
+            if 0 > new_val or new_val > 2**bit_size:
+                raise ValueError("Invalid value")
+
+            bit_index = entry.register_bit
+            bit_mask = ((1 << bit_size) - 1) << bit_index  # Create a mask for extracting X bits starting from bit_index
+            clear_mask = ~(bit_mask)  # Mask for clearing the bits to be updated
+
+            # Clear the bits to be updated in the current_value
+            ushortValue = current_value & clear_mask
+
+            # Set the bits according to the new_value at the specified bit position
+            ushortValue |= (new_val << bit_index) & bit_mask
+
+            bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
+            check_value = (ushortValue >> bit_index) & bit_mask
+
+            if check_value != new_val:
+                raise ValueError("something went wrong bitwise")
+        else:
+            raise TypeError("Unsupported data type")
+            
+       
+
+        
+        if ushortValue == None:
+            raise ValueError("Invalid value - None")
+
+        self.reader.write_register(entry.register, ushortValue, registry_type=registry_type)
+
+
+    def read_variable(self, variable_name : str, registry_type : Registry_Type, entry : registry_map_entry = None):
+        ##clean for convinecne  
+        if variable_name:
+            variable_name = variable_name.strip().lower().replace(' ', '_')
+
+        registry_map = self.protocolSettings.get_registry_map(registry_type)
+
+        if entry == None:
+            for e in registry_map:
+                if e.variable_name == variable_name:
+                    entry = e
+                    break
 
         if entry:
             start : int = 0
@@ -148,6 +210,7 @@ class Inverter:
         
 
         if not ranges: #ranges is empty, use min max
+            end = end + 1
             ranges = []
             start = start - batch_size
             while( start := start + batch_size ) < end:
@@ -218,7 +281,6 @@ class Inverter:
 
             if item.register not in registry:
                 continue
-
             value = ''    
 
             if item.data_type == Data_Type.UINT: #read uint
@@ -320,6 +382,16 @@ class Inverter:
                 info[item.variable_name] = value
 
         return info
+    
+    def read_registry(self, registry_type : Registry_Type = Registry_Type.INPUT) -> dict[str,str]:
+        map = self.protocolSettings.get_registry_map(registry_type)
+        if not map:
+            return {}
+        
+        registry = self.read_registers(self.protocolSettings.get_registry_ranges(registry_type), registry_type=registry_type)
+        info = self.process_registery(registry, map)
+        return info
+
 
     def read_input_registry(self) -> dict[str,str]:
         ''' reads input registers and returns as clean dict object inverters '''

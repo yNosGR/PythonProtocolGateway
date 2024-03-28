@@ -28,6 +28,9 @@ class modbus_rtu(reader_base):
             return self.client.read_input_registers(start, count, **kwargs)
         elif registry_type == Registry_Type.HOLDING:
             return self.client.read_holding_registers(start, count, **kwargs)
+        
+    def write_register(self, register : int, value : int, **kwargs):
+        self.client.write_register(register, value, **kwargs) #function code 0x06 writes to holding register
 
     def connect(self):
         self.client.connect()
