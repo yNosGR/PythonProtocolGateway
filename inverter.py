@@ -323,13 +323,17 @@ class Inverter:
 
     def read_input_registry(self) -> dict[str,str]:
         ''' reads input registers and returns as clean dict object inverters '''
-
+        if not self.protocolSettings.input_registry_map: #empty map. no data to read
+            return {}
+        
         registry = self.read_registers(self.protocolSettings.input_registry_ranges, registry_type=Registry_Type.INPUT)
         info = self.process_registery(registry, self.protocolSettings.input_registry_map)
         return info
     
     def read_holding_registry(self) -> dict[str,str]:
         ''' reads holding registers and returns as clean dict object inverters '''
+        if not self.protocolSettings.holding_registry_map: #empty map. no data to read
+            return {}
 
         registry = self.read_registers(self.protocolSettings.holding_registry_ranges, registry_type=Registry_Type.HOLDING)
         info = self.process_registery(registry, self.protocolSettings.holding_registry_map)

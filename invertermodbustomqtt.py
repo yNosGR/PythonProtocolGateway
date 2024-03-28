@@ -201,8 +201,7 @@ class InverterModBusToMQTT:
             self.__analyze_protocol = self.__settings.getboolean(section, 'analyze_protocol', fallback=False)
             self.__analyze_protocol_save_load = self.__settings.getboolean(section, 'analyze_protocol_save_load', fallback=False)
 
-            self.__send_holding_register = self.__settings.getboolean(section, 'send_holding_register', fallback=False)
-            self.__send_input_register = self.__settings.getboolean(section, 'send_input_register', fallback=True)
+           
             self.measurement = self.__settings.get(section, 'measurement', fallback="")
 
             reader_section = 'serial'
@@ -220,6 +219,20 @@ class InverterModBusToMQTT:
 
             self.inverter = Inverter(name, unit, protocol_version, settings=reader_settings, max_precision=self.__max_precision, log=self.__log)
             self.inverter.print_info()
+
+            #default for send_holding_register
+            fallback = False
+            if "send_holding_register" in self.inverter.protocolSettings.settings:
+                fallback = self.inverter.protocolSettings.settings["send_holding_register"]
+
+            self.__send_holding_register = self.__settings.getboolean(section, 'send_holding_register', fallback=fallback)
+
+            #default for send_input_register
+            fallback = True
+            if "send_input_register" in self.inverter.protocolSettings.settings:
+                fallback = self.inverter.protocolSettings.settings["send_input_register"]
+
+            self.__send_input_register = self.__settings.getboolean(section, 'send_input_register', fallback=fallback)
 
 
         
@@ -575,10 +588,10 @@ class InverterModBusToMQTT:
         device['name'] = self.__settings.get('mqtt_device', 'name', fallback='Solar Inverter')
 
         registry_map : list[registry_map_entry] = []
-        if self.__send_input_register:
+        if self.__send_input_register and self.inverter.protocolSettings.input_registry_map:
             registry_map.extend(self.inverter.protocolSettings.input_registry_map)
 
-        if self.__send_holding_register:
+        if self.__send_holding_register and self.inverter.protocolSettings.holding_registry_map:
             registry_map.extend(self.inverter.protocolSettings.holding_registry_map)
 
         length = len(registry_map)
