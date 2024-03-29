@@ -77,6 +77,39 @@ class Data_Type(Enum):
 
         return -1 #should never happen
 
+class WriteMode(Enum):
+    READ = 0x00
+    ''' READ ONLY '''
+    READDISABLED = 0x01
+    ''' DO NOT READ OR WRITE'''
+    WRITE = 0x02
+    ''' READ AND WRITE '''
+
+    @classmethod
+    def fromString(cls, name : str):
+        name = name.strip().upper()
+
+        #common alternative names
+        alias : dict[str,WriteMode] = {
+            "R"     : "READ",
+            "READ"  : "READ",
+            "WD"    : "READ",
+            "RD"            : "READDISABLED",
+            "READDISABLED"  : "READDISABLED",
+            "DISABLED"      : "READDISABLED",
+            "D"             : "READDISABLED",
+            "RW"    : "WRITE",
+            "W"     : "WRITE",
+            "WRITE" : "WRITE"
+        }
+        
+        if name in alias:
+            name = alias[name]
+        else:
+            name = "READ" #default
+
+        return getattr(cls, name)
+
 class Registry_Type(Enum):
     HOLDING = 0x03
     INPUT = 0x04
@@ -93,6 +126,8 @@ class registry_map_entry:
     concatenate : bool
     concatenate_registers : list[int] 
 
+
+    values : list
     value_regex : str = ""
 
     value_min : int = 0
@@ -102,6 +137,9 @@ class registry_map_entry:
 
     ''' if value needs to be concatenated with other registers'''
     data_type : Data_Type = Data_Type.USHORT
+
+    write_mode : WriteMode = WriteMode.READ
+    ''' enable disable reading/writing '''
 
 
 class protocol_settings:
@@ -117,6 +155,8 @@ class protocol_settings:
     holding_registry_ranges : list[tuple]
 
     codes : dict[str, str]
+    settings : dict[str, str]
+    ''' default settings provided by protocol json '''
 
     def __init__(self, protocol : str, settings_dir : str = 'protocols'):
         self.protocol = protocol
@@ -131,15 +171,30 @@ class protocol_settings:
 
                     self.variable_mask.append(line.strip().lower())
 
-        self.load__codes() #load first, so priority to json codes
-        if "reader" in self.codes:
-            self.reader = self.codes["reader"]
+        self.load__json() #load first, so priority to json codes
+        if "reader" in self.settings:
+            self.reader = self.settings["reader"]
         else:
             self.reader = "modbus_rtu"
 
         self.load__input_registry_map()
         self.load__holding_registry_map()
 
+    def get_registry_map(self, registry_type : Registry_Type) -> list[registry_map_entry]:
+        if registry_type == Registry_Type.INPUT:
+            return self.input_registry_map
+        elif registry_type == Registry_Type.HOLDING:
+            return self.holding_registry_map
+        
+        return None
+    
+    def get_registry_ranges(self, registry_type : Registry_Type) -> list[registry_map_entry]:
+        if registry_type == Registry_Type.INPUT:
+            return self.input_registry_ranges
+        elif registry_type == Registry_Type.HOLDING:
+            return self.holding_registry_ranges
+        
+        return None
 
     def get_holding_registry_entry(self, name : str):
         return self.get_registry_entry(name, self.holding_registry_map)
@@ -155,7 +210,7 @@ class protocol_settings:
         
         return None
 
-    def load__codes(self, file : str = '', settings_dir : str = ''):
+    def load__json(self, file : str = '', settings_dir : str = ''):
         if not settings_dir:
             settings_dir = self.settings_dir
 
@@ -167,12 +222,21 @@ class protocol_settings:
         with open(path) as f:
             self.codes = json.loads(f.read())
 
+        self.settings = {}
+
+        # Iterate over the keys and add entries not ending with "_codes" to self.settings
+        for key, value in self.codes.items():
+            if not key.endswith("_codes"):
+                self.settings[key] = value
+
+
     def load__registry(self, path, registry_type : Registry_Type = Registry_Type.INPUT) -> list[registry_map_entry]: 
         registry_map : list[registry_map_entry] = []
         register_regex = re.compile(r'(?P<register>\d+)\.b(?P<bit>\d{1,2})')
 
         range_regex = re.compile(r'(?P<reverse>r|)(?P<start>\d+)[\-~](?P<end>\d+)')
         ascii_value_regex = re.compile(r'(?P<regex>^\[.+\]$)')
+        list_regex = re.compile(r'\s*(?:(?P<range_start>\d+)-(?P<range_end>\d+)|(?P<element>[^,\s][^,]*?))\s*(?:,|$)')
 
 
         if not os.path.exists(path): #return empty is file doesnt exist.
@@ -247,34 +311,54 @@ class protocol_settings:
 
 
                 #get value range for protocol analyzer
+                values : list = []
                 value_min : int = 0
                 value_max : int = 65535 #default - max value for ushort
                 value_regex : str = ""
                 value_is_json : bool = False
 
                 #test if value is json.
-                try:
-                    codes_json = json.loads(row['values'])
-                    value_is_json = True
+                if "{" in row['values']: #to try and stop non-json values from parsing. the json parser is buggy for validation
+                    try:
+                        codes_json = json.loads(row['values'])
+                        value_is_json = True
 
-                    name = row['documented name']+'_codes'
-                    if name not in self.codes:
-                        self.codes[name] = codes_json
+                        name = row['documented name']+'_codes'
+                        if name not in self.codes:
+                            self.codes[name] = codes_json
 
-                except ValueError:
-                    value_is_json = False
+                    except ValueError:
+                        value_is_json = False
 
                 if not value_is_json:
-                    val_match = range_regex.search(row['values'])
-                    if val_match:
-                        value_min = int(val_match.group('start'))
-                        value_max = int(val_match.group('end'))
+                    if ',' in row['values']:
+                        matches = list_regex.finditer(row['values'])
 
-                    if data_type == Data_Type.ASCII:
-                        #value_regex
-                        val_match = ascii_value_regex.search(row['values'])
+                        for match in matches:
+                            groups = match.groupdict()
+                            if groups['range_start'] and groups['range_end']:
+                                start = int(groups['range_start'])
+                                end = int(groups['range_end'])
+                                values.extend(range(start, end + 1))
+                            else:
+                                values.append(groups['element'])
+                    else:
+                        matched : bool = False
+                        val_match = range_regex.search(row['values'])
                         if val_match:
-                            value_regex = val_match.group('regex') 
+                            value_min = int(val_match.group('start'))
+                            value_max = int(val_match.group('end'))
+                            matched = True
+
+                        if data_type == Data_Type.ASCII:
+                            #value_regex
+                            val_match = ascii_value_regex.search(row['values'])
+                            if val_match:
+                                value_regex = val_match.group('regex') 
+                                matched = True
+
+                        if not matched: #single value
+                            values.append(row['values'])
 
                 concatenate : bool = False
                 concatenate_registers : list[int] = []
@@ -308,9 +392,13 @@ class protocol_settings:
                     r = range(len(concatenate_registers))
                 else:
                     r = range(1)
+
+                writeMode : WriteMode = WriteMode.READ
+                if "writable" in row:
+                    writeMode = WriteMode.fromString(row['writable'])
                 
                 for i in r:
-                    item = registry_map_entry( 
+                    item = registry_map_entry(
                                                 registry_type = registry_type,
                                                 register= register,
                                                 register_bit=register_bit,
@@ -321,9 +409,11 @@ class protocol_settings:
                                                 data_type= data_type,
                                                 concatenate = concatenate,
                                                 concatenate_registers = concatenate_registers,
+                                                values=values,
                                                 value_min=value_min,
                                                 value_max=value_max,
-                                                value_regex=value_regex
+                                                value_regex=value_regex,
+                                                write_mode=writeMode
                                             )
                     registry_map.append(item)
                     register = register + 1
@@ -371,6 +461,13 @@ class protocol_settings:
     def calculate_registry_ranges(self, map : list[registry_map_entry], max_register : int) -> list[tuple]:
         ''' read optimization; calculate which ranges to read'''
         max_batch_size = 45 #see manual; says max batch is 45
+
+        if "batch_size" in self.settings:
+            try:
+                max_batch_size = int(self.settings['batch_size'])
+            except ValueError:
+                pass
+
         start = -max_batch_size
         ranges : list[tuple] = []
 
@@ -381,10 +478,12 @@ class protocol_settings:
             end = start+max_batch_size
             for register in map:
                 if register.register >= start and register.register < end:
+                    if register.write_mode == WriteMode.READDISABLED: ##register is disabled; skip
+                        continue
                     registers.append(register.register)
 
             if registers: #not empty
-                ranges.append((min(registers), max(registers)-min(registers))) ## APPENDING A TUPLE!
+                ranges.append((min(registers), max(registers)-min(registers)+1)) ## APPENDING A TUPLE!
 
         return ranges
 
@@ -425,5 +524,24 @@ class protocol_settings:
         
         self.holding_registry_ranges = self.calculate_registry_ranges(self.holding_registry_map, self.holding_registry_size)
 
-        
+    def validate_registry_entry(self, entry : registry_map_entry, val) -> int:
+            #if code, validate first. 
+            if entry.documented_name+'_codes' in self.codes:
+                if val in self.codes[entry.documented_name+'_codes']:
+                    return 1
+                else:
+                    return 0
+
+            if entry.data_type == Data_Type.ASCII:
+                if val and not re.match('[^a-zA-Z0-9\_\-]', val): #validate ascii
+                    if entry.value_regex: #regex validation
+                        if re.match(entry.value_regex, val):
+                            if entry.concatenate:
+                                return len(entry.concatenate_registers)
+
+            else: #default type
+                if int(val) >= entry.value_min and int(val) <= entry.value_max:
+                    return 1
+
+            return 0    
 #settings = protocol_settings('v0.14')

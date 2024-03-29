@@ -1,13 +1,14 @@
-variable name;data type;register;documented name;description;customer write;values;unit;initial value;note;;;
-;;0;On_Off;"The Standby On/Off state and the AC output DisEN/EN state; The low byte is the Standby on/off(1/0), the high byte is the AC output disable/enable (1/0). ";;0x0000: Output enable 0x0100: Output disable;;;;;0;
-;;1;OutputConfig;AC output set;W;"{""0"": ""BAT First"", ""1"":""PV First""}";; 2: UTI First; 3: PV&UTI First;;;0
-;;2;ChargeConfig;Charge source set;W;"{""0"":""PV first"",""1"": ""PV&UTI""}";; 2: PV Only;;;;0
+variable name;data type;register;documented name;description;writable;values;unit;initial value;note;;;
+;1bit;0;On_Off low;;;standby on, standby off;;;;;;
+;1bit;0.b8;On_Off high;"The Standby On/Off state and the AC output DisEN/EN state; The low byte is the Standby on/off(1/0), the high byte is the AC output disable/enable (1/0). ";;0x0000: Output enable 0x0100: Output disable;;;;;0;
+;;1;OutputConfig;AC output set;W;"{""0"": ""BAT First"", ""1"": ""PV First"", ""2"": ""UTI First"", ""3"": ""PV&UTI First""}";; 2: UTI First; 3: PV&UTI First;;;0
+;;2;ChargeConfig;Charge source set;W;"{""0"": ""PV first"", ""1"": ""PV&UTI"", ""2"": ""PV Only""}";; 2: PV Only;;;;0
 ;;3;UtiOutStart;Uti Output Start Time;W;0-23;;H(hour);0;;;
 ;;4;UtiOutEnd;Uti Output End Time;W;0-23;;H(hour);0;;;
 ;;5;UtiChargeStart;Uti Charge Start Time;W;0-23;;H(hour);0;;;
 ;;6;UtiChargeEnd;Uti Charge End Time;W;0-23;;H(hour);0;;;
-;;7;PVModel;PV Input Mode;W;"{""0"": ""Independent"", ""1"": ""Parallel""}";;;;;0;
-;;8;ACInModel;AC Input Mode;W;"{""0"": ""APL,90-280VAC"", ""1"": ""UPS,170-280VAC"", ""2"": ""GEN""}";;;0;;;
+PV Input Mode;;7;PVModel;PV Input Mode;W;"{""0"": ""Independent"", ""1"": ""Parallel""}";;;;;0;
+AC Input Mode;;8;ACInModel;AC Input Mode;W;"{""0"": ""APL,90-280VAC"", ""1"": ""UPS,170-280VAC"", ""2"": ""GEN""}";;;0;;;
 ;ASCII;r9~11;Fw version;Firmware version (high);;;;ASCII;;;;
 ;ASCII;r12~14;Fw version2;Control Firmware version (high);;;;ASCII;;;;
 ;;15;LCD language;LCD language;W;{{lcd_language_codes}};1;English;;;;
@@ -18,13 +19,13 @@ variable name;data type;register;documented name;description;customer write;valu
 ;;20;OverLoadRestart;Over Load Restart;W;"{""0"": ""Yes"", ""1"": ""No"", ""2"": ""Swith to UTI""}";;0;Yes(over 1mins restart; Load to after over Load three times to stop output); ;
 ;;21;OverTempRestart;Over Temperature Restart;W;"{""0"": ""Yes"", ""1"": ""No""}";;0;Yes(over  Temperature to restart ; after over Temperature  three times to stop output)  ;;
 ;;22;BuzzerEN;Buzzer on/off enable;W;"{""1"": ""Enable"", ""0"": ""Disable""}";;;1;;;
-Serial Number;ASCII;23-27;Serial No;Serial number 5;W;[A-Z0-9];;;;;;
+Serial Number;ASCII;23-27;Serial No;Serial number 5;WD;[A-Z0-9];;;;;;
 ;;28;Moudle H;Inverter Moudle (high);W;;;Can be set at standy state Only	 		 		 		 ;;;;
 ;;29;Moudle L;Inverter Moudle (low);W;P-battery type: 0: Lead_Acid 1: Lithium 2: CustomLead_Acid U-user type: ;;Can be set at;;;;
 ;;30;Com Address;Communicate address;W;1~254;;;1;;;
-;;31;FlashStart;Update firmware;W;0x0001: own 0X0100: control broad;;;;;;
-;;32;Reset User Info;Reset User Information;W;0x0001;;;;;;
-;;33;Reset to factory;Reset to factory;W;0x0001;;;;;;
+;;31;FlashStart;Update firmware;WD;0x0001: own 0X0100: control broad;;;;;;
+;;32;Reset User Info;Reset User Information;WD;0x0001;;;;;;
+;;33;Reset to factory;Reset to factory;WD;0x0001;;;;;;
 ;;34;MaxChargeCurr;Max Charge Current;W;0~180;1A;;70;;;
 ;;35;BulkChargeVolt;Bulk Charge Volt;W;500~640;0.1V;;564;;;
 ;;36;FloatChargeVolt;Float Charge Volt;W;500~560;0.1V;;540;;;
@@ -32,16 +33,16 @@ Serial Number;ASCII;23-27;Serial No;Serial number 5;W;[A-Z0-9];;;;;;
 ;;38;ACChargeCurr;AC Charge Current;W;0~100;1A;;30;;;
 ;;39;Battery Type;Battery Type;W;"{""0"": ""AGM"", ""1"": ""FLD"", ""2"": ""USE"", ""3"": ""Lithium"", ""4"": ""USE2""}";;;1;Can be set at standy Only ;;
 ;;40;Aging Mode;Aging Mode;W;"{""0"": ""Normal Mode"", ""1"": ""Aging Mode""}";;;;;0;Can be set at standy state Only
-;1bit;41;Etl check enable;;W;"{""b0"":""Etl check enable"", ""b1"" : ""Pv ISO Check enable""}";;;;0:Disable; 1:Enable;
-;1bit;41.b1;Pv ISO Check enable;;;;;;;;;
+;1bit;41;Etl check enable;;W;"{""1"": ""Enable"", ""0"": ""Disable""}";;;;0:Disable; 1:Enable;
+;1bit;41.b1;Pv ISO Check enable;;W;"{""1"": ""Enable"", ""0"": ""Disable""}";;;;;;
 ;;42;Safety Type;;W;"{""1"": ""standard"", ""2"": ""ETL"", ""3"": ""AS4777"", ""4"": ""CQC"", ""5"": ""VDE4105""}";1;;;;;
 ;;43;DTC;Device Type Code;&*6;;;;;;;
-;;45;Sys Year;System time-year;W;Year offset is 2000;;;;;;
-;;46;Sys Month;System time- Month;W;;;;;;;
-;;47;Sys Day;System time- Day;W;;;;;;;
-;;48;Sys Hour;System time- Hour;W;;;;;;;
-;;49;Sys Min;System time- Min;W;;;;;;;
-;;50;Sys Sec;System time- Second;W;;;;;;;
+System Year;;45;Sys Year;System time-year;W;Year offset is 2000;;;;;;
+System Month;;46;Sys Month;System time- Month;W;;;;;;;
+System Day;;47;Sys Day;System time- Day;W;;;;;;;
+System Hour;;48;Sys Hour;System time- Hour;W;;;;;;;
+System Minute;;49;Sys Min;System time- Min;W;;;;;;;
+System Second;;50;Sys Sec;System time- Second;W;;;;;;;
 ;;52;uwAcVoltHighL;;;;;;;;;
 ;;53;uwAcVoltLowL;;;;;;;;;
 ;;54;uwAcFreqHighL;;;;;;;;;
@@ -79,8 +80,8 @@ Serial Number;ASCII;23-27;Serial No;Serial number 5;W;[A-Z0-9];;;;;;
 ;;102;ManualStartEn;;;;;;;;;
 ;;103;SciLossChkEn;;;;;;;;;
 ;;104;BlightEn;;;;;;;;;
-;;105;ParaMaxChgCurr;Parallel Maximum current;System charge;;;;;;;
-;;106;LiProtocolType;Protocol battery;type;for;;1~99;;1;;
+;;105;ParaMaxChgCurr;Parallel Maximum current;;;;;;;;
+;;106;LiProtocolType;Protocol battery;;for;;1~99;;1;;
 ;;107;AudioAlarmEn;;;;;;;;;
 ;;108;uwEqEn;;;;;;;;;
 ;;109;uwEqChgVolt;;;;;;;;;
