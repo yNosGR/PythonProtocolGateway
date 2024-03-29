@@ -16,6 +16,9 @@ if sys.version_info < (3, 9):
     print("==================================================")
     time.sleep(4)
 
+
+import argparse
+
 import atexit
 import glob
 import random
@@ -128,14 +131,20 @@ class InverterModBusToMQTT:
     
     inverter : Inverter
     measurement : str
+    config_file : str
 
-    def __init__(self):
+    def __init__(self, config_file : str):
         self.__log = logging.getLogger('invertermodbustomqqt_log')
         handler = logging.StreamHandler(sys.stdout)
         self.__log.setLevel(logging.DEBUG)
         formatter = logging.Formatter('[%(asctime)s]  {%(filename)s:%(lineno)d}  %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
         self.__log.addHandler(handler)
+
+        self.config_file = os.path.dirname(os.path.realpath(__file__)) + '/growatt2mqtt.cfg'
+        newcfg = os.path.dirname(os.path.realpath(__file__)) + '/'+ config_file
+        if os.path.isfile(newcfg):
+            self.config_file = newcfg
 
         #logging.basicConfig()
         #pymodbus_log = logging.getLogger('pymodbus')
@@ -151,12 +160,9 @@ class InverterModBusToMQTT:
         self.__log.info("Initialize Inverter ModBus To MQTT Server")
         self.__settings = RawConfigParser()
 
-        cfg = os.path.dirname(os.path.realpath(__file__)) + '/growatt2mqtt.cfg'
-        newcfg = os.path.dirname(os.path.realpath(__file__)) + '/config.cfg'
-        if os.path.isfile(newcfg):
-            cfg = newcfg
 
-        self.__settings.read(cfg)
+
+        self.__settings.read(self.config_file)
 
         ##[TIME]
         self.__interval = self.__settings.getint('time', 'interval', fallback=1)
@@ -724,10 +730,19 @@ def main():
     main method
     """
     print(__logo)
-    inverter2mqtt = InverterModBusToMQTT()
+
+    inverter2mqtt = InverterModBusToMQTT(args.config)
     inverter2mqtt.init_invertermodbustomqtt()
     inverter2mqtt.run()
 
 
 if __name__ == "__main__":
+    # Create ArgumentParser object
+    parser = argparse.ArgumentParser(description='Description of your script')
+
+    # Add arguments
+    parser.add_argument('--config', '-c', type=str, help='Specify Config File', default='config.cfg')
+    # Parse arguments
+    args = parser.parse_args()
+
     main()
