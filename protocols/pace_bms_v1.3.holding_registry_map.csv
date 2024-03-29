@@ -1,4 +1,4 @@
-variable name;data type;register;documented name;length;writeable;unit;values;note;
+variable name;data type;register;documented name;length;writable;unit;values;note;
 ;SHORT;0;Current;2byte;R;10mA;;Positive: charging Negative: discharging;
 ;USHORT;1;Voltage of pack;2byte;R;10mV;;;
 ;8BIT;2;SOC;2byte;R;%;0~100%;;
