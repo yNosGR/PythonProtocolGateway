@@ -34,9 +34,10 @@ manually select protocol in .cfg
 protocol_version = {{version}}
 ```
 v0.14 = growatt inverters 2020+
-growatt_2020_v1.24 = alt protocol for growatt inverters 2020+ - currently untested
-sigineer_v0.11 = sigineer inverters - working but variable names need to be cleaned up
+sigineer_v0.11 = sigineer inverters
+growatt_2020_v1.24 = alt protocol for large growatt inverters - currently untested
 eg4_v58 = eg4 inverters ( EG4-6000XP ) - implemented but untested
+hdhk_16ch_ac_module = some chinese current monitoring device :P
 ```
 
 ### protocol analyzer - work in progress
