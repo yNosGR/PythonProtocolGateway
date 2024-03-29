@@ -10,3 +10,6 @@ class reader_base:
     
     def read_registers(start, count=1, registry_type : Registry_Type = Registry_Type.INPUT, **kwargs):
         pass
+
+    def write_register(self, register : int, value : int, **kwargs):
+        pass
