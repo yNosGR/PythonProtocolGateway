@@ -294,7 +294,7 @@ class Inverter:
                 # Convert the combined unsigned value to a signed integer if necessary
                 if val & (1 << 15):  # Check if the sign bit (bit 31) is set
                     # Perform two's complement conversion to get the signed integer
-                    value = val - (1 << 16)
+                    value = -((~val & 0xFFFF) + 1)
                 else:
                     value = val
                 value = -value
