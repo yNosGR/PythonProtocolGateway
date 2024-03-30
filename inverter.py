@@ -289,7 +289,6 @@ class Inverter:
                 value = float((registry[item.register] << 16) + registry[item.register + 1])
             elif item.data_type == Data_Type.SHORT: #read signed short
                 val = registry[item.register]
-                val &= 0xFFFF  # Mask out the sign bit of the unsigned short
 
                 # Convert the combined unsigned value to a signed integer if necessary
                 if val & (1 << 15):  # Check if the sign bit (bit 31) is set
