@@ -287,6 +287,16 @@ class Inverter:
                 if item.register + 1 not in registry:
                     continue
                 value = float((registry[item.register] << 16) + registry[item.register + 1])
+            elif item.data_type == Data_Type.SHORT: #read signed short
+                val = registry[item.register]
+
+                # Convert the combined unsigned value to a signed integer if necessary
+                if val & (1 << 15):  # Check if the sign bit (bit 31) is set
+                    # Perform two's complement conversion to get the signed integer
+                    value = val - (1 << 16)
+                else:
+                    value = val
+                value = -value
             elif item.data_type == Data_Type.INT: #read int
                 if item.register + 1 not in registry:
                     continue
