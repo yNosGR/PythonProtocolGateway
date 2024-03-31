@@ -1,7 +1,6 @@
 Originally from andiburger/growatt2mqtt, heavily modified to easily work with new and multiple protocols, configurable protocols, and added propper mqtt discovery / functionality to work with home assistant
 
-### Rebranding to InverterModBusToMQTT
-Sorry, better now than later. 
+### Rebranding Again, 
 if you installed this when it was called growatt2mqtt-hotnoob, you'll need to reinstall if you want to update. 
 
 # InverterModBusToMQTT
@@ -9,8 +8,12 @@ if you installed this when it was called growatt2mqtt-hotnoob, you'll need to re
 InverterModBusToMQTT is a small python-based service which connects via usb to the Modbus Over Serial interface of your solar inverters and published the collected data on MQTT.
 The python service can be configured via a small config file.
 
-with the addition of other brands, this will need to be renamed eventually to something... maybe ModBusInverterToMQTT
+# Python Protocol Gateway - Rebranding
+Rebranding Coming in v1.0.9
 
+Python Protocol Gateway reads data via Modbus RTU or other protocols and translates the data for MQTT. 
+In the long run, Python Protocol Gateway will become a general purpose protocol gateway to translate between more than just modbus and mqtt. 
+Growatt, EG4, Sigineer, SOK, PACE-BMS
 
 # Installation
 Connect the USB-B port on the inverter into your computer / device
