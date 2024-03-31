@@ -24,7 +24,6 @@ class modbus_udp(reader_base):
         if "host" in settings:
             self.host = settings["host"]
 
-
         if not self.host:
             raise ValueError("Host is not set")
         
