@@ -29,16 +29,15 @@ import json
 import logging
 import sys
 import traceback
-from configparser import RawConfigParser
+from configparser import RawConfigParser, ConfigParser
 import paho.mqtt.client as mqtt
-from paho.mqtt.properties import Properties
-from paho.mqtt.packettypes import PacketTypes
 
-import importlib
 
 from classes.protocol_settings import protocol_settings,Data_Type,registry_map_entry,Registry_Type,WriteMode
 from classes.transports.transport_base import transport_base
+from classes.transport import Transport
 from pymodbus.exceptions import ModbusIOException
+
 
 
 
@@ -83,22 +82,6 @@ class Protocol_Gateway:
     # mqtt client handle
     __mqtt_client = None
 
-    # mqtt port of mqtt broker
-    __mqtt_port = -1
-    # mqtt topic the inverter data will be published
-    __mqtt_topic = ""
-    
-    __mqtt_discovery_topic : str = "homeassistant"
-
-    __mqtt_discovery_enabled : bool = True
-
-    __mqtt_json : bool = False
-
-    __mqtt_reconnect_delay : int = 7
-
-    __mqtt_reconnect_attempts : int = 21
-    ''' max number of reconnects during a disconnect '''
-
     __mqtt_reconnecting : float = 0
     ''' keep track of if reconnecting. so we can determine if mqtt event bugged out'''
 
@@ -115,8 +98,6 @@ class Protocol_Gateway:
     __log_level = 'DEBUG'
 
     __device_serial_number = "hotnoob"
-
-    __max_precision : int = -1
 
     __write : bool = False
     ''' enable / disable write mode - setting'''
@@ -139,7 +120,7 @@ class Protocol_Gateway:
     __running : bool = False
     ''' controls main loop'''
 
-
+    __transports : list[Transport] = []
 
     
     measurement : str
@@ -183,40 +164,48 @@ class Protocol_Gateway:
         self.__log.info("Initialize Inverter ModBus To MQTT Server")
         self.__settings = RawConfigParser()
 
+
+        self.__settings = ConfigParser()
         self.__settings.read(self.config_file)
+
+
+        ##[general]
+        self.__log_level = self.__settings.get('general','log_level', fallback='DEBUG')
+        if (self.__log_level != 'DEBUG'):
+            self.__log.setLevel(logging.getLevelName(self.__log_level))
+        
+        self.__analyze_protocol = self.__settings.getboolean('general', 'analyze_protocol', fallback=False)
+        self.__write = self.__settings.getboolean('general', 'write', fallback=False)
+        self.__analyze_protocol_save_load = self.__settings.getboolean('general', 'analyze_protocol_save_load', fallback=False)
+
+        for section in self.__settings.sections():
+            if section.startswith('transport'):
+                transport_cfg = self.__settings[section]
+                transport_type      = transport_cfg.get('transport', fallback="")
+                protocol_version    = transport_cfg.get('protocol_version', fallback="")
+
+                if not transport_type and not protocol_version:
+                    raise ValueError('Missing Transport / Protocol Version')
+                
+            
+                if protocol_version:
+                    protocolSettings : protocol_settings = protocol_settings(protocol_version)
+
+                    if not transport_type and not protocolSettings.transport:
+                        raise ValueError('Missing Transport')
+                    
+                    if not transport_type:
+                        transport_type = protocolSettings.transport
+
+                transport : Transport = Transport(transport_type, transport_cfg)
+                self.__transports.append(transport)
+
 
         ##[TIME]
         self.__interval = self.__settings.getint('time', 'interval', fallback=1)
         self.__offline_interval = self.__settings.getint('time', 'offline_interval', fallback=60)
         self.__error_interval = self.__settings.getint('time', 'error_interval', fallback=60)
         
-        self.__log_level = self.__settings.get('general','log_level', fallback='DEBUG')
-        self.__max_precision = self.__settings.getint('general','max_precision', fallback=-1)
-
-        if (self.__log_level != 'DEBUG'):
-            self.__log.setLevel(logging.getLevelName(self.__log_level))
-
-
-        self.__log.info("start connection mqtt ...")
-        self.__mqtt_host = self.__settings.get(
-            'mqtt', 'host', fallback='mqtt.eclipseprojects.io')
-        
-        self.__mqtt_port = self.__settings.get('mqtt', 'port', fallback=1883)
-        self.__mqtt_topic = self.__settings.get('mqtt', 'topic', fallback='home/inverter')
-        self.__mqtt_discovery_topic = self.__settings.get('mqtt', 'discovery_topic', fallback='homeassistant')
-        self.__mqtt_discovery_enabled = strtobool(self.__settings.get('mqtt', 'discovery_enabled', fallback="true"))
-        self.__mqtt_json = strtobool(self.__settings.get('mqtt', 'json', fallback="false"))
-        self.__mqtt_reconnect_delay = self.__settings.getint('mqtt', 'reconnect_delay', fallback=7)
-        if not isinstance( self.__mqtt_reconnect_delay , int) or self.__mqtt_reconnect_delay < 1: #minumum 1 second
-            self.__mqtt_reconnect_delay = 1
-
-        self.__mqtt_reconnect_attempts = self.__settings.getint('mqtt', 'reconnect_attempts', fallback=21)
-        if not isinstance( self.__mqtt_reconnect_attempts , int) or self.__mqtt_reconnect_attempts < 0: #minimum 0
-            self.__mqtt_reconnect_attempts = 0
-
-        self.__holding_register_prefix = self.__settings.get("mqtt", "holding_register_prefix", fallback="")
-        self.__input_register_prefix = self.__settings.get("mqtt", "input_register_prefix", fallback="")
-
         # inverter / device
         #this is kinda dumb, overcomplicates things, let's stick to 1 inverter at a time, can always run multiple instances of script
         #keep this loop for backwards compatability
@@ -228,29 +217,9 @@ class Protocol_Gateway:
             self.unit = int(self.__settings.get(section, 'unit'))
             self.protocol_version = str(self.__settings.get(section, 'protocol_version'))
 
-            self.__analyze_protocol = self.__settings.getboolean(section, 'analyze_protocol', fallback=False)
-            self.__write = self.__settings.getboolean(section, 'write', fallback=False)
-            self.__analyze_protocol_save_load = self.__settings.getboolean(section, 'analyze_protocol_save_load', fallback=False)
 
-           
             self.measurement = self.__settings.get(section, 'measurement', fallback="")
-
-            reader_section = 'serial'
-            if self.__settings.has_section('reader'):
-                reader_section = 'reader'
-                
-            self.reader_settings : dict[str, object] = {} 
-            self.reader_settings["reader"] = self.__settings.get(reader_section, 'reader', fallback='')
-            self.reader_settings["port"] = self.__settings.get(reader_section, 'port', fallback='/dev/ttyUSB0')
-            self.reader_settings["baudrate"] = self.__settings.getint(reader_section, 'baudrate', fallback=9600)
-            self.reader_settings["certfile"] = self.__settings.get(reader_section, 'certfile', fallback='')
-            self.reader_settings["keyfile"] = self.__settings.get(reader_section, 'keyfile', fallback='')
-            self.reader_settings["host"] = self.__settings.get(reader_section, 'host', fallback='')
-            self.reader_settings["hostname"] = self.__settings.get(reader_section, 'hostname', fallback='')
-
-            #load protocol settings
-            self.protocolSettings = protocol_settings(self.protocol_version)
-
+            
             #default for send_holding_register
             fallback = False
             if "send_holding_register" in self.protocolSettings.settings:
@@ -265,56 +234,6 @@ class Protocol_Gateway:
 
             self.__send_input_register = self.__settings.getboolean(section, 'send_input_register', fallback=fallback)
 
-
-        print("max_precision: " + str(self.__max_precision))
-
-
-
-        #override reader if set
-        if self.reader_settings["reader"]:
-            self.protocolSettings.transport = self.reader_settings["reader"]
-        #load reader
-        # Import the module
-        module = importlib.import_module('classes.transports.'+self.protocolSettings.transport)
-
-
-        # Get the class from the module
-        cls = getattr(module, self.protocolSettings.transport)
-
-        self.reader : transport_base = cls(self.reader_settings)
-        self.reader.connect()
-
-        self.__mqtt_error_topic = self.__settings.get(
-            'mqtt', 'error_topic', fallback='home/inverter/error')
-        self.__log.info("mqtt settings: \n")
-        self.__log.info("mqtt host %s\n", self.__mqtt_host)
-        self.__log.info("mqtt port %s\n", self.__mqtt_port)
-        self.__log.info("mqtt_topic %s\n", self.__mqtt_topic)
-
-        #compatability with newer lib
-        
-        if hasattr(mqtt, "CallbackAPIVersion"):
-            self.__mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
-        else:
-            self.__mqtt_client = mqtt.Client()
-
-        self.__mqtt_client.on_connect = self.on_connect
-        self.__mqtt_client.on_message = self.on_message
-        self.__mqtt_client.on_disconnect = self.on_disconnect
-        
-
-        ## Set username and password
-        username = self.__settings.get('mqtt', 'user')
-        password = self.__settings.get('mqtt', 'pass')
-        if username:
-            self.__mqtt_client.username_pw_set(username=username, password=password)
-
-        self.__mqtt_client.connect(str(self.__mqtt_host), int(self.__mqtt_port), 60)
-        self.__mqtt_client.loop_start()
-
-        self.__properties = Properties(PacketTypes.PUBLISH)
-        self.__properties.MessageExpiryInterval = 30  # in seconds
-
         atexit.register(self.exit_handler)
 
     def exit_handler(self):
@@ -324,57 +243,7 @@ class Protocol_Gateway:
         return
 
 
-    def mqtt_reconnect(self):
-        self.__log.info("Disconnected from MQTT Broker!")
-        if self.__mqtt_reconnecting != 0: #stop double calls
-            return
-        # Attempt to reconnect
-        for attempt in range(0, self.__mqtt_reconnect_attempts):
-            self.__mqtt_reconnecting = time.time()
-            try:
-                self.__log.warning("Attempting to reconnect("+str(attempt)+")...")
-                if random.randint(0,1): #alternate between methods because built in reconnect might be unreliable. 
-                    self.__mqtt_client.reconnect()
-                else:
-                    self.__mqtt_client.loop_stop()
-                    self.__mqtt_client.connect(str(self.__mqtt_host), int(self.__mqtt_port), 60)
-                    self.__mqtt_client.loop_start()
-
-                #sleep to give a chance to reconnect. 
-                time.sleep(self.__mqtt_reconnect_delay)    
-                if self.__mqtt_connected:
-                    self.__mqtt_reconnecting = 0
-                    return
-            except:
-                self.__log.warning("Reconnection failed. Retrying in "+str(self.__mqtt_reconnect_delay)+" second(s)...")
-                time.sleep(self.__mqtt_reconnect_delay)
-        
-        #failed to reonnect
-        self.__log.critical("Failed to Reconnect, Too many attempts")
-        self.__running = False
-        self.__mqtt_reconnecting = 0
-        quit() #exit, service should restart entire script
-
-    def on_disconnect(self, client, userdata, rc):
-       self.mqtt_reconnect()
-
-    def on_connect(self, client, userdata, flags, rc):
-        """ The callback for when the client receives a CONNACK response from the server. """
-        self.__log.info("Connected with result code %s\n",str(rc))
-        self.__mqtt_connected = True
-
-
-    __write_topics : dict[str, registry_map_entry] = {}
-
-    def on_message(self, client, userdata, msg):
-        """ The callback for when a PUBLISH message is received from the server. """
-        self.__log.info(msg.topic+" "+str(msg.payload.decode('utf-8')))
-
-        #self.protocolSettings.validate_registry_entry
-        if msg.topic in self.__write_topics:
-            entry = self.__write_topics[msg.topic]
-            self.write_variable(entry, value=str(msg.payload.decode('utf-8')))
-
+    
 
     def run(self):
         """
@@ -679,77 +548,9 @@ class Protocol_Gateway:
             print("=== "+str(name)+" - "+str(protocol_scores[name])+" ===")
             print("input register score: " + str(input_register_score[name]) + "; valid registers: "+str(input_valid_count[name])+" of " + str(len(protocols[name].input_registry_map)))
             print("holding register score : " + str(holding_register_score[name]) + "; valid registers: "+str(holding_valid_count[name])+" of " + str(len(protocols[name].holding_registry_map)))
-        
+          
                     
-                    
-    def mqtt_discovery(self):
-        print("Publishing HA Discovery Topics...")
-
-        disc_payload = {}
-        disc_payload['availability_topic'] = self.__mqtt_topic + "/availability"
-
-        device = {}
-        device['manufacturer'] = self.__settings.get('mqtt_device', 'manufacturer', fallback='HotNoob')
-        device['model'] = self.__settings.get('mqtt_device', 'model', fallback='HotNoob Was Here 2024')
-        device['identifiers'] = "hotnoob_" + self.__device_serial_number
-        device['name'] = self.__settings.get('mqtt_device', 'name', fallback='Solar Inverter')
-
-        registry_map : list[registry_map_entry] = []
-        if self.__send_input_register and self.protocolSettings.input_registry_map:
-            registry_map.extend(self.protocolSettings.input_registry_map)
-
-        if self.__send_holding_register and self.protocolSettings.holding_registry_map:
-            registry_map.extend(self.protocolSettings.holding_registry_map)
-
-        length = len(registry_map)
-        count = 0
-        for item in registry_map:
-            count = count + 1
-
-            if item.concatenate and item.register != item.concatenate_registers[0]:
-                continue #skip all except the first register so no duplicates
-            
-            if item.write_mode == WriteMode.READDISABLED: #disabled
-                continue
-
-            clean_name = item.variable_name.lower().replace(' ', '_')
-
-            if self.__input_register_prefix and item.registry_type == Registry_Type.INPUT:
-                clean_name = self.__input_register_prefix + clean_name
-
-            if self.__holding_register_prefix and item.registry_type == Registry_Type.HOLDING:
-                clean_name = self.__holding_register_prefix + clean_name
-
-
-            print('Publishing Topic '+str(count)+' of ' + str(length) + ' "'+str(clean_name)+'"', end='\r', flush=True)
-
-            #device['sw_version'] = bms_version
-            disc_payload = {}
-            disc_payload['availability_topic'] = self.__mqtt_topic + "/availability"
-            disc_payload['device'] = device
-            disc_payload['name'] = clean_name
-            disc_payload['unique_id'] = "hotnoob_" + self.__device_serial_number + "_"+clean_name
-
-            writePrefix = ""
-            if self.__write and item.write_mode == WriteMode.WRITE:
-                writePrefix = "" #home assistant doesnt like write prefix
-
-            disc_payload['state_topic'] = self.__mqtt_topic +writePrefix+ "/"+clean_name
-            
-            if item.unit:
-                disc_payload['unit_of_measurement'] = item.unit
-
-
-            discovery_topic = self.__mqtt_discovery_topic+"/sensor/inverter-" + self.__device_serial_number  + writePrefix + "/" + disc_payload['name'].replace(' ', '_') + "/config"
-            
-            self.__mqtt_client.publish(discovery_topic,
-                                       json.dumps(disc_payload),qos=1, retain=True)
-            
-            time.sleep(0.01) #slow down for better reliability
-        
-        self.__mqtt_client.publish(disc_payload['availability_topic'],"online",qos=0, retain=True)
-        print()
-        self.__log.info("Published HA "+str(count)+"x Discovery Topics")
+   
 
     #region - was inverter class
     def read_serial_number(self) -> str:
@@ -1102,15 +903,6 @@ class Protocol_Gateway:
     #endregion - was inveter class
 
 
-def strtobool (val):
-    """Convert a string representation of truth to true (1) or false (0).
-    True values are 'y', 'yes', 't', 'true', 'on', and '1'
-    """
-    val = val.lower()
-    if val in ('y', 'yes', 't', 'true', 'on', '1'):
-        return 1
-    
-    return 0
 
 def main():
     """

@@ -1,5 +1,5 @@
 {
-    "reader" : "modbus_rtu",
+    "transport" : "modbus_rtu",
     "send_holding_register" :  true,
     "send_input_register" : false,
     "batch_size": 7,

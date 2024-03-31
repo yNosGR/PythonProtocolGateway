@@ -1,5 +1,5 @@
 {
-    "reader" : "modbus_rtu",
+    "transport" : "modbus_rtu",
     "system_status_codes" : 
     {
         "0" : "StandBy",
