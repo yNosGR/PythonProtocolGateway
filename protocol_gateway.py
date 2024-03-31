@@ -36,23 +36,32 @@ from paho.mqtt.packettypes import PacketTypes
 
 import importlib
 
-from protocol_settings import protocol_settings,Data_Type,registry_map_entry,Registry_Type,WriteMode
-from readers.reader_base import reader_base
+from classes.protocol_settings import protocol_settings,Data_Type,registry_map_entry,Registry_Type,WriteMode
+from classes.transports.transport_base import transport_base
 from pymodbus.exceptions import ModbusIOException
 
 
 
 __logo = """
-   ____                        _   _   ____  __  __  ___ _____ _____ 
-  / ___|_ __ _____      ____ _| |_| |_|___ \|  \/  |/ _ \_   _|_   _|
- | |  _| '__/ _ \ \ /\ / / _` | __| __| __) | |\/| | | | || |   | |  
- | |_| | | | (_) \ V  V / (_| | |_| |_ / __/| |  | | |_| || |   | |  
-  \____|_|  \___/ \_/\_/ \__,_|\__|\__|_____|_|  |_|\__\_\|_|   |_|  
-                                                                      
-    """
+
+██████╗ ██╗   ██╗████████╗██╗  ██╗ ██████╗ ███╗   ██╗                                                                                
+██╔══██╗╚██╗ ██╔╝╚══██╔══╝██║  ██║██╔═══██╗████╗  ██║                                                                                
+██████╔╝ ╚████╔╝    ██║   ███████║██║   ██║██╔██╗ ██║                                                                                
+██╔═══╝   ╚██╔╝     ██║   ██╔══██║██║   ██║██║╚██╗██║                                                                                
+██║        ██║      ██║   ██║  ██║╚██████╔╝██║ ╚████║                                                                                
+╚═╝        ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝                                                                                
+                                                                                                                                     
+██████╗ ██████╗  ██████╗ ████████╗ ██████╗  ██████╗ ██████╗ ██╗          ██████╗  █████╗ ████████╗███████╗██╗    ██╗ █████╗ ██╗   ██╗
+██╔══██╗██╔══██╗██╔═══██╗╚══██╔══╝██╔═══██╗██╔════╝██╔═══██╗██║         ██╔════╝ ██╔══██╗╚══██╔══╝██╔════╝██║    ██║██╔══██╗╚██╗ ██╔╝
+██████╔╝██████╔╝██║   ██║   ██║   ██║   ██║██║     ██║   ██║██║         ██║  ███╗███████║   ██║   █████╗  ██║ █╗ ██║███████║ ╚████╔╝ 
+██╔═══╝ ██╔══██╗██║   ██║   ██║   ██║   ██║██║     ██║   ██║██║         ██║   ██║██╔══██║   ██║   ██╔══╝  ██║███╗██║██╔══██║  ╚██╔╝  
+██║     ██║  ██║╚██████╔╝   ██║   ╚██████╔╝╚██████╗╚██████╔╝███████╗    ╚██████╔╝██║  ██║   ██║   ███████╗╚███╔███╔╝██║  ██║   ██║   
+╚═╝     ╚═╝  ╚═╝ ╚═════╝    ╚═╝    ╚═════╝  ╚═════╝ ╚═════╝ ╚══════╝     ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝   ╚═╝   
+                                                                                                                                     
+"""
 
 
-class InverterModBusToMQTT:
+class Protocol_Gateway:
     """
     Main class, implementing the Growatt / Inverters to MQTT functionality
     """
@@ -143,7 +152,7 @@ class InverterModBusToMQTT:
     '''time inbetween requests'''
 
     modbus_version = ""
-    reader : reader_base
+    reader : transport_base
     reader_settings : dict[str, str]
     
 
@@ -263,16 +272,16 @@ class InverterModBusToMQTT:
 
         #override reader if set
         if self.reader_settings["reader"]:
-            self.protocolSettings.reader = self.reader_settings["reader"]
+            self.protocolSettings.transport = self.reader_settings["reader"]
         #load reader
         # Import the module
-        module = importlib.import_module('readers.'+self.protocolSettings.reader)
+        module = importlib.import_module('classes.transports.'+self.protocolSettings.transport)
 
 
         # Get the class from the module
-        cls = getattr(module, self.protocolSettings.reader)
+        cls = getattr(module, self.protocolSettings.transport)
 
-        self.reader : reader_base = cls(self.reader_settings)
+        self.reader : transport_base = cls(self.reader_settings)
         self.reader.connect()
 
         self.__mqtt_error_topic = self.__settings.get(
@@ -1109,7 +1118,7 @@ def main():
     """
     print(__logo)
 
-    inverter2mqtt = InverterModBusToMQTT(args.config)
+    inverter2mqtt = Protocol_Gateway(args.config)
     inverter2mqtt.init_invertermodbustomqtt()
     inverter2mqtt.run()
 

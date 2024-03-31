@@ -1,12 +1,12 @@
 import logging
-from protocol_settings import Registry_Type
-from pymodbus.client.sync import ModbusUdpClient
-from .reader_base import reader_base
+from classes.protocol_settings import Registry_Type
+from pymodbus.client.sync import ModbusTcpClient
+from .transport_base import transport_base
 
-class modbus_udp(reader_base):
-    port : int = 502
+class modbus_tcp(transport_base):
+    port : str = 502
     host : str = ""
-    client : ModbusUdpClient 
+    client : ModbusTcpClient 
 
     def __init__(self, settings : dict[str,str]):
         #logger = logging.getLogger(__name__)
@@ -21,7 +21,7 @@ class modbus_udp(reader_base):
         if not self.host:
             raise ValueError("Host is not set")
 
-        self.client = ModbusUdpClient(host=self.host, port=self.port, timeout=7, retries=3)
+        self.client = ModbusTcpClient(host=self.host, port=self.port, timeout=7, retries=3)
         
     def read_registers(self, start, count=1, registry_type : Registry_Type = Registry_Type.INPUT, **kwargs):
         if registry_type == Registry_Type.INPUT:

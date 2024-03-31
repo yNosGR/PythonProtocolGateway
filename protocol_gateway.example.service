@@ -1,9 +1,9 @@
 [Unit]
-Description=InverterModBus
+Description=Protocol Gateway For - {description}
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/python3 -u invertermodbustomqtt.py
+ExecStart=/usr/bin/python3 -u protocol_gateway.py
 WorkingDirectory={{directory for files}}
 StandardOutput=inherit
 StandardError=inherit

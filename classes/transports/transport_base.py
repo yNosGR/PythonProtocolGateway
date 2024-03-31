@@ -1,7 +1,7 @@
-from protocol_settings import Registry_Type
+from classes.protocol_settings import Registry_Type
 
 
-class reader_base:
+class transport_base:
     def __init__(self, settings : dict[str,str]) -> None:
         pass
 

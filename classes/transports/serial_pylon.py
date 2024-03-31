@@ -1,7 +1,7 @@
 from .serial_frame_client import serial_frame_client
-from .reader_base import reader_base
+from .transport_base import transport_base
 
-class serial_pylon(reader_base):
+class serial_pylon(transport_base):
     client : serial_frame_client
 
     #this format is pretty common; i need a name for it.

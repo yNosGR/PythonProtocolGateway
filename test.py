@@ -1,5 +1,5 @@
 import glob
-from protocol_settings import protocol_settings
+from classes.protocol_settings import protocol_settings
 
 settings_dir = 'protocols'
 

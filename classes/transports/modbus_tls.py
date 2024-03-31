@@ -1,9 +1,9 @@
 import logging
-from protocol_settings import Registry_Type
+from classes.protocol_settings import Registry_Type
 from pymodbus.client.sync import ModbusTlsClient
-from .reader_base import reader_base
+from .transport_base import transport_base
 
-class modbus_udp(reader_base):
+class modbus_udp(transport_base):
     port : int = 502
     host : str = ""
 

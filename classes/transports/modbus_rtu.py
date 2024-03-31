@@ -1,9 +1,9 @@
 import logging
-from protocol_settings import Registry_Type
+from classes.protocol_settings import Registry_Type
 from pymodbus.client.sync import ModbusSerialClient
-from .reader_base import reader_base
+from .transport_base import transport_base
 
-class modbus_rtu(reader_base):
+class modbus_rtu(transport_base):
     port : str = "/dev/ttyUSB0"
     baudrate : int = 9600
     client : ModbusSerialClient 
