@@ -6,19 +6,24 @@ import time
 from pymodbus.exceptions import ModbusIOException
 
 from .transport_base import transport_base
-from ..protocol_settings import Data_Type, Registry_Type, registry_map_entry
+from ..protocol_settings import Data_Type, Registry_Type, registry_map_entry, protocol_settings
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from configparser import SectionProxy
-    from ..protocol_settings import protocol_settings
 
 class modbus_base(transport_base):
     modbus_delay : float = 0.85
     '''time inbetween requests'''
 
+    analyze_protocol_enabled : bool = False
+    analyze_protocol_save_load : bool = False
+
     def __init__(self, settings : 'SectionProxy', protocolSettings : 'protocol_settings' = None):
         super().__init__(settings, protocolSettings=protocolSettings)
+
+        self.analyze_protocol_enabled = settings.get('analyze_protocol', fallback=self.analyze_protocol)
+        self.analyze_protocol_save_load = settings.get('analyze_protocol_save_load', fallback=self.analyze_protocol_save_load)
 
         #from transport_base settings
         if self.write_enabled:
@@ -27,6 +32,11 @@ class modbus_base(transport_base):
         #if sn is empty, attempt to autoread it
         if not self.device_serial_number: 
             self.device_serial_number = self.read_serial_number()
+
+        if self.analyze_protocol_enabled:
+            self.connect()
+            self.analyze_protocol()
+            quit()
 
     def read_serial_number(self) -> str:
         serial_number = str(self.read_variable("Serial Number", Registry_Type.HOLDING))
@@ -144,7 +154,7 @@ class modbus_base(transport_base):
         holding_save_path = "holding_registry.json"
 
         #load previous scan if enabled and exists
-        if self.__analyze_protocol_save_load and os.path.exists(input_save_path) and os.path.exists(holding_save_path):
+        if self.analyze_protocol_save_load and os.path.exists(input_save_path) and os.path.exists(holding_save_path):
             with open(input_save_path, "r") as file:
                 input_registry = json.load(file)
 
@@ -157,10 +167,10 @@ class modbus_base(transport_base):
         else:
             #perform registry scan
             ##batch_size = 1, read registers one by one; if out of bound. it just returns error
-            input_registry = self.read_registers(min=0, max=max_input_register, batch_size=45, registry=Registry_Type.INPUT)
-            holding_registry = self.read_registers(min=0, max=max_holding_register, batch_size=45, registry=Registry_Type.HOLDING)
+            input_registry = self.read_modbus_registers(start=0, end=max_input_register, batch_size=45, registry_type=Registry_Type.INPUT)
+            holding_registry = self.read_modbus_registers(start=0, end=max_holding_register, batch_size=45, registry_type=Registry_Type.HOLDING)
 
-            if self.__analyze_protocol_save_load: #save results if enabled
+            if self.analyze_protocol_save_load: #save results if enabled
                 with open(input_save_path, "w") as file:
                     json.dump(input_registry, file)
 
@@ -169,10 +179,12 @@ class modbus_base(transport_base):
 
         #print results for debug
         print("=== START INPUT REGISTER ===")
-        print([(key, value) for key, value in input_registry.items()])
+        if input_registry:
+            print([(key, value) for key, value in input_registry.items()])
         print("=== END INPUT REGISTER ===")
         print("=== START HOLDING REGISTER ===")
-        print([(key, value) for key, value in holding_registry.items()])
+        if holding_registry:
+            print([(key, value) for key, value in holding_registry.items()])
         print("=== END HOLDING REGISTER ===")
 
         #very well possible the registers will be incomplete due to different hardware sizes
@@ -258,8 +270,8 @@ class modbus_base(transport_base):
         #print scores
         for name in sorted(protocol_scores, key=protocol_scores.get, reverse=True):
             print("=== "+str(name)+" - "+str(protocol_scores[name])+" ===")
-            print("input register score: " + str(input_register_score[name]) + "; valid registers: "+str(input_valid_count[name])+" of " + str(len(protocols[name].input_registry_map)))
-            print("holding register score : " + str(holding_register_score[name]) + "; valid registers: "+str(holding_valid_count[name])+" of " + str(len(protocols[name].holding_registry_map)))
+            print("input register score: " + str(input_register_score[name]) + "; valid registers: "+str(input_valid_count[name])+" of " + str(len(protocols[name].get_registry_map(Registry_Type.INPUT))))
+            print("holding register score : " + str(holding_register_score[name]) + "; valid registers: "+str(holding_valid_count[name])+" of " + str(len(protocols[name].get_registry_map(Registry_Type.HOLDING))))
           
   
     def write_variable(self, entry : registry_map_entry, value : str, registry_type : Registry_Type = Registry_Type.HOLDING):
@@ -348,9 +360,6 @@ class modbus_base(transport_base):
             registers = self.read_modbus_registers(start=start, end=end, registry_type=registry_type)
             results = self.process_registery(registers, registry_map)
             return results[entry.variable_name]
-            
-
-
     
     def read_modbus_registers(self, ranges : list[tuple] = None, start : int = 0, end : int = None, batch_size : int = 45, registry_type : Registry_Type = Registry_Type.INPUT ) -> dict:
         ''' maybe move this to transport_base ?'''
@@ -548,6 +557,6 @@ class modbus_base(transport_base):
         if not map:
             return {}
         
-        registry = self.read_registers(self.protocolSettings.get_registry_ranges(registry_type), registry_type=registry_type)
+        registry = self.read_modbus_registers(self.protocolSettings.get_registry_ranges(registry_type), registry_type=registry_type)
         info = self.process_registery(registry, map)
         return info
