@@ -1,61 +1,46 @@
-[time]
-interval = 10
-offline_interval = 60
-error_interval = 60
+[general]
+log_level = DEBUG
 
-[reader]
-#[serial] / reader settings
-#name is deprecated. new name is [reader]. contians protocol reader settings. 
-#if tcp/tls/udp port is the port number
+[transport.0] #name must be unique, ie: transport.modbus
+#rs485 / modbus device
+#protocol config files are located in protocols/
+protocol_version = v0.14
+analyze_protocol = false
+write = false
+
+#in
+#was unit
+address = 2
 port = {{serial port, likely /dev/ttyUSB0}}
 baudrate = 9600
 
-#tcp/tls/udp example
+#modbus tcp/tls/udp example
 #host = 192.168.0.7
 #port = 502
 #override protocol reader
-#reader = modbus_tcp
+#transport = modbus_tcp
+
+#the 'transport' that we want to share this with
+bridge = transport.1
+
+manufacturer = HDHK
+model = HDHK 16CH AC
+#optional; leave blank to autofetch serial from device
+serial_number = HDHK777
+
+read_interval = 10
+error_interval = 60
 
 
-[inverter]
-unit = 1
-#protocol config files are located in protocols/
-#you can wait for more, or attempt to make your own. the csvs are just taken from the docs pdf
-protocol_version = v0.14
-analyze_protocol = false
-send_holding_register = false
-
-#name is deprecated
-name = main
-#measurement is deprecated
-measurement = inverter
-
-[general]
-log_level = DEBUG
-#limit sent data to having x decimal points. -1 to show all decimal points
-max_precision = 2
-
-[mqtt]
+[transport.1]
+#connect mqtt
+transport=mqtt
 host = {{mqtt ip / host}}
 port = 1883
-user = {{mqtt username here, or blank for public}}
+user = {{mqtt username here}}
 pass = {{mqtt password}}
-topic = inverter/growatt/spf12000t
-error_topic = inverter/growatt/spf12000t/error
+base_topic = home/inverter/
+error_topic = /error
 json = false
 discovery_enabled = true
 discovery_topic = homeassistant
-#number of seconds between reconnecting mqtt; default is 7s
-#reconnect_delay = 7
-#max number of attempts to reconnect in one failure, before exiting. default is 21
-#reconnect_attempts = 21
-#prefix to add to variable name based on register
-holding_register_prefix =
-input_register_prefix = 
-
-[mqtt_device]
-manufacturer = Growatt
-name = Growatt SPF 12000T
-model = SFP 12000T
-#optional; leave blank to autofetch serial from device
-serial_number = 
