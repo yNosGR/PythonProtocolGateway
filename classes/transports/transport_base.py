@@ -54,6 +54,7 @@ class transport_base:
             self.device_name = settings.get("name", fallback=self.device_manufacturer+" "+self.device_name)
             self.bridge = settings.get("bridge", self.bridge)
             self.read_interval = settings.getfloat("read_interval", self.read_interval)
+            self.write_enabled = settings.getboolean("write_enabled", self.write_enabled)
 
     def init_bridge(self, from_transport : 'transport_base'):
         pass
@@ -67,12 +68,34 @@ class transport_base:
 
     def connect(self, transports : 'transport_base'):
         pass
-    
-    def read_registers(self, start, count=1, registry_type : Registry_Type = Registry_Type.INPUT, **kwargs):
-        pass
 
     def write_data(self, data : dict[str,str]):
+        ''' general purpose write function for between transports'''
+        pass
+
+    def read_data(self) -> dict[str,str]:
+        ''' general purpose read function for between transports; 
+        return type may be changed to dict[str, registrsy_map_entry]. still thinking about this'''
+        pass
+
+
+
+    def enable_write(self):
+        ''' required for sensitive / manually defined protocols '''
+        pass
+
+    #region - modbus
+    #might limit to modbus_base only. not sure; might also apply to future protocols
+    def read_registers(self, start, count=1, registry_type : Registry_Type = Registry_Type.INPUT, **kwargs):
         pass
 
     def write_register(self, register : int, value : int, **kwargs):
         pass
+
+    def analyse_protocol(self):
+        pass
+
+    def validate_protocol(self, protocolSettings : 'protocol_settings') -> float:
+        ''' validates protocol'''
+        pass
+    #endregion

@@ -92,6 +92,7 @@ class mqtt(transport_base):
         self.mqtt_properties = paho.mqtt.properties.Properties(paho.mqtt.packettypes.PacketTypes.PUBLISH)
         self.mqtt_properties.MessageExpiryInterval = 30  # in seconds
 
+        self.write_enabled = True #set default
         super().__init__(settings)
 
     def connect(self):
@@ -145,7 +146,9 @@ class mqtt(transport_base):
     __write_topics : dict[str, registry_map_entry] = {}
 
     def write_data(self, data : dict[str,str]):
-
+        if not self.write_enabled:
+            return 
+        
         self._log.info("write data to mqtt transport")   
         self._log.info(data)   
         #have to send this every loop, because mqtt doesnt disconnect when HA restarts. HA bug. 

@@ -1,10 +1,10 @@
 import logging
 from classes.protocol_settings import Registry_Type, protocol_settings
 from pymodbus.client.sync import ModbusSerialClient
-from .transport_base import transport_base
+from .modbus_base import modbus_base
 from configparser import SectionProxy
 
-class modbus_rtu(transport_base):
+class modbus_rtu(modbus_base):
     port : str = "/dev/ttyUSB0"
     addresses : list[int] = []
     baudrate : int = 9600
@@ -34,7 +34,7 @@ class modbus_rtu(transport_base):
     def read_registers(self, start, count=1, registry_type : Registry_Type = Registry_Type.INPUT, **kwargs):
 
         if 'unit' not in kwargs:
-            kwargs = {'unit': self.addresses[0], **kwargs}
+            kwargs = {'unit': int(self.addresses[0]), **kwargs}
 
         if registry_type == Registry_Type.INPUT:
             return self.client.read_input_registers(start, count, **kwargs)
@@ -42,6 +42,9 @@ class modbus_rtu(transport_base):
             return self.client.read_holding_registers(start, count, **kwargs)
         
     def write_register(self, register : int, value : int, **kwargs):
+        if not self.write_enabled:
+            return 
+        
         if 'unit' not in kwargs:
             kwargs = {'unit': self.addresses[0], **kwargs}
 
