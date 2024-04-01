@@ -14,9 +14,9 @@ class transport_base:
     protocol_version : str = ''
     transport_name : str = ''
     device_name : str = ''
-    device_serial_number : str = ''
-    device_manufacturer : str = ''
-    device_model : str = ''
+    device_serial_number : str = 'hotnoob'
+    device_manufacturer : str = 'hotnoob'
+    device_model : str = 'hotnoob'
     bridge : str = ''
     write_enabled : bool = False
 

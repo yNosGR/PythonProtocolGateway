@@ -173,6 +173,10 @@ class Protocol_Gateway:
                 transport.on_message = self.on_message
                 self.__transports.append(transport)
 
+        #connect first
+        for transport in self.__transports:
+            transport.connect()
+        time.sleep(7)
         #apply links
         for to_transport in self.__transports:
             for from_transport in self.__transports:
@@ -180,8 +184,7 @@ class Protocol_Gateway:
                     to_transport.init_bridge(from_transport)
                     from_transport.init_bridge(to_transport)
 
-        for transport in self.__transports:
-            transport.connect()
+
 
         atexit.register(self.exit_handler)
 

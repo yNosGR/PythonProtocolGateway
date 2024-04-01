@@ -95,6 +95,7 @@ class mqtt(transport_base):
         super().__init__(settings)
 
     def connect(self):
+        print("mqtt connect")
         if self.__first_connection:
             self.__first_connection = False
             self.client.connect(str(self.host), int(self.port), 60)
@@ -169,6 +170,8 @@ class mqtt(transport_base):
             #self.write_variable(entry, value=str(msg.payload.decode('utf-8')))
 
     def init_bridge(self, from_transport : transport_base):
+        
+            
         if from_transport.write_enabled:
             self.__write_topics = {}
             #subscribe to write topics
@@ -179,6 +182,8 @@ class mqtt(transport_base):
                     self.__write_topics[topic] = entry
                     self.client.subscribe(topic)
 
+        if self.discovery_enabled:
+            self.mqtt_discovery(from_transport)
 
     def mqtt_discovery(self, from_transport : transport_base):
         print("Publishing HA Discovery Topics...")
@@ -193,11 +198,8 @@ class mqtt(transport_base):
         device['name'] = from_transport.device_name
 
         registry_map : list[registry_map_entry] = []
-        if self.__send_input_register and self.protocolSettings.input_registry_map:
-            registry_map.extend(self.protocolSettings.input_registry_map)
-
-        if self.__send_holding_register and self.protocolSettings.holding_registry_map:
-            registry_map.extend(self.protocolSettings.holding_registry_map)
+        for entries in from_transport.protocolSettings.registry_map.values():
+            registry_map.extend(entries)    
 
         length = len(registry_map)
         count = 0
@@ -212,11 +214,12 @@ class mqtt(transport_base):
 
             clean_name = item.variable_name.lower().replace(' ', '_')
 
-            if self.__input_register_prefix and item.registry_type == Registry_Type.INPUT:
-                clean_name = self.__input_register_prefix + clean_name
+            if False:
+                if self.__input_register_prefix and item.registry_type == Registry_Type.INPUT:
+                    clean_name = self.__input_register_prefix + clean_name
 
-            if self.__holding_register_prefix and item.registry_type == Registry_Type.HOLDING:
-                clean_name = self.__holding_register_prefix + clean_name
+                if self.__holding_register_prefix and item.registry_type == Registry_Type.HOLDING:
+                    clean_name = self.__holding_register_prefix + clean_name
 
 
             print('Publishing Topic '+str(count)+' of ' + str(length) + ' "'+str(clean_name)+'"', end='\r', flush=True)
@@ -229,7 +232,7 @@ class mqtt(transport_base):
             disc_payload['unique_id'] = "hotnoob_" + from_transport.device_serial_number + "_"+clean_name
 
             writePrefix = ""
-            if self.__write and item.write_mode == WriteMode.WRITE:
+            if from_transport.write_enabled and item.write_mode == WriteMode.WRITE:
                 writePrefix = "" #home assistant doesnt like write prefix
 
             disc_payload['state_topic'] = self.base_topic +writePrefix+ "/"+clean_name
@@ -238,12 +241,12 @@ class mqtt(transport_base):
                 disc_payload['unit_of_measurement'] = item.unit
 
 
-            discovery_topic = self.base_topic+"/sensor/inverter-" + from_transport.device_serial_number  + writePrefix + "/" + disc_payload['name'].replace(' ', '_') + "/config"
+            discovery_topic = self.discovery_topic+"/sensor/HN-" + from_transport.device_serial_number  + writePrefix + "/" + disc_payload['name'].replace(' ', '_') + "/config"
             
             self.client.publish(discovery_topic,
                                        json.dumps(disc_payload),qos=1, retain=True)
             
-            time.sleep(0.01) #slow down for better reliability
+            time.sleep(0.07) #slow down for better reliability
         
         self.client.publish(disc_payload['availability_topic'],"online",qos=0, retain=True)
         print()
