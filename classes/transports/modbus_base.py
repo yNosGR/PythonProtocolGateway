@@ -22,8 +22,8 @@ class modbus_base(transport_base):
     def __init__(self, settings : 'SectionProxy', protocolSettings : 'protocol_settings' = None):
         super().__init__(settings, protocolSettings=protocolSettings)
 
-        self.analyze_protocol_enabled = settings.get('analyze_protocol', fallback=self.analyze_protocol)
-        self.analyze_protocol_save_load = settings.get('analyze_protocol_save_load', fallback=self.analyze_protocol_save_load)
+        self.analyze_protocol_enabled = settings.getboolean('analyze_protocol', fallback=self.analyze_protocol)
+        self.analyze_protocol_save_load = settings.getboolean('analyze_protocol_save_load', fallback=self.analyze_protocol_save_load)
 
         #from transport_base settings
         if self.write_enabled:

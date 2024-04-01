@@ -79,12 +79,6 @@ class Protocol_Gateway:
 
     __device_serial_number = "hotnoob"
 
-    __analyze_protocol : bool = False
-    ''' enable / disable analyze mode'''
-
-    __analyze_protocol_save_load : bool = False
-    ''' if enabled, saves registry scan; but if found loads registry from file'''
-
     __running : bool = False
     ''' controls main loop'''
 
@@ -120,9 +114,6 @@ class Protocol_Gateway:
         self.__log_level = self.__settings.get('general','log_level', fallback='DEBUG')
         if (self.__log_level != 'DEBUG'):
             self.__log.setLevel(logging.getLevelName(self.__log_level))
-        
-        self.__analyze_protocol = self.__settings.getboolean('general', 'analyze_protocol', fallback=False)
-        self.__analyze_protocol_save_load = self.__settings.getboolean('general', 'analyze_protocol_save_load', fallback=False)
 
         for section in self.__settings.sections():
             if section.startswith('transport'):
