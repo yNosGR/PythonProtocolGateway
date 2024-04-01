@@ -581,7 +581,7 @@ class Protocol_Gateway:
             
 
     def read_registers(self, transport : transport_base , ranges : list[tuple] = None, start : int = 0, end : int = None, batch_size : int = 45, registry_type : Registry_Type = Registry_Type.INPUT ) -> dict:
-        
+        ''' maybe move this to transport_base ?'''
 
         if not ranges: #ranges is empty, use min max
             if start == 0 and end == None:
