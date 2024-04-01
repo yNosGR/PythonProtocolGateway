@@ -10,7 +10,7 @@ write = false
 
 #in
 #was unit
-address = 2
+address = 1
 port = {{serial port, likely /dev/ttyUSB0}}
 baudrate = 9600
 
