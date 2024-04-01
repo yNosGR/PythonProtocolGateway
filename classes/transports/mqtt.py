@@ -15,10 +15,6 @@ from .transport_base import transport_base
 from configparser import SectionProxy
 from ..protocol_settings import registry_map_entry, WriteMode, Registry_Type
 
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from classes.transport import Transport
-
 
 class mqtt(transport_base):
     ''' for future; this will hold mqtt transport'''
@@ -43,6 +39,7 @@ class mqtt(transport_base):
     client : MQTTClient = None
     mqtt_properties : paho.mqtt.properties.Properties = None
 
+    __first_connection : bool = True
     __reconnecting : bool = False
     __connected : bool = False
 
@@ -89,33 +86,37 @@ class mqtt(transport_base):
         self.client.username_pw_set(username=username, password=password)
 
         self.client.on_connect = self.on_connect
-        self.client.on_message = self.on_message
+        self.client.on_message = self.client_on_message
         self.client.on_disconnect = self.on_disconnect
 
         self.mqtt_properties = paho.mqtt.properties.Properties(paho.mqtt.packettypes.PacketTypes.PUBLISH)
         self.mqtt_properties.MessageExpiryInterval = 30  # in seconds
 
-        super().__init__()
+        super().__init__(settings)
 
-    def connect(self, transports : list[transport_base]):
-        self.client.connect(str(self.__mqtt_host), int(self.__mqtt_port), 60)
-        self.client.loop_start()
+    def connect(self):
+        if self.__first_connection:
+            self.__first_connection = False
+            self.client.connect(str(self.host), int(self.port), 60)
+            self.client.loop_start()
+        else:
+            self.mqtt_reconnect() #special reconnect function
 
 
     def mqtt_reconnect(self):
-        self.__log.info("Disconnected from MQTT Broker!")
+        self._log.info("Disconnected from MQTT Broker!")
         if self.__reconnecting != 0: #stop double calls
             return
         # Attempt to reconnect
-        for attempt in range(0, self.__mqtt_reconnect_attempts):
+        for attempt in range(0, self.reconnect_attempts):
             self.__reconnecting = time.time()
             try:
-                self.__log.warning("Attempting to reconnect("+str(attempt)+")...")
+                self._log.warning("Attempting to reconnect("+str(attempt)+")...")
                 if random.randint(0,1): #alternate between methods because built in reconnect might be unreliable. 
                     self.client.reconnect()
                 else:
                     self.client.loop_stop()
-                    self.client.connect(str(self.__mqtt_host), int(self.__mqtt_port), 60)
+                    self.client.connect(str(self.host), int(self.port), 60)
                     self.client.loop_start()
 
                 #sleep to give a chance to reconnect. 
@@ -124,11 +125,11 @@ class mqtt(transport_base):
                     self.__reconnecting = 0
                     return
             except:
-                self.__log.warning("Reconnection failed. Retrying in "+str(self.reconnect_delay)+" second(s)...")
+                self._log.warning("Reconnection failed. Retrying in "+str(self.reconnect_delay)+" second(s)...")
                 time.sleep(self.reconnect_delay)
         
         #failed to reonnect
-        self.__log.critical("Failed to Reconnect, Too many attempts")
+        self._log.critical("Failed to Reconnect, Too many attempts")
         self.__reconnecting = 0
         quit() #exit, service should restart entire script
 
@@ -137,20 +138,46 @@ class mqtt(transport_base):
 
     def on_connect(self, client, userdata, flags, rc):
         """ The callback for when the client receives a CONNACK response from the server. """
-        self.__log.info("Connected with result code %s\n",str(rc))
+        self._log.info("Connected with result code %s\n",str(rc))
         self.__connected = True
-
 
     __write_topics : dict[str, registry_map_entry] = {}
 
-    def on_message(self, client, userdata, msg):
+    def write_data(self, data : dict[str,str]):
+
+        self._log.info("write data to mqtt transport")   
+        self._log.info(data)   
+        #have to send this every loop, because mqtt doesnt disconnect when HA restarts. HA bug. 
+        self.client.publish(self.base_topic + "/availability","online", qos=0,retain=True)
+
+        if(self.json):
+            # Serializing json
+            json_object = json.dumps(data, indent=4)
+            self.client.publish(self.base_topic, json_object, 0, properties=self.__properties)
+        else:
+            for key, val in data.items():
+                self.client.publish(str(self.base_topic+'/'+key).lower(), str(val))
+
+    def client_on_message(self, client, userdata, msg):
         """ The callback for when a PUBLISH message is received from the server. """
-        self.__log.info(msg.topic+" "+str(msg.payload.decode('utf-8')))
+        self._log.info(msg.topic+" "+str(msg.payload.decode('utf-8')))
 
         #self.protocolSettings.validate_registry_entry
         if msg.topic in self.__write_topics:
             entry = self.__write_topics[msg.topic]
-            self.write_variable(entry, value=str(msg.payload.decode('utf-8')))
+            self.on_message(self, entry, msg.payload.decode('utf-8'))
+            #self.write_variable(entry, value=str(msg.payload.decode('utf-8')))
+
+    def init_bridge(self, from_transport : transport_base):
+        if from_transport.write_enabled:
+            self.__write_topics = {}
+            #subscribe to write topics
+            for entry in from_transport.protocolSettings.holding_registry_map:
+                if entry.write_mode == WriteMode.WRITE:
+                    #__write_topics
+                    topic : str = self.base_topic + "/write/" + entry.variable_name.lower().replace(' ', '_')
+                    self.__write_topics[topic] = entry
+                    self.client.subscribe(topic)
 
 
     def mqtt_discovery(self, from_transport : transport_base):
@@ -220,4 +247,4 @@ class mqtt(transport_base):
         
         self.client.publish(disc_payload['availability_topic'],"online",qos=0, retain=True)
         print()
-        self.__log.info("Published HA "+str(count)+"x Discovery Topics")
+        self._log.info("Published HA "+str(count)+"x Discovery Topics")

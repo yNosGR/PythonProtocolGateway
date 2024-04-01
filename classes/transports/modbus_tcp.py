@@ -21,7 +21,7 @@ class modbus_tcp(transport_base):
         self.port = settings.getint("port", self.port)
 
         self.client = ModbusTcpClient(host=self.host, port=self.port, timeout=7, retries=3)
-        super().__init__(protocolSettings=protocolSettings)
+        super().__init__(settings, protocolSettings=protocolSettings)
         
     def read_registers(self, start, count=1, registry_type : Registry_Type = Registry_Type.INPUT, **kwargs):
         if registry_type == Registry_Type.INPUT:

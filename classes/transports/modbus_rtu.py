@@ -6,6 +6,7 @@ from configparser import SectionProxy
 
 class modbus_rtu(transport_base):
     port : str = "/dev/ttyUSB0"
+    addresses : list[int] = []
     baudrate : int = 9600
     client : ModbusSerialClient 
 
@@ -13,27 +14,38 @@ class modbus_rtu(transport_base):
         #logger = logging.getLogger(__name__)
         #logging.basicConfig(level=logging.DEBUG)
 
+        #todo: implement send holding/input option? here?
+
         self.port = settings.get("port", "")
         if not self.port:
             raise ValueError("Port is not set")
-        
+
         self.baudrate = settings.getint("buadrate", 9600)
 
+        address : int = settings.getint("address", 0)
+        self.addresses = [address]
 
         self.client = ModbusSerialClient(method='rtu', port=self.port, 
                                      baudrate=int(self.baudrate), 
                                      stopbits=1, parity='N', bytesize=8, timeout=2
                                      )
-        super().__init__(protocolSettings=protocolSettings)
+        super().__init__(settings, protocolSettings=protocolSettings)
         
     def read_registers(self, start, count=1, registry_type : Registry_Type = Registry_Type.INPUT, **kwargs):
+
+        if 'unit' not in kwargs:
+            kwargs = {'unit': self.addresses[0], **kwargs}
+
         if registry_type == Registry_Type.INPUT:
             return self.client.read_input_registers(start, count, **kwargs)
         elif registry_type == Registry_Type.HOLDING:
             return self.client.read_holding_registers(start, count, **kwargs)
         
     def write_register(self, register : int, value : int, **kwargs):
+        if 'unit' not in kwargs:
+            kwargs = {'unit': self.addresses[0], **kwargs}
+
         self.client.write_register(register, value, **kwargs) #function code 0x06 writes to holding register
 
     def connect(self):
-        self.client.connect()
+        self.connected = self.client.connect()

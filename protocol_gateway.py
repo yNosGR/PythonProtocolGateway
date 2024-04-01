@@ -4,6 +4,7 @@ Main module for Growatt / Inverters ModBus RTU data to MQTT
 """
 
 
+import importlib
 import sys
 import time
 
@@ -35,7 +36,6 @@ import paho.mqtt.client as mqtt
 
 from classes.protocol_settings import protocol_settings,Data_Type,registry_map_entry,Registry_Type,WriteMode
 from classes.transports.transport_base import transport_base
-from classes.transport import Transport
 from pymodbus.exceptions import ModbusIOException
 
 
@@ -73,34 +73,12 @@ class Protocol_Gateway:
     __offline_interval = None
     # error interval in [s]
     __error_interval = None
-    # device name of serial usb connection [/dev/tty...]
-    __port = None
-    # baudrate to access modbus connection
-    __baudrate = -1
-    # mqtt server host address
-    __mqtt_host = None
-    # mqtt client handle
-    __mqtt_client = None
 
-    __mqtt_reconnecting : float = 0
-    ''' keep track of if reconnecting. so we can determine if mqtt event bugged out'''
-
-    __mqtt_connected : bool = False
-    ''' flag to keep track of if mqtt is connected because mqtt events / functions are unreliable '''
-
-    # mqtt error topic in case the growatt2mqtt runs in error moder or inverter is powered off
-    __mqtt_error_topic = ""
-    # mqtt properties handle for publishing data
-    __properties = None
-    # logging module
     __log = None
     # log level, available log levels are CRITICAL, FATAL, ERROR, WARNING, INFO, DEBUG
     __log_level = 'DEBUG'
 
     __device_serial_number = "hotnoob"
-
-    __write : bool = False
-    ''' enable / disable write mode - setting'''
 
     __analyze_protocol : bool = False
     ''' enable / disable analyze mode'''
@@ -108,31 +86,20 @@ class Protocol_Gateway:
     __analyze_protocol_save_load : bool = False
     ''' if enabled, saves registry scan; but if found loads registry from file'''
 
-    __send_holding_register : bool = False
-    ''' send holding register over mqtt '''
-
-    __send_input_register : bool = True
-    ''' send input register over mqtt '''
-
-    __holding_register_prefix : str = ""
-    __input_register_prefix : str = ""
-
     __running : bool = False
     ''' controls main loop'''
 
-    __transports : list[Transport] = []
+    __transports : list[transport_base] = []
+    ''' transport_base is for type hinting. this can be any transport'''
 
-    
-    measurement : str
     config_file : str
 
 
-    protocolSettings : protocol_settings
-
+    #probably move this to the transport
     modbus_delay : float = 0.85
     '''time inbetween requests'''
 
-    modbus_version = ""
+
     reader : transport_base
     reader_settings : dict[str, str]
     
@@ -175,7 +142,6 @@ class Protocol_Gateway:
             self.__log.setLevel(logging.getLevelName(self.__log_level))
         
         self.__analyze_protocol = self.__settings.getboolean('general', 'analyze_protocol', fallback=False)
-        self.__write = self.__settings.getboolean('general', 'write', fallback=False)
         self.__analyze_protocol_save_load = self.__settings.getboolean('general', 'analyze_protocol_save_load', fallback=False)
 
         for section in self.__settings.sections():
@@ -188,7 +154,7 @@ class Protocol_Gateway:
                     raise ValueError('Missing Transport / Protocol Version')
                 
             
-                if protocol_version:
+                if not transport_type and protocol_version: #get transport from protocol settings... 
                     protocolSettings : protocol_settings = protocol_settings(protocol_version)
 
                     if not transport_type and not protocolSettings.transport:
@@ -197,42 +163,25 @@ class Protocol_Gateway:
                     if not transport_type:
                         transport_type = protocolSettings.transport
 
-                transport : Transport = Transport(transport_type, transport_cfg)
+
+                # Import the module
+                module = importlib.import_module('classes.transports.'+transport_type)
+                # Get the class from the module
+                cls = getattr(module, transport_type)
+                transport : transport_base = cls(transport_cfg)
+
+                transport.on_message = self.on_message
                 self.__transports.append(transport)
 
+        #apply links
+        for to_transport in self.__transports:
+            for from_transport in self.__transports:
+                if to_transport.bridge == from_transport.transport_name:
+                    to_transport.init_bridge(from_transport)
+                    from_transport.init_bridge(to_transport)
 
-        ##[TIME]
-        self.__interval = self.__settings.getint('time', 'interval', fallback=1)
-        self.__offline_interval = self.__settings.getint('time', 'offline_interval', fallback=60)
-        self.__error_interval = self.__settings.getint('time', 'error_interval', fallback=60)
-        
-        # inverter / device
-        #this is kinda dumb, overcomplicates things, let's stick to 1 inverter at a time, can always run multiple instances of script
-        #keep this loop for backwards compatability
-        for section in self.__settings.sections():
-            if not section.startswith('inverter') and not section.startswith('device'):
-                continue
-
-            self.name = self.__settings.get(section, 'name', fallback="NO NAME")
-            self.unit = int(self.__settings.get(section, 'unit'))
-            self.protocol_version = str(self.__settings.get(section, 'protocol_version'))
-
-
-            self.measurement = self.__settings.get(section, 'measurement', fallback="")
-            
-            #default for send_holding_register
-            fallback = False
-            if "send_holding_register" in self.protocolSettings.settings:
-                fallback = self.protocolSettings.settings["send_holding_register"]
-
-            self.__send_holding_register = self.__settings.getboolean(section, 'send_holding_register', fallback=fallback)
-
-            #default for send_input_register
-            fallback = True
-            if "send_input_register" in self.protocolSettings.settings:
-                fallback = self.protocolSettings.settings["send_input_register"]
-
-            self.__send_input_register = self.__settings.getboolean(section, 'send_input_register', fallback=fallback)
+        for transport in self.__transports:
+            transport.connect()
 
         atexit.register(self.exit_handler)
 
@@ -242,7 +191,8 @@ class Protocol_Gateway:
         self.__mqtt_client.publish( self.__mqtt_topic + "/availability","offline")
         return
 
-
+    def on_message(self, transport : transport_base, registry_map_entry : registry_map_entry, data : str):
+        ''' message recieved from a transport! '''
     
 
     def run(self):
@@ -257,99 +207,54 @@ class Protocol_Gateway:
             quit()
 
 
-        self.__device_serial_number = self.__settings.get('mqtt_device', 'serial_number', fallback='')
 
-        if not self.__device_serial_number: #if empty, fetch serial
-            self.__device_serial_number = self.read_serial_number()
-                    
-        print("using serial number: " + self.__device_serial_number)
+        if False: #this needs to be implemented in transport init
+            if not self.__device_serial_number: #if empty, fetch serial
+                self.__device_serial_number = self.read_serial_number()
+                        
+            print("using serial number: " + self.__device_serial_number)
 
-        if self.__write:
+        if False:
             self.enable_write()
 
-        if self.__mqtt_discovery_enabled:
-            self.mqtt_discovery()
-
-        error_sleep = 0
         while self.__running:
-            if not self.__mqtt_client.is_connected(): ##mqtt not connected. 
-                if self.__mqtt_reconnecting == 0 or time.time() - self.__mqtt_reconnecting > 15*60:
-                    self.mqtt_reconnect() #on disconnect event might have failed. manually reconnect
-
-                print('MQTT is not connected')
-                time.sleep(self.__mqtt_reconnect_delay)
-                continue
-            
-            self.__mqtt_connected = True
-            
-
-            online = False
-            # If this inverter errored then we wait a bit before trying again
-            if error_sleep > 0:
-                error_sleep -= self.__interval
-                continue
-
             try:
-                info = {}
-
-                if self.__send_input_register:
-                    new_info = self.read_input_registry()
-                    if self.__input_register_prefix:
-                        new_info = {self.__input_register_prefix + key: value for key, value in new_info.items()}
-
-                    info.update(new_info)
-
-                if self.__send_holding_register:
-                    print("read holding registers")
-                    new_info = self.read_holding_registry()
-
-                    if self.__holding_register_prefix:
-                        new_info = {self.__holding_register_prefix + key: value for key, value in new_info.items()}
-
-                    info.update(new_info)
-
-                if info is None:
-                    self.__log.info("Register is None; modbus busy?")
-                    continue
-
-                # Mark that at least one inverter is online so we should continue collecting data
-                online = True
                 now = time.time()
-                points = [{
-                    'time': int(now),
-                    'measurement': self.measurement,
-                    "fields": info
-                }]
-                self.__log.info(points)
+                for transport in self.__transports:
+                    if transport.read_interval > 0 and now - transport.last_read_time  > transport.read_interval:
+                        transport.last_read_time = now
+                        #preform read
+                        if not transport.connected:
+                            transport.connect() #reconnect
+                        else: #transport is connected
+                            
+                            #todo maybe move this to... transport?
+                            #todo reimplement holding registry
+                            info = {}
+                            for registry_type in Registry_Type:
+                                registry = self.read_registers(transport, transport.protocolSettings.get_registry_ranges(registry_type=registry_type), registry_type=registry_type)
+                                new_info = self.process_registery(transport, registry, transport.protocolSettings.get_registry_map(registry_type))
 
-                #have to send this every loop, because mqtt doesnt disconnect when HA restarts. HA bug. 
-                self.__mqtt_client.publish(self.__mqtt_topic + "/availability","online", qos=0,retain=True)
+                                if False:
+                                    new_info = {self.__input_register_prefix + key: value for key, value in new_info.items()}
 
-                if(self.__mqtt_json):
-                    # Serializing json
-                    json_object = json.dumps(points[0], indent=4)
-                    self.__mqtt_client.publish(self.__mqtt_topic, json_object, 0, properties=self.__properties)
-                else:
-                    for key, val in info.items():
-                        self.__mqtt_client.publish(str(self.__mqtt_topic+'/'+key).lower(), str(val))
+                                info.update(new_info) 
 
-                #if it makes it here, mqtt should be connected. 
-                self.__mqtt_reconnect_attempts = 0
-                self.__mqtt_reconnecting = 0
-
+                            if not info:
+                                self.__log.info("Register is Empty; transport busy?")
+                                continue
+                            
+                            if transport.bridge:
+                                for to_transport in self.__transports:
+                                    if to_transport.transport_name == transport.bridge:
+                                        to_transport.write_data(info)
+                                        break
+              
             except Exception as err:
                 traceback.print_exc()
-                self.__log.error(self.name)
                 self.__log.error(err)
-                json_object = '{"name":' + str(self.name)+',error_code:'+str(err)+'}'
-                self.__mqtt_client.publish(self.__mqtt_error_topic, json_object, 0, properties=self.__properties)
-                error_sleep = self.__error_interval
 
-            if online:
-                time.sleep(self.__interval)
-            else:
-                # If all the inverters are not online because no power is being generated then we sleep for 1 min
-                time.sleep(self.__offline_interval)
+            time.sleep(7)
 
 
     def enable_write(self):
@@ -363,15 +268,8 @@ class Protocol_Gateway:
             self.__write = True
             print("enable write - validation passed")
             
-            self.__write_topics = {}
-            #subscribe to write topics
-            for entry in self.protocolSettings.holding_registry_map:
-                if entry.write_mode == WriteMode.WRITE:
-                    #__write_topics
-                    topic : str = self.__mqtt_topic + "/write/" + entry.variable_name.lower().replace(' ', '_')
-                    self.__write_topics[topic] = entry
-                    self.__mqtt_client.subscribe(topic)
-    
+            #write topics moved to mqtt transport
+        
     def validate_protocol(self, registry_type : Registry_Type = Registry_Type.INPUT) -> float:
         """
         validate protocol
@@ -416,11 +314,11 @@ class Protocol_Gateway:
         for name in protocol_names:
             protocols[name] = protocol_settings(name)
 
-            if protocols[name].input_registry_size > max_input_register:
-                max_input_register = protocols[name].input_registry_size
+            if protocols[name].registry_map_size[Registry_Type.INPUT] > max_input_register:
+                max_input_register = protocols[name].registry_map_size[Registry_Type.INPUT]
 
-            if protocols[name].input_registry_size > max_holding_register:
-                max_holding_register = protocols[name].holding_registry_size
+            if protocols[name].registry_map_size[Registry_Type.HOLDING] > max_holding_register:
+                max_holding_register = protocols[name].registry_map_size[Registry_Type.HOLDING]
 
         print("max input register: ", max_input_register)
         print("max holding register: ", max_holding_register)
@@ -513,11 +411,11 @@ class Protocol_Gateway:
             holding_valid_count[name] = 0
 
             #process registry based on protocol
-            input_info = self.process_registery(input_registry, protocol.input_registry_map)
-            holding_info = self.process_registery(input_registry, protocol.holding_registry_map)
+            input_info = self.process_registery(input_registry, protocol.registry_map[Registry_Type.INPUT])
+            holding_info = self.process_registery(input_registry, protocol.registry_map[Registry_Type.HOLDING])
             
 
-            for entry in protocol.input_registry_map:
+            for entry in protocol.registry_map[Registry_Type.INPUT]:
                 if entry.variable_name in input_info:
                     val = input_info[entry.variable_name]
                     score = evaluate_score(entry, val)
@@ -527,7 +425,7 @@ class Protocol_Gateway:
                     input_register_score[name] = input_register_score[name] + score
 
 
-            for entry in protocol.holding_registry_map:
+            for entry in protocol.registry_map[Registry_Type.HOLDING]:
                 if entry.variable_name in holding_info:
                     val = holding_info[entry.variable_name]
                     score = evaluate_score(entry, val)
@@ -587,13 +485,6 @@ class Protocol_Gateway:
             serial_number = sn2
 
         return serial_number
-
-    def print_info(self):
-        """ prints basic information about the current ModBus inverter """
-        self.__log.info('Inverter:')
-        self.__log.info('\tName: %s\n', str(self.name))
-        self.__log.info('\tUnit: %s\n', str(self.unit))
-        self.__log.info('\tModbus Version: %s\n', str(self.modbus_version))
 
     def write_variable(self, entry : registry_map_entry, value : str, registry_type : Registry_Type = Registry_Type.HOLDING):
         """ writes a value to a ModBus register; todo: registry_type to handle other write functions"""
@@ -686,10 +577,13 @@ class Protocol_Gateway:
             return results[entry.variable_name]
             
 
-    def read_registers(self, ranges : list[tuple] = None, start : int = 0, end : int = None, batch_size : int = 45, registry_type : Registry_Type = Registry_Type.INPUT ) -> dict:
+    def read_registers(self, transport : transport_base , ranges : list[tuple] = None, start : int = 0, end : int = None, batch_size : int = 45, registry_type : Registry_Type = Registry_Type.INPUT ) -> dict:
         
 
         if not ranges: #ranges is empty, use min max
+            if start == 0 and end == None:
+                return {} #empty
+            
             end = end + 1
             ranges = []
             start = start - batch_size
@@ -713,7 +607,7 @@ class Protocol_Gateway:
 
             isError = False
             try:
-                register = self.reader.read_registers(range[0], range[1], registry_type=registry_type, unit=self.unit)
+                register = transport.read_registers(range[0], range[1], registry_type=registry_type)
 
             except ModbusIOException as e: 
                 print("ModbusIOException : ", e.error_code)
@@ -752,7 +646,7 @@ class Protocol_Gateway:
 
         return registry
 
-    def process_registery(self, registry : dict, map : list[registry_map_entry]) -> dict[str,str]:
+    def process_registery(self, transport : transport_base, registry : dict, map : list[registry_map_entry]) -> dict[str,str]:
         '''process registry into appropriate datatypes and names'''
         
         concatenate_registry : dict = {}
@@ -799,14 +693,14 @@ class Protocol_Gateway:
                 if item.data_type == Data_Type._8BIT_FLAGS:
                     start_bit = 8
                 
-                if item.documented_name+'_codes' in self.protocolSettings.codes:
+                if item.documented_name+'_codes' in transport.protocolSettings.codes:
                     flags : list[str] = []
                     for i in range(start_bit, 16):  # Iterate over each bit position (0 to 15)
                         # Check if the i-th bit is set
                         if (val >> i) & 1:
                             flag_index = "b"+str(i)
-                            if flag_index in self.protocolSettings.codes[item.documented_name+'_codes']:
-                                flags.append(self.protocolSettings.codes[item.documented_name+'_codes'][flag_index])
+                            if flag_index in transport.protocolSettings.codes[item.documented_name+'_codes']:
+                                flags.append(transport.protocolSettings.codes[item.documented_name+'_codes'][flag_index])
                             
                     value = ",".join(flags)
                 else:
@@ -836,16 +730,17 @@ class Protocol_Gateway:
             if item.unit_mod != float(1):
                 value = value * item.unit_mod
 
-            if  isinstance(value, float) and self.max_precision > -1:
-                value = round(value, self.max_precision)
+            #move this to transport level
+            #if  isinstance(value, float) and self.max_precision > -1:
+            #   value = round(value, self.max_precision)
 
             if (item.data_type != Data_Type._16BIT_FLAGS and
-                item.documented_name+'_codes' in self.protocolSettings.codes):
+                item.documented_name+'_codes' in transport.protocolSettings.codes):
                 try:
                     cleanval = str(int(value))
             
-                    if cleanval in self.protocolSettings.codes[item.documented_name+'_codes']:
-                        value = self.protocolSettings.codes[item.documented_name+'_codes'][cleanval]
+                    if cleanval in transport.protocolSettings.codes[item.documented_name+'_codes']:
+                        value = transport.protocolSettings.codes[item.documented_name+'_codes'][cleanval]
                 except:
                     #do nothing; try is for intval
                     value = value

@@ -147,12 +147,9 @@ class protocol_settings:
     transport : str
     settings_dir : str
     variable_mask : list[str]
-    input_registry_map : list[registry_map_entry]
-    input_registry_size : int = 0
-    input_registry_ranges : list[tuple]
-    holding_registry_map : list[registry_map_entry]
-    holding_registry_size : int = 0
-    holding_registry_ranges : list[tuple]
+    registry_map : dict[Registry_Type, list[registry_map_entry]] = {}
+    registry_map_size : dict[Registry_Type, int] = {}
+    registry_map_ranges : dict[Registry_Type, list[tuple]] = {}
 
     codes : dict[str, str]
     settings : dict[str, str]
@@ -180,34 +177,29 @@ class protocol_settings:
         else:
             self.transport = "modbus_rtu"
 
-        self.load__input_registry_map()
-        self.load__holding_registry_map()
+
+        for registry_type in Registry_Type:
+            self.load_registry_map(registry_type)
 
     def get_registry_map(self, registry_type : Registry_Type) -> list[registry_map_entry]:
-        if registry_type == Registry_Type.INPUT:
-            return self.input_registry_map
-        elif registry_type == Registry_Type.HOLDING:
-            return self.holding_registry_map
-        
-        return None
+        return self.registry_map[registry_type]
     
     def get_registry_ranges(self, registry_type : Registry_Type) -> list[registry_map_entry]:
-        if registry_type == Registry_Type.INPUT:
-            return self.input_registry_ranges
-        elif registry_type == Registry_Type.HOLDING:
-            return self.holding_registry_ranges
-        
-        return None
+        return self.registry_map_ranges[registry_type]
+
 
     def get_holding_registry_entry(self, name : str):
-        return self.get_registry_entry(name, self.holding_registry_map)
+        ''' deprecated '''
+        return self.get_registry_entry(name, registry_type=Registry_Type.HOLDING)
     
     def get_input_registry_entry(self, name : str):
-        return self.get_registry_entry(name, self.input_registry_map)
+        ''' deprecated '''
+        return self.get_registry_entry(name, registry_type=Registry_Type.INPUT)
 
-    def get_registry_entry(self, name : str, map : list[registry_map_entry]) -> registry_map_entry:
+    def get_registry_entry(self, name : str, registry_type : Registry_Type) -> registry_map_entry:
+        
         name = name.strip().lower().replace(' ', '_') #clean name
-        for item in map:
+        for item in self.registry_map[registry_type]:
             if item.documented_name == name:
                 return item
         
@@ -490,42 +482,27 @@ class protocol_settings:
 
         return ranges
 
-
-    def load__input_registry_map(self, file : str = '', settings_dir : str = ''):
+    def load_registry_map(self, registry_type : Registry_Type, file : str = '', settings_dir : str = ''):
         if not settings_dir:
             settings_dir = self.settings_dir
 
         if not file:
-            file = self.protocol + '.input_registry_map.csv'
+            file = self.protocol + '.'+registry_type.name.lower()+'_registry_map.csv'
 
         path = settings_dir + '/' + file
 
-        self.input_registry_map = self.load__registry(path, Registry_Type.INPUT)
+        self.registry_map[registry_type] = self.load__registry(path, registry_type)
 
-        #get max register size
-        for item in self.input_registry_map:
-            if item.register > self.input_registry_size:
-                self.input_registry_size = item.register
-
-        self.input_registry_ranges = self.calculate_registry_ranges(self.input_registry_map, self.input_registry_size)
-
-    def load__holding_registry_map(self, file : str = '', settings_dir : str = ''):
-        if not settings_dir:
-            settings_dir = self.settings_dir
-
-        if not file:
-            file = self.protocol + '.holding_registry_map.csv'
-
-        path = settings_dir + '/' + file
-
-        self.holding_registry_map = self.load__registry(path, Registry_Type.HOLDING)
-
-        #get max register size
-        for item in self.holding_registry_map:
-            if item.register > self.holding_registry_size:
-                self.holding_registry_size = item.register
+        size : int = 0
         
-        self.holding_registry_ranges = self.calculate_registry_ranges(self.holding_registry_map, self.holding_registry_size)
+        #get max register size
+        for item in self.registry_map[registry_type]:
+            if item.register > size:
+                size = item.register
+
+        self.registry_map_size[registry_type] = size
+        self.registry_map_ranges[registry_type] = self.calculate_registry_ranges(self.registry_map[registry_type], self.registry_map_size[registry_type])
+
 
     def validate_registry_entry(self, entry : registry_map_entry, val) -> int:
             #if code, validate first. 
