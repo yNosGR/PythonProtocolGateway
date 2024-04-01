@@ -148,7 +148,8 @@ class Protocol_Gateway:
         for transport in self.__transports:
             self.__log.info("Connecting to "+str(transport.type)+":" +str(transport.transport_name)+"...")
             transport.connect()
-        time.sleep(7)
+
+        time.sleep(0.7)
         #apply links
         for to_transport in self.__transports:
             for from_transport in self.__transports:
