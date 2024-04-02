@@ -31,4 +31,5 @@ class modbus_udp(transport_base):
             return self.client.read_holding_registers(start, count, **kwargs)
 
     def connect(self):
-        self.client.connect()
+        self.connected = self.client.connect()
+        super().connect()

@@ -136,15 +136,6 @@ class Protocol_Gateway:
                     from_transport.init_bridge(to_transport)
 
 
-
-        atexit.register(self.exit_handler)
-
-    def exit_handler(self):
-        '''on exit handler'''
-        print("Exiting")
-        self.__mqtt_client.publish( self.__mqtt_topic + "/availability","offline")
-        return
-
     def on_message(self, transport : transport_base, entry : registry_map_entry, data : str):
         ''' message recieved from a transport! '''
         for to_transport in self.__transports:
@@ -159,18 +150,6 @@ class Protocol_Gateway:
         """
 
         self.__running = True
-
-        if False:
-            self.analyze_protocol()
-            quit()
-
-
-
-        if False: #this needs to be implemented in transport init
-            if not self.__device_serial_number: #if empty, fetch serial
-                self.__device_serial_number = self.read_serial_number()
-                        
-            print("using serial number: " + self.__device_serial_number)
 
         if False:
             self.enable_write()

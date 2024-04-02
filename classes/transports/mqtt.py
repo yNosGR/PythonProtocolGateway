@@ -1,3 +1,4 @@
+import atexit
 import logging
 import random
 import time
@@ -94,6 +95,7 @@ class mqtt(transport_base):
 
         self.write_enabled = True #set default
         super().__init__(settings)
+        
 
     def connect(self):
         print("mqtt connect")
@@ -101,10 +103,16 @@ class mqtt(transport_base):
             self.__first_connection = False
             self.client.connect(str(self.host), int(self.port), 60)
             self.client.loop_start()
+            atexit.register(self.exit_handler)
         else:
             self.mqtt_reconnect() #special reconnect function
 
-
+    def exit_handler(self):
+        '''on exit handler'''
+        print("MQTT Exiting...")
+        self.client.publish( self.base_topic + "/availability","offline")
+        return
+    
     def mqtt_reconnect(self):
         self._log.info("Disconnected from MQTT Broker!")
         if self.__reconnecting != 0: #stop double calls

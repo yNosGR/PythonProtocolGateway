@@ -52,3 +52,4 @@ class modbus_rtu(modbus_base):
 
     def connect(self):
         self.connected = self.client.connect()
+        super().connect()

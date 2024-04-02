@@ -18,6 +18,7 @@ class modbus_base(transport_base):
 
     analyze_protocol_enabled : bool = False
     analyze_protocol_save_load : bool = False
+    first_connect : bool = True
 
     def __init__(self, settings : 'SectionProxy', protocolSettings : 'protocol_settings' = None):
         super().__init__(settings, protocolSettings=protocolSettings)
@@ -25,6 +26,13 @@ class modbus_base(transport_base):
         self.analyze_protocol_enabled = settings.getboolean('analyze_protocol', fallback=self.analyze_protocol)
         self.analyze_protocol_save_load = settings.getboolean('analyze_protocol_save_load', fallback=self.analyze_protocol_save_load)
 
+
+        if self.analyze_protocol_enabled:
+            self.connect()
+            self.analyze_protocol()
+            quit()
+
+    def init_after_connect(self):
         #from transport_base settings
         if self.write_enabled:
             self.enable_write()
@@ -33,11 +41,11 @@ class modbus_base(transport_base):
         if not self.device_serial_number: 
             self.device_serial_number = self.read_serial_number()
 
-        if self.analyze_protocol_enabled:
-            self.connect()
-            self.analyze_protocol()
-            quit()
-
+    def connect(self):
+        if self.connected and self.first_connect:
+            self.first_connect = False
+            self.init_after_connect()
+            
     def read_serial_number(self) -> str:
         serial_number = str(self.read_variable("Serial Number", Registry_Type.HOLDING))
         print("read SN: " +serial_number)

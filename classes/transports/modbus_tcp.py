@@ -28,6 +28,7 @@ class modbus_tcp(transport_base):
             return self.client.read_input_registers(start, count, **kwargs)
         elif registry_type == Registry_Type.HOLDING:
             return self.client.read_holding_registers(start, count, **kwargs)
-
+    
     def connect(self):
-        self.client.connect()
+        self.connected = self.client.connect()
+        super().connect()

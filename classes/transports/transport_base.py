@@ -48,6 +48,8 @@ class transport_base:
         if self.protocolSettings:
             self.protocol_version = self.protocolSettings.protocol
 
+            #todo, reimplement default settings from protocolsettings
+
         if settings:
             self.device_serial_number = settings.get("serial_number", self.device_serial_number)
             self.device_manufacturer = settings.get("manufacturer", self.device_manufacturer)
