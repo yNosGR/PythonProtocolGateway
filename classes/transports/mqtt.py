@@ -145,7 +145,7 @@ class mqtt(transport_base):
 
     __write_topics : dict[str, registry_map_entry] = {}
 
-    def write_data(self, data : dict[str,str]):
+    def write_data(self, data : dict[str, str]):
         if not self.write_enabled:
             return 
         
@@ -159,8 +159,8 @@ class mqtt(transport_base):
             json_object = json.dumps(data, indent=4)
             self.client.publish(self.base_topic, json_object, 0, properties=self.__properties)
         else:
-            for key, val in data.items():
-                self.client.publish(str(self.base_topic+'/'+key).lower(), str(val))
+            for entry, val in data.items():
+                self.client.publish(str(self.base_topic+'/'+entry).lower(), str(val))
 
     def client_on_message(self, client, userdata, msg):
         """ The callback for when a PUBLISH message is received from the server. """
@@ -174,11 +174,10 @@ class mqtt(transport_base):
 
     def init_bridge(self, from_transport : transport_base):
         
-            
         if from_transport.write_enabled:
             self.__write_topics = {}
             #subscribe to write topics
-            for entry in from_transport.protocolSettings.holding_registry_map:
+            for entry in from_transport.protocolSettings.get_registry_map(Registry_Type.HOLDING):
                 if entry.write_mode == WriteMode.WRITE:
                     #__write_topics
                     topic : str = self.base_topic + "/write/" + entry.variable_name.lower().replace(' ', '_')

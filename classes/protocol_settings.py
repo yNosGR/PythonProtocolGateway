@@ -119,6 +119,8 @@ class registry_map_entry:
     registry_type : Registry_Type
     register : int
     register_bit : int
+    register_byte : int 
+    ''' byte offset for canbus ect... '''
     variable_name : str
     documented_name : str
     unit : str
@@ -140,6 +142,20 @@ class registry_map_entry:
 
     write_mode : WriteMode = WriteMode.READ
     ''' enable disable reading/writing '''
+    
+    def __str__(self):
+        return self.variable_name
+
+    def __eq__(self, other):
+        return (    isinstance(other, registry_map_entry) 
+                    and self.register == other.register 
+                    and self.register_bit == other.register_bit
+                    and self.registry_type == other.registry_type
+                    and self.register_byte == other.register_byte)
+
+    def __hash__(self):
+        # Hash based on tuple of object attributes
+        return hash((self.variable_name, self.register_bit, self.register_byte, self.registry_type))
 
 
 class protocol_settings:
@@ -397,6 +413,7 @@ class protocol_settings:
                                                 registry_type = registry_type,
                                                 register= register,
                                                 register_bit=register_bit,
+                                                register_byte= -1,
                                                 variable_name= variable_name,
                                                 documented_name = row['documented name'],
                                                 unit= str(character_part),

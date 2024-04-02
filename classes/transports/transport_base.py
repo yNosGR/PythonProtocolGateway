@@ -54,7 +54,10 @@ class transport_base:
             self.device_name = settings.get("device_name", fallback=self.device_manufacturer+" "+self.device_name)
             self.bridge = settings.get("bridge", self.bridge)
             self.read_interval = settings.getfloat("read_interval", self.read_interval)
-            self.write_enabled = settings.getboolean("write_enabled", self.write_enabled)
+            if "write_enabled" in settings:
+                self.write_enabled = settings.getboolean("write_enabled", self.write_enabled)
+            else:
+                self.write_enabled = settings.getboolean("write", self.write_enabled)
 
     def init_bridge(self, from_transport : 'transport_base'):
         pass
@@ -69,10 +72,11 @@ class transport_base:
     def connect(self, transports : 'transport_base'):
         pass
 
-    def write_data(self, data : dict[str,str]):
+    def write_data(self, data : dict[str, registry_map_entry]):
         ''' general purpose write function for between transports'''
         pass
 
+    #lets convert this to dict[str, registry_map_entry]
     def read_data(self) -> dict[str,str]:
         ''' general purpose read function for between transports; 
         return type may be changed to dict[str, registrsy_map_entry]. still thinking about this'''

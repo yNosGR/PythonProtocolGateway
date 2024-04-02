@@ -81,6 +81,20 @@ class modbus_base(transport_base):
             self.write_enabled = True
             print("enable write - validation passed")
 
+    def write_data(self, data : dict[str, str]) -> None:
+        if not self.write_enabled:
+            return
+
+        registry_map = self.protocolSettings.get_registry_map(Registry_Type.HOLDING)
+
+        for key, value in data.items():
+            for entry in registry_map:
+                if entry.variable_name == key:
+                    self.write_variable(entry, value, Registry_Type.HOLDING)
+                    break
+
+        time.sleep(self.modbus_delay) #sleep inbetween requests so modbus can rest
+
     def read_data(self) -> dict[str, str]:
         info = {}
         for registry_type in Registry_Type:
@@ -99,6 +113,7 @@ class modbus_base(transport_base):
 
     def validate_protocol(self, protocolSettings : 'protocol_settings') -> float:
         score_percent = self.validate_registry(Registry_Type.HOLDING)
+        return score_percent
 
     
     def validate_registry(self, registry_type : Registry_Type = Registry_Type.INPUT) -> float:
@@ -278,13 +293,13 @@ class modbus_base(transport_base):
         """ writes a value to a ModBus register; todo: registry_type to handle other write functions"""
 
         #read current value
-        current_registers = self.read_registers(start=entry.register, end=entry.register, registry_type=registry_type)
+        current_registers = self.read_modbus_registers(start=entry.register, end=entry.register, registry_type=registry_type)
         results = self.process_registery(current_registers, self.protocolSettings.get_registry_map(registry_type))
         current_value = current_registers[entry.register]
 
       
         if not self.protocolSettings.validate_registry_entry(entry, current_value):
-            raise ValueError("Invalid value in register. unsafe to write")
+            raise ValueError("Invalid value in register. unsafe to write") #i need to figure out a better error handler for theese. 
         
         if not self.protocolSettings.validate_registry_entry(entry, value):
             raise ValueError("Invalid new value. unsafe to write")

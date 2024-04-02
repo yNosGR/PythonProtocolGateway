@@ -167,9 +167,13 @@ class Protocol_Gateway:
         self.__mqtt_client.publish( self.__mqtt_topic + "/availability","offline")
         return
 
-    def on_message(self, transport : transport_base, registry_map_entry : registry_map_entry, data : str):
+    def on_message(self, transport : transport_base, entry : registry_map_entry, data : str):
         ''' message recieved from a transport! '''
-    
+        for to_transport in self.__transports:
+            if to_transport.transport_name != transport.transport_name:
+                if to_transport.transport_name == transport.bridge or transport.transport_name == to_transport.bridge:
+                    to_transport.write_data({entry.variable_name : data})
+                    break
 
     def run(self):
         """
