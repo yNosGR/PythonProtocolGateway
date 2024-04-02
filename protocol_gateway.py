@@ -21,23 +21,14 @@ if sys.version_info < (3, 9):
 import argparse
 
 import atexit
-import glob
-import random
-import re
-
 import os
-import json
 import logging
 import sys
 import traceback
 from configparser import RawConfigParser, ConfigParser
-import paho.mqtt.client as mqtt
-
 
 from classes.protocol_settings import protocol_settings,Data_Type,registry_map_entry,Registry_Type,WriteMode
 from classes.transports.transport_base import transport_base
-
-
 
 
 __logo = """
@@ -63,21 +54,9 @@ class Protocol_Gateway:
     """
     Main class, implementing the Growatt / Inverters to MQTT functionality
     """
-    # Global variables, defined private, all variables will be configured via cfg file
-    # settings --> from config file
-    __settings = None
-    # interval in seconds for pulling modbus data [s]
-    __interval = None
-    # in case inverter is offline the script will sleep that defined time [s]
-    __offline_interval = None
-    # error interval in [s]
-    __error_interval = None
-
     __log = None
     # log level, available log levels are CRITICAL, FATAL, ERROR, WARNING, INFO, DEBUG
     __log_level = 'DEBUG'
-
-    __device_serial_number = "hotnoob"
 
     __running : bool = False
     ''' controls main loop'''
@@ -111,9 +90,8 @@ class Protocol_Gateway:
         self.__settings.read(self.config_file)
 
         ##[general]
-        self.__log_level = self.__settings.get('general','log_level', fallback='DEBUG')
-        if (self.__log_level != 'DEBUG'):
-            self.__log.setLevel(logging.getLevelName(self.__log_level))
+        self.__log_level = self.__settings.get('general','log_level', fallback='INFO')
+        self.__log.setLevel(logging.getLevelName(self.__log_level))
 
         for section in self.__settings.sections():
             if section.startswith('transport'):
