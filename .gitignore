@@ -7,6 +7,7 @@ virtualenv/*
 growatt2mqtt.cfg
 growatt2mqtt.service
 config.cfg
+*.cfg
 invertermodbustomqtt.service
 log.txt
 variable_mask.txt

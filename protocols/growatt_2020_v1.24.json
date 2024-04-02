@@ -1,5 +1,5 @@
 {
-    "reader" : "modbus_rtu",
+    "transport" : "modbus_rtu",
     "empty_codes" : 
     {
         "0" : "TODO"

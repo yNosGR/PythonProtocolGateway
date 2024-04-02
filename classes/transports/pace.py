@@ -1,7 +1,7 @@
 import time
 import struct
 import logging
-from protocol_settings import Registry_Type
+from classes.protocol_settings import Registry_Type
 from pymodbus.client.sync import ModbusSerialClient, BaseModbusClient
 from pymodbus.transaction import ModbusRtuFramer 
 

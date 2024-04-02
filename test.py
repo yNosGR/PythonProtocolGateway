@@ -1,28 +1,25 @@
-import glob
-from protocol_settings import protocol_settings
+class Base:
+    top_class_name = None
 
-settings_dir = 'protocols'
+    def __init__(self):
+        self.top_class_name = self.__class__.__name__        
+        print("Subclass top class name:", self.top_class_name)
 
-protocol_names : list[str] = []
-protcols : dict[str,protocol_settings] = {}
+        
 
-for file in glob.glob(settings_dir + "/*.json"):
-    file = file.lower().replace(settings_dir, '').replace('/', '').replace('\\', '').replace('\\', '').replace('.json', '')
-    print(file)
-    protocol_names.append(file)
+# Example usage
+class Subclass(Base):
+    def __init__(self):
+        super().__init__()  # Call the __init__ method of the base class
+        print("Subclass top class name:", self.top_class_name)
+
+# Example usage
+class Subclass2(Base):
+    def __init__(self):
+        super().__init__()  # Call the __init__ method of the base class
+        print("Subclass top class name:", self.top_class_name)
 
 
-max_input_register : int = 0
-max_holding_register : int = 0
-
-for name in protocol_names:
-    protcols[name] = protocol_settings(name)
-
-    if protcols[name].input_registry_size > max_input_register:
-        max_input_register = protcols[name].input_registry_size
-
-    if protcols[name].input_registry_size > max_holding_register:
-        max_holding_register = protcols[name].holding_registry_size
-
-print("max input register: ", max_input_register)
-print("max holding register: ", max_holding_register)
+# Create an instance of SubSubclass
+sub_sub_instance = Subclass()
+sub_sub_instance = Subclass2()

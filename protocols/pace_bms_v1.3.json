@@ -1,8 +1,8 @@
 {
-    "reader" : "modbus_rtu",
+    "transport" : "modbus_rtu",
     "send_holding_register" :  true,
     "send_input_register" : false,
-    "batch_size": 7,
+    "batch_size": 21,
     "warning_flag_codes": 
     {
         "b0" : "battery cell overvoltage alarm",
