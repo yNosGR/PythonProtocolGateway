@@ -1,23 +1,23 @@
-Originally from andiburger/growatt2mqtt, heavily modified to easily work with new and multiple protocols, configurable protocols, and added propper mqtt discovery / functionality to work with home assistant
+For advanced configuration help, please checkout the wiki :)
 
-### Rebranding Again, 
-if you installed this when it was called growatt2mqtt-hotnoob, you'll need to reinstall if you want to update. 
+### Rebranding Again... last time.
+if you installed this when it was called growatt2mqtt-hotnoob or InverterModBusToMQTT, you'll need to reinstall if you want to update. 
 
-# InverterModBusToMQTT
+# Python Protocol Gateway
 
-InverterModBusToMQTT is a small python-based service which connects via usb to the Modbus Over Serial interface of your solar inverters and published the collected data on MQTT.
-The python service can be configured via a small config file.
-
-# Python Protocol Gateway - Rebranding
-Rebranding Coming in v1.0.9
-
-Python Protocol Gateway reads data via Modbus RTU or other protocols and translates the data for MQTT. 
+Python Protocol Gateway is a python-based service that reads data via Modbus RTU or other protocols and translates the data for MQTT. 
+Configuration is handled via a small config files. 
 In the long run, Python Protocol Gateway will become a general purpose protocol gateway to translate between more than just modbus and mqtt. 
-Growatt, EG4, Sigineer, SOK, PACE-BMS
 
-# Installation
-Connect the USB-B port on the inverter into your computer / device
+For specific device installation instructions please checkout the wiki:
+Growatt, EG4, Sigineer, SOK, PACE-BMS
+https://github.com/HotNoob/PythonProtocolGateway/wiki
+
+# General Installation
+Connect the USB port on the inverter into your computer / device. This port is essentially modbus usb adapter.
 When connected, the device will show up as a serial port. 
+ 
+Alternatively, connect a usb adapter to your rs485 / can port with appropriate wiring. 
 
 ### install requirements
 ```
@@ -25,7 +25,9 @@ apt install pip python3 -y
 pip install -r requirements.txt
 ```
 
-### Config file (config.cfg) - rename .example.cfg to .cfg
+python 3.9 or greater. python 3.10+ for best compatability. 
+
+### Config file (config.cfg) - copy .example.cfg to .cfg
 Edit configuration.
 ```
 cp config.example.cfg  config.cfg
@@ -43,50 +45,29 @@ eg4_v58 = eg4 inverters ( EG4-6000XP ) - implemented but untested
 hdhk_16ch_ac_module = some chinese current monitoring device :P
 ```
 
-### protocol analyzer - work in progress
-this is a new feature, currently in the making.
-update the configuration:
-```
-[inverter]
-analyze_protocol = true
-```
-
-when this mode runs, it will read the registers of your inverter and attempt to determine which protocol best fits. 
-the higher the value, the more likely that the protocol matches. 
-
-```
-=== growatt_2020_v1.24 - 710 ===
-input register : 405 of 695
-holding register : 305 of 561
-=== sigineer_v0.11 - 62 ===
-input register : 31 of 150
-holding register : 31 of 63
-=== v0.14 - 60 ===
-input register : 19 of 63
-holding register : 41 of 101
-```
-
-the results above suggests that "growatt_2020_v1.24" is the most likely protocol for the inverter.
+more details on these protocols can be found in the wiki
 
 ### run as script
-```python3 -u invertermodbustomqtt.py```
+```python3 -u protocol_gateway.py```
 
 
 ### install as service
+ppg can be used as a shorter service name ;)
+
 ```
-cp invertermodbustomqtt.example.service  /etc/systemd/system/invertermodbustomqtt.service
-nano /etc/systemd/system/invertermodbustomqtt.service
+cp protocol_gateway.example.service  /etc/systemd/system/protocol_gateway.service
+nano /etc/systemd/system/protocol_gateway.service
 ```
 edit working directory in service file to wherever you put the files
 ```
-nano /etc/systemd/system/invertermodbustomqtt.service
+nano /etc/systemd/system/protocol_gateway.service
 ```
 reload daemon, enable and start service
 ```
 sudo systemctl daemon-reload
-sudo systemctl enable invertermodbustomqtt.service
-sudo systemctl start invertermodbustomqtt.service
-systemctl status invertermodbustomqtt.service
+sudo systemctl enable protocol_gateway.service
+sudo systemctl start protocol_gateway.service
+systemctl status protocol_gateway.service
 ```
 
 ### install mqtt on home assistant
@@ -105,15 +86,14 @@ once installed; the device should show up on home assistant under mqtt
 more docs on setting up mqtt here: https://www.home-assistant.io/integrations/mqtt
 i probably might have missed something. ha is new to me.
 
-### update procedure
+### general update procedure
 update files and restart script / service
 ```
 git pull
-systemctl restart invertermodbustomqtt.service
+systemctl restart protocol_gateway.service
 ```
 
-**if you installed this when it was called growatt2mqtt-hotnoob, you'll need to reinstall if you want to update. **
-
+**if you installed this when it was called growatt2mqtt-hotnoob or invertermodbustomqtt, you'll need to reinstall if you want to update. **
 
 ### Unknown Status MQTT Home Assistant 
 If all values appear as "Unknown"
@@ -144,5 +124,5 @@ donations would be appreciated.
 ```(btc) bc1qh394vazcguedkw2rlklnuhapdq7qgpnnz9c3t0```
 
 ### Use Docker - untested
-- ```docker build -t invertermodbustomqtt ```
-- ```docker run --device=/dev/ttyUSB0 invertermodbustomqtt```
+- ```docker build -t protocol_gateway ```
+- ```docker run --device=/dev/ttyUSB0 protocol_gateway```
