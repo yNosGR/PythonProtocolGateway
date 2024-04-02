@@ -51,7 +51,7 @@ class transport_base:
         if settings:
             self.device_serial_number = settings.get("serial_number", self.device_serial_number)
             self.device_manufacturer = settings.get("manufacturer", self.device_manufacturer)
-            self.device_name = settings.get("name", fallback=self.device_manufacturer+" "+self.device_name)
+            self.device_name = settings.get("device_name", fallback=self.device_manufacturer+" "+self.device_name)
             self.bridge = settings.get("bridge", self.bridge)
             self.read_interval = settings.getfloat("read_interval", self.read_interval)
             self.write_enabled = settings.getboolean("write_enabled", self.write_enabled)
