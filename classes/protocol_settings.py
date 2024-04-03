@@ -199,7 +199,7 @@ class protocol_settings:
         for registry_type in Registry_Type:
             self.load_registry_map(registry_type)
 
-    def get_registry_map(self, registry_type : Registry_Type) -> list[registry_map_entry]:
+    def get_registry_map(self, registry_type : Registry_Type = Registry_Type.ZERO) -> list[registry_map_entry]:
         return self.registry_map[registry_type]
     
     def get_registry_ranges(self, registry_type : Registry_Type) -> list[registry_map_entry]:
@@ -394,6 +394,9 @@ class protocol_settings:
                 else:
                     range_match = range_regex.search(row['register'])
                     if not range_match:
+                        if row['register'][0] == 'x':
+                            register = int.from_bytes(bytes.fromhex(row['register'][1:]), byteorder='big')
+                            
                         register = int(row['register'])
                     else:
                         reverse = range_match.group('reverse')
