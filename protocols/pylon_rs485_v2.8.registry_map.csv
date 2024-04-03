@@ -1,0 +1,2 @@
+variable name,data type,register,documented name,description,writable,values,unit,note
+,,0,version,protocol version,,0~255,,
