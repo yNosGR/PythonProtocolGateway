@@ -19,7 +19,7 @@ class serial_frame_client():
     port : str = '/dev/ttyUSB0'
     baud :  int = 9600
 
-    timeout : float = 30
+    timeout : float = 5
     ''' timeout in seconds '''
 
     #region asyncronous
@@ -43,6 +43,7 @@ class serial_frame_client():
         self.port = port
         self.baud = baud
         self.client = serial.Serial(port, baud)
+        # bytesize=8, parity=serial.PARITY_NONE, stopbits=1, exclusive=True
 
     def connect(self):
         if self.asynchronous:
