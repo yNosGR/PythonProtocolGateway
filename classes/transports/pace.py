@@ -306,8 +306,8 @@ class pace:
         if "port" in settings:
             self.port = settings["port"]
 
-        if "buadrate" in settings:
-            self.baudrate = settings["buadrate"]
+        if "baudrate" in settings:
+            self.baudrate = settings["baudrate"]
 
         self.client = CustomModbusSerialClient(method='binary', port=self.port, 
                                 baudrate=int(self.baudrate), 

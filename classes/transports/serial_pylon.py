@@ -29,7 +29,7 @@ class return_codes(Enum):
     @classmethod
     def fromByte(cls, value : bytes):
         try:
-            return cls(value)  # Attempt to access the Enum member
+            return cls(int(value, 16))  # Attempt to access the Enum member
         except ValueError:
             return return_codes.UNKNOWN_ERROR
 
@@ -62,7 +62,7 @@ class serial_pylon(transport_base):
         if not self.port:
             raise ValueError("Port is not set")
 
-        self.baudrate = settings.getint("buadrate", 9600)
+        self.baudrate = settings.getint("baudrate", 9600)
 
         address : int = settings.getint("address", 0)
         self.addresses = [address]
@@ -103,28 +103,35 @@ class serial_pylon(transport_base):
             #entry.concatenate this protocol probably doesnt require concatenate, since info is variable length.
             command = entry.register #CID1 and CID2 combined creates a single ushort
             self.send_command(command)  
-            return self.decode_frame(self.client.read())
+            frame = self.client.read()
+            if frame:
+                return self.decode_frame(frame)
 
         return None
-    
-    def checksum(self, frame: bytes):
-        assert isinstance(frame, bytes)
 
-        sum = 0
-        for byte in frame:
-            sum += byte
-        sum = ~sum
-        sum %= 0x10000
-        sum += 1
-        return sum
+    def calculate_checksum(self, data):
+        # Calculate the sum of all characters in ASCII value
+        ascii_sum = sum(data)
 
+        # Take modulus 65536
+        remainder = ascii_sum % 65536
+
+        # Bitwise invert the remainder and add 1
+        checksum = ~remainder & 0xFFFF
+        checksum += 1
+
+        return checksum
 
     def decode_frame(self, raw_frame: bytes) -> bytes:
-        frame_data = raw_frame[0:len(raw_frame) - 5]
-        frame_chksum = raw_frame[len(raw_frame) - 5:-1]
+        b4 = raw_frame
+        raw_frame = bytes(raw_frame)
 
-        got_frame_checksum = self.checksum(frame_data)
-        assert got_frame_checksum == int(frame_chksum, 16)
+        frame_data = raw_frame[0:len(raw_frame) - 5]
+        frame_chksum = raw_frame[-5:-1]
+
+        calc_checksum = self.calculate_checksum(frame_data)
+        if calc_checksum != int(frame_chksum, 16):
+            self._log.warning(f"Serial Pylon checksum error, got {calc_checksum}, expected {frame_chksum}")
 
         data = Object()
         data.ver = frame_data[0:2]
@@ -161,8 +168,9 @@ class serial_pylon(transport_base):
 
         frame : bytes = self.VER + self.ADR +struct.pack('<H', command) + self.LENGTH + info
 
-        frame_chksum = self.checksum(frame)
+        frame_chksum = self.calculate_checksum(frame)
         frame = frame + struct.pack('<H', frame_chksum) 
+        return frame
         
         
     def send_command(self, cmd, info: bytes = b''):

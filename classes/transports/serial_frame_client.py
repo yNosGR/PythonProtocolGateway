@@ -12,7 +12,7 @@ class serial_frame_client():
     '''start of information'''
     eoi : bytes
     '''end of information'''
-    pending_frames : list[bytes]
+    pending_frames : list[bytes] = []
 
     max_frame_size : int = 256
 
@@ -38,6 +38,8 @@ class serial_frame_client():
 
 
     def __init__(self, port : str , baud : int , soi : bytes, eoi : bytes) -> None:
+        self.soi = soi
+        self.eoi = eoi
         self.port = port
         self.baud = baud
         self.client = serial.Serial(port, baud)
@@ -54,7 +56,7 @@ class serial_frame_client():
     def write(self, data : bytes):
         ''' write data, excluding SOI and EOI bytes'''
         data = self.soi + data + self.eoi
-        self.client.write()
+        self.client.write(data)
 
     def read(self, reset_buffer = True, frames = 1) -> list[bytes] | bytes:
         ''' returns list of frames, if frames > 1 '''
@@ -67,6 +69,7 @@ class serial_frame_client():
             self.client.reset_input_buffer()
         
         timedout = time.time() + self.timeout
+        self.client.timeout = self.timeout
         frameCount = 0
 
         while time.time() < timedout:

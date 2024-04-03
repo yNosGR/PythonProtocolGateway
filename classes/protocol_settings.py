@@ -396,8 +396,8 @@ class protocol_settings:
                     if not range_match:
                         if row['register'][0] == 'x':
                             register = int.from_bytes(bytes.fromhex(row['register'][1:]), byteorder='big')
-                            
-                        register = int(row['register'])
+                        else:   
+                            register = int(row['register'])
                     else:
                         reverse = range_match.group('reverse')
                         start = int(range_match.group('start'))
