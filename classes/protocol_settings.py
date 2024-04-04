@@ -1,6 +1,7 @@
 import csv
 from dataclasses import dataclass
 from enum import Enum
+from defs.common import strtoint
 import itertools
 import json
 import re
@@ -250,13 +251,13 @@ class protocol_settings:
 
     def load__registry(self, path, registry_type : Registry_Type = Registry_Type.INPUT) -> list[registry_map_entry]: 
         registry_map : list[registry_map_entry] = []
-        register_regex = re.compile(r'(?P<register>\d+)\.b(?P<bit>\d{1,2})')
+        register_regex = re.compile(r'(?P<register>x?\d+)\.(b(?P<bit>x?\d{1,2})|(?P<byte>x?\d{1,2}))')
 
         data_type_regex = re.compile(r'(?P<datatype>\w+)\.(?P<length>\d+)')
 
-        range_regex = re.compile(r'(?P<reverse>r|)(?P<start>\d+)[\-~](?P<end>\d+)')
+        range_regex = re.compile(r'(?P<reverse>r|)(?P<start>x?\d+)[\-~](?P<end>x?\d+)')
         ascii_value_regex = re.compile(r'(?P<regex>^\[.+\]$)')
-        list_regex = re.compile(r'\s*(?:(?P<range_start>\d+)-(?P<range_end>\d+)|(?P<element>[^,\s][^,]*?))\s*(?:,|$)')
+        list_regex = re.compile(r'\s*(?:(?P<range_start>x?\d+)-(?P<range_end>x?\d+)|(?P<element>[^,\s][^,]*?))\s*(?:,|$)')
 
 
         if not os.path.exists(path): #return empty is file doesnt exist.
@@ -371,8 +372,8 @@ class protocol_settings:
                         for match in matches:
                             groups = match.groupdict()
                             if groups['range_start'] and groups['range_end']:
-                                start = int(groups['range_start'])
-                                end = int(groups['range_end'])
+                                start = strtoint(groups['range_start'])
+                                end = strtoint(groups['range_end'])
                                 values.extend(range(start, end + 1))
                             else:
                                 values.append(groups['element'])
@@ -401,20 +402,29 @@ class protocol_settings:
                 register_bit : int = 0
                 match = register_regex.search(row['register'])
                 if match:
-                    register = int(match.group('register'))
-                    register_bit = int(match.group('bit'))
+                    register = strtoint(match.group('register'))
+
+                    register_bit = match.group('bit')
+                    if register_bit:
+                        register_bit = strtoint(register_bit)
+                    else:
+                        register_bit = 0
+
+                    register_byte = match.group('byte')
+                    if register_byte:
+                        register_byte = strtoint(register_byte)
+                    else:
+                        register_byte = 0
+
                     #print("register: " + str(register) + " bit : " + str(register_bit))
                 else:
                     range_match = range_regex.search(row['register'])
                     if not range_match:
-                        if row['register'][0] == 'x':
-                            register = int.from_bytes(bytes.fromhex(row['register'][1:]), byteorder='big')
-                        else:   
-                            register = int(row['register'])
+                        register = strtoint(row['register'])
                     else:
                         reverse = range_match.group('reverse')
-                        start = int(range_match.group('start'))
-                        end = int(range_match.group('end'))
+                        start = strtoint(range_match.group('start'))
+                        end = strtoint(range_match.group('end'))
                         register = start
                         if end > start:
                             concatenate = True
@@ -431,7 +441,7 @@ class protocol_settings:
                     r = range(1)
 
                 read_command = None
-                if "read command" in row:
+                if "read command" in row and row['read command']:
                     if row['read command'][0] == 'x':
                         read_command = bytes.fromhex(row['read command'][1:])
                     else:
@@ -452,7 +462,7 @@ class protocol_settings:
                                                 unit= str(character_part),
                                                 unit_mod= numeric_part,
                                                 data_type= data_type,
-                                                data_type_len = data_type_len,
+                                                data_type_size = data_type_len,
                                                 concatenate = concatenate,
                                                 concatenate_registers = concatenate_registers,
                                                 values=values,

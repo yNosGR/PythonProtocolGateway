@@ -87,12 +87,16 @@ class serial_pylon(transport_base):
         if self.VER == b'\x00':
             #get VER for communicating
             #SOI VER ADR 46H 4FH LENGT INFO CHKSUM EOI
-            version = self.read_variable('version')
+            version = self.read_variable('version', attribute='ver')
             if version:
+                print("pylon protocol version is "+str(version))
                 self.VER = version
+
+                name = self.read_variable('battery_name')
+                print(name)
             pass
 
-    def read_variable(self, variable_name : str, entry : 'registry_map_entry' = None):
+    def read_variable(self, variable_name : str, entry : 'registry_map_entry' = None, attribute : str = 'info'):
         ##clean for convinecne  
         if variable_name:
             variable_name = variable_name.strip().lower().replace(' ', '_')
@@ -111,8 +115,8 @@ class serial_pylon(transport_base):
             command = entry.register #CID1 and CID2 combined creates a single ushort
             self.send_command(command)  
             frame = self.client.read()
-            if frame:
-                return self.decode_frame(frame)
+            if frame: #decode info to ascii: bytes.fromhex(name.decode("utf-8")).decode("ascii")
+                return getattr(self.decode_frame(frame), attribute)
 
         return None
 
@@ -133,12 +137,12 @@ class serial_pylon(transport_base):
         b4 = raw_frame
         raw_frame = bytes(raw_frame)
 
-        frame_data = raw_frame[0:len(raw_frame) - 5]
-        frame_chksum = raw_frame[-5:-1]
+        frame_data = raw_frame[0:-4]
+        frame_checksum = raw_frame[-4:]
 
-        calc_checksum = self.calculate_checksum(frame_data)
-        if calc_checksum != int(frame_chksum, 16):
-            self._log.warning(f"Serial Pylon checksum error, got {calc_checksum}, expected {frame_chksum}")
+        calc_checksum = struct.pack('>H', self.calculate_checksum(raw_frame[0:-4])).hex().upper().encode()
+        if calc_checksum != frame_checksum:
+            self._log.warning(f"Serial Pylon checksum error, got {calc_checksum}, expected {frame_checksum}")
 
         data = Object()
         data.ver = frame_data[0:2]
@@ -155,7 +159,7 @@ class serial_pylon(transport_base):
             self._log.warning(f"Serial Pylon Error code {returnCode}")
 
         #todo, process info
-        return data.info
+        return data
 
     
     def build_frame(self, command : int, info: bytes = b''):
@@ -171,17 +175,23 @@ class serial_pylon(transport_base):
 
             info_length = (lenid_invert_plus_one << 12) + lenid
 
-        self.LENGTH = struct.pack('<H', info_length)
-
-        frame : bytes = self.VER + self.ADR +struct.pack('<H', command) + self.LENGTH + info
+            
+        self.VER = b'\x20'
 
         #protocol is in ASCII hex. :facepalm:
-        frame = ''.join(['{:02X}'.format(byte) for byte in frame])
+        frame : str = self.VER.hex().upper()
+        frame = frame + self.ADR.hex().upper()
+        frame = frame + struct.pack('>H', command).hex().upper()
+        frame = frame + struct.pack('>H', info_length).hex().upper()
+        frame = frame + info.hex().upper()
+
+        frame = frame.encode()
 
         frame_chksum = self.calculate_checksum(frame)
-        frame = frame + '{:04X}'.format(struct.pack('<H', frame_chksum))
+        frame = frame + struct.pack('>H', frame_chksum).hex().upper().encode()
 
-       
+        #test frame
+        #self.decode_frame(frame)
 
         return frame
         
