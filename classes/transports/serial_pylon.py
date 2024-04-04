@@ -46,7 +46,7 @@ class serial_pylon(transport_base):
 
     #this format is pretty common; i need a name for it.
     SOI : bytes = b'\x7e' # aka b"~"
-    VER : bytes = b'\x00' # aka b"\r"
+    VER : bytes = b'\x00' 
     ''' version has to be fetched first '''
     ADR : bytes
     CID1 : bytes
@@ -55,7 +55,7 @@ class serial_pylon(transport_base):
     ''' 2 bytes - include LENID & LCHKSUM'''
     INFO : bytes
     CHKSUM : bytes
-    EOI : bytes = b'\x0d'
+    EOI : bytes = b'\x0d' # aka b"\r"
 
     def __init__(self, settings : 'SectionProxy', protocolSettings : 'protocol_settings' = None):
         super().__init__(settings, protocolSettings=protocolSettings)
@@ -175,8 +175,14 @@ class serial_pylon(transport_base):
 
         frame : bytes = self.VER + self.ADR +struct.pack('<H', command) + self.LENGTH + info
 
+        #protocol is in ASCII hex. :facepalm:
+        frame = ''.join(['{:02X}'.format(byte) for byte in frame])
+
         frame_chksum = self.calculate_checksum(frame)
-        frame = frame + struct.pack('<H', frame_chksum) 
+        frame = frame + '{:04X}'.format(struct.pack('<H', frame_chksum))
+
+       
+
         return frame
         
         

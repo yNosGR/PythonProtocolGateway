@@ -143,6 +143,9 @@ class registry_map_entry:
     data_type : Data_Type = Data_Type.USHORT
     data_type_size : int = -1
     ''' for non-fixed size types like ASCII'''
+
+    read_command : bytes = None
+    ''' for transports/protocols that require sending a command ontop of "register" '''
  
     write_mode : WriteMode = WriteMode.READ
     ''' enable disable reading/writing '''
@@ -427,6 +430,13 @@ class protocol_settings:
                 else:
                     r = range(1)
 
+                read_command = None
+                if "read command" in row:
+                    if row['read command'][0] == 'x':
+                        read_command = bytes.fromhex(row['read command'][1:])
+                    else:
+                        read_command = row['read command'].encode('utf-8')
+
                 writeMode : WriteMode = WriteMode.READ
                 if "writable" in row:
                     writeMode = WriteMode.fromString(row['writable'])
@@ -449,6 +459,7 @@ class protocol_settings:
                                                 value_min=value_min,
                                                 value_max=value_max,
                                                 value_regex=value_regex,
+                                                read_command = read_command,
                                                 write_mode=writeMode
                                             )
                     registry_map.append(item)
