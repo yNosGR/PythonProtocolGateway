@@ -141,7 +141,9 @@ class registry_map_entry:
 
     ''' if value needs to be concatenated with other registers'''
     data_type : Data_Type = Data_Type.USHORT
-
+    data_type_size : int = -1
+    ''' for non-fixed size types like ASCII'''
+ 
     write_mode : WriteMode = WriteMode.READ
     ''' enable disable reading/writing '''
     
@@ -247,6 +249,8 @@ class protocol_settings:
         registry_map : list[registry_map_entry] = []
         register_regex = re.compile(r'(?P<register>\d+)\.b(?P<bit>\d{1,2})')
 
+        data_type_regex = re.compile(r'(?P<datatype>\w+)\.(?P<length>\d+)')
+
         range_regex = re.compile(r'(?P<reverse>r|)(?P<start>\d+)[\-~](?P<end>\d+)')
         ascii_value_regex = re.compile(r'(?P<regex>^\[.+\]$)')
         list_regex = re.compile(r'\s*(?:(?P<range_start>\d+)-(?P<range_end>\d+)|(?P<element>[^,\s][^,]*?))\s*(?:,|$)')
@@ -326,9 +330,15 @@ class protocol_settings:
                     row['values'] = ""
                     print("WARNING No Value Column : path: " + str(path)) 
 
+                data_type_len : int = -1
                 #optional row, only needed for non-default data types
                 if 'data type' in row and row['data type']:
-                    data_type = Data_Type.fromString(row['data type'])
+                    matches = data_type_regex.search(row['data type'])
+                    if matches:
+                        data_type_len = int(matches.group('length'))
+                        data_type = Data_Type.fromString(matches.group('datatype'))
+                    else:
+                        data_type = Data_Type.fromString(row['data type'])
 
 
                 #get value range for protocol analyzer
@@ -432,6 +442,7 @@ class protocol_settings:
                                                 unit= str(character_part),
                                                 unit_mod= numeric_part,
                                                 data_type= data_type,
+                                                data_type_len = data_type_len,
                                                 concatenate = concatenate,
                                                 concatenate_registers = concatenate_registers,
                                                 values=values,

@@ -1,6 +1,8 @@
 from enum import Enum
 import struct
 
+import serial
+
 from ..Object import Object
 
 from .serial_frame_client import serial_frame_client
@@ -70,7 +72,12 @@ class serial_pylon(transport_base):
         self.ADR = struct.pack('B', address)
         #todo, multi address support later
 
-        self.client = serial_frame_client(self.port, self.baudrate, self.SOI, self.EOI)
+        self.client = serial_frame_client(self.port, 
+                                          self.baudrate, 
+                                          self.SOI, 
+                                          self.EOI, 
+                                          bytesize=8, parity=serial.PARITY_NONE, stopbits=1, exclusive=True)
+
 
         pass
 

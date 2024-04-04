@@ -37,13 +37,12 @@ class serial_frame_client():
     #endregion asyncronous
 
 
-    def __init__(self, port : str , baud : int , soi : bytes, eoi : bytes) -> None:
+    def __init__(self, port : str , baud : int , soi : bytes, eoi : bytes, **kwrgs) -> None:
         self.soi = soi
         self.eoi = eoi
         self.port = port
         self.baud = baud
-        self.client = serial.Serial(port, baud)
-        # bytesize=8, parity=serial.PARITY_NONE, stopbits=1, exclusive=True
+        self.client = serial.Serial(port, baud, **kwrgs)
 
     def connect(self):
         if self.asynchronous:
