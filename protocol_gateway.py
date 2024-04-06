@@ -25,7 +25,7 @@ import os
 import logging
 import sys
 import traceback
-from configparser import RawConfigParser, ConfigParser
+from configparser import ConfigParser
 
 from classes.protocol_settings import protocol_settings,Data_Type,registry_map_entry,Registry_Type,WriteMode
 from classes.transports.transport_base import transport_base
@@ -49,6 +49,11 @@ __logo = """
                                                                                                                                      
 """
 
+
+class CustomConfigParser(ConfigParser):
+    def get(self, section, option, *args, **kwargs):
+        value = super().get(section, option, *args, **kwargs)
+        return value.strip() if value is not None else value
 
 class Protocol_Gateway:
     """
@@ -86,7 +91,7 @@ class Protocol_Gateway:
 
         self.__log.info("Loading...")
 
-        self.__settings = ConfigParser()
+        self.__settings = CustomConfigParser()
         self.__settings.read(self.config_file)
 
         ##[general]
