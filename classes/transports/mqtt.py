@@ -50,8 +50,8 @@ class mqtt(transport_base):
             raise ValueError("Host is not set")
         
         self.port = settings.getint('port', fallback=self.port)
-        self.base_topic = settings.get('base_topic', fallback=self.base_topic) 
-        self.error_topic = settings.get('error_topic', fallback=self.error_topic) 
+        self.base_topic = settings.get('base_topic', fallback=self.base_topic).rstrip('/')
+        self.error_topic = settings.get('error_topic', fallback=self.error_topic).rstrip('/')
         self.discovery_topic = settings.get('discovery_topic', fallback=self.discovery_topic)
         self.discovery_enabled = strtobool(settings.get('discovery_enabled', self.discovery_enabled))
         self.json = strtobool(settings.get('json', self.json))
