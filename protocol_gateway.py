@@ -52,7 +52,14 @@ __logo = """
 
 class CustomConfigParser(ConfigParser):
     def get(self, section, option, *args, **kwargs):
-        value = super().get(section, option, *args, **kwargs)
+        if isinstance(option, list):
+            for name in option:
+                value = super().get(section, name, *args, **kwargs)
+                if value:
+                    break
+
+        else:
+            value = super().get(section, option, *args, **kwargs)
         return value.strip() if value is not None else value
 
 class Protocol_Gateway:
