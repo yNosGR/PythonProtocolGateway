@@ -92,7 +92,7 @@ class serial_pylon(transport_base):
                 print("pylon protocol version is "+str(version))
                 self.VER = version
 
-                name = self.read_variable('battery_name')
+                name = self.read_variable('battery_name')                    
                 print(name)
             pass
 
@@ -116,7 +116,11 @@ class serial_pylon(transport_base):
             self.send_command(command)  
             frame = self.client.read()
             if frame: #decode info to ascii: bytes.fromhex(name.decode("utf-8")).decode("ascii")
-                return getattr(self.decode_frame(frame), attribute)
+                raw = getattr(self.decode_frame(frame), attribute)
+                if raw:
+                    raw = self.protocolSettings.process_registery({entry.register, raw}, map=registry_map)
+                return raw
+
 
         return None
 
