@@ -9,7 +9,7 @@ import paho.mqtt.client
 import paho.mqtt.properties
 import paho.mqtt.packettypes
 
-from paho.mqtt.client import Client as MQTTClient
+from paho.mqtt.client import Client as MQTTClient, MQTT_ERR_NO_CONN
 
 from defs.common import strtobool
 from .transport_base import transport_base
@@ -42,7 +42,7 @@ class mqtt(transport_base):
 
     __first_connection : bool = True
     __reconnecting : bool = False
-    __connected : bool = False
+    connected : bool = False
 
     def __init__(self, settings : SectionProxy):
         self.host = settings.get('host', fallback="")
@@ -131,7 +131,7 @@ class mqtt(transport_base):
 
                 #sleep to give a chance to reconnect. 
                 time.sleep(self.reconnect_delay)    
-                if self.__connected:
+                if self.connected:
                     self.__reconnecting = 0
                     return
             except:
@@ -144,12 +144,12 @@ class mqtt(transport_base):
         quit() #exit, service should restart entire script
 
     def on_disconnect(self, client, userdata, rc):
-       self.mqtt_reconnect()
+       self.connected = False
 
     def on_connect(self, client, userdata, flags, rc):
         """ The callback for when the client receives a CONNACK response from the server. """
         self._log.info("Connected with result code %s\n",str(rc))
-        self.__connected = True
+        self.connected = True
 
     __write_topics : dict[str, registry_map_entry] = {}
 
@@ -157,10 +157,15 @@ class mqtt(transport_base):
         if not self.write_enabled:
             return 
         
+        if self.connected:
+            self.connected = self.client.is_connected()
+        
         self._log.info("write data to mqtt transport")   
         self._log.info(data)   
         #have to send this every loop, because mqtt doesnt disconnect when HA restarts. HA bug. 
-        self.client.publish(self.base_topic + "/availability","online", qos=0,retain=True)
+        info = self.client.publish(self.base_topic + "/availability","online", qos=0,retain=True)
+        if info.rc == MQTT_ERR_NO_CONN:
+            self.connected = False
 
         if(self.json):
             # Serializing json
