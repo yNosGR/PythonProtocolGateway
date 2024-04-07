@@ -89,12 +89,38 @@ class serial_pylon(transport_base):
             #SOI VER ADR 46H 4FH LENGT INFO CHKSUM EOI
             version = self.read_variable('version', attribute='ver')
             if version:
+                self.connected = True
                 print("pylon protocol version is "+str(version))
                 self.VER = version
 
                 name = self.read_variable('battery_name')                    
                 print(name)
             pass
+
+    def read_data(self):
+        info = {}
+        registry_map = self.protocolSettings.get_registry_map()
+
+        
+        data : dict [int, bytes] = {}
+        for entry in registry_map:
+            
+            if entry.register not in data: #todo: need to check send data. later.
+                command = entry.register #CID1 and CID2 combined creates a single ushort
+                self.send_command(command)  
+                frame = self.client.read()
+                if frame: #decode info to ascii: bytes.fromhex(name.decode("utf-8")).decode("ascii")
+                    raw = getattr(self.decode_frame(frame), 'info')
+                    if raw:
+                        raw = bytes.fromhex(raw.decode("utf8")) #because protocol is in "ascii"
+                        data[entry.register] = raw
+
+        info = self.protocolSettings.process_registery({entry.register : raw}, map=registry_map)
+
+        if not info:
+            self._log.info("Data is Empty; Serial Pylon Transport busy?")
+
+        return info
 
     def read_variable(self, variable_name : str, entry : 'registry_map_entry' = None, attribute : str = 'info'):
         ##clean for convinecne  
@@ -117,8 +143,9 @@ class serial_pylon(transport_base):
             frame = self.client.read()
             if frame: #decode info to ascii: bytes.fromhex(name.decode("utf-8")).decode("ascii")
                 raw = getattr(self.decode_frame(frame), attribute)
-                if raw:
-                    raw = self.protocolSettings.process_registery({entry.register, raw}, map=registry_map)
+                if raw and attribute == 'info':
+                    raw = bytes.fromhex(raw.decode("utf8")) #because protocol is in "ascii"
+                    raw = self.protocolSettings.process_registery({entry.register : raw}, map=registry_map)
                 return raw
 
 

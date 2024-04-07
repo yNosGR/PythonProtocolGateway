@@ -1,4 +1,0 @@
-{
-    "transport" : "serial_pylon",
-    "baud" : 115200
-}

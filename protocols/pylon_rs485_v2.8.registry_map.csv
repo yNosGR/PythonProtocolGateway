@@ -1,5 +1,0 @@
-variable name,data type,register,read command,documented name,description,writable,values,unit,note
-,BYTE,x464F,,version,protocol version,,0~255,,
-,ASCII.10,x4651,,battery name,,,,,
-,USHORT,x4651.10,,software version,,,,,
-,ASCII.20,X4651.12,,manufacturer name,,,,,
