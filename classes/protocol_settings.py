@@ -720,6 +720,8 @@ class protocol_settings:
             except:
                 #do nothing; try is for intval
                 value = value
+                
+        return value
 
     def process_registery(self, registry : dict[int,int] | dict[int,bytes] , map : list[registry_map_entry]) -> dict[str,str]:
         '''process registry into appropriate datatypes and names -- maybe add func for single entry later?'''
