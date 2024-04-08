@@ -669,14 +669,14 @@ class protocol_settings:
             if entry.data_type == Data_Type._8BIT_FLAGS:
                 start_bit = 8
             
-            if entry.documented_name+'_codes' in self.protocolSettings.codes:
+            if entry.documented_name+'_codes' in self.codes:
                 flags : list[str] = []
                 for i in range(start_bit, 16):  # Iterate over each bit position (0 to 15)
                     # Check if the i-th bit is set
                     if (val >> i) & 1:
                         flag_index = "b"+str(i)
-                        if flag_index in self.protocolSettings.codes[entry.documented_name+'_codes']:
-                            flags.append(self.protocolSettings.codes[entry.documented_name+'_codes'][flag_index])
+                        if flag_index in self.codes[entry.documented_name+'_codes']:
+                            flags.append(self.codes[entry.documented_name+'_codes'][flag_index])
                         
                 value = ",".join(flags)
             else:
@@ -711,12 +711,12 @@ class protocol_settings:
         #   value = round(value, self.max_precision)
 
         if (entry.data_type != Data_Type._16BIT_FLAGS and
-            entry.documented_name+'_codes' in self.protocolSettings.codes):
+            entry.documented_name+'_codes' in self.codes):
             try:
                 cleanval = str(int(value))
         
-                if cleanval in self.protocolSettings.codes[entry.documented_name+'_codes']:
-                    value = self.protocolSettings.codes[entry.documented_name+'_codes'][cleanval]
+                if cleanval in self.codes[entry.documented_name+'_codes']:
+                    value = self.codes[entry.documented_name+'_codes'][cleanval]
             except:
                 #do nothing; try is for intval
                 value = value
