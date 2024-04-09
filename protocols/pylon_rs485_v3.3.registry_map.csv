@@ -3,7 +3,7 @@ variable name,data type,register,read command,documented name,description,writab
 ,ASCII.10,x4651,,battery name,,,,,
 ,USHORT,x4651.10,,software version,,,,,
 ,ASCII.20,x4651.12,,manufacturer name,,,,,
-,ASCII,x4642,0x01,battery_cell_number,,,,,todo
+,BYTE,x4642,0x01,Battery 1 number of cells,,,,,todo
 ,,,,,,,,,
 ,USHORT,x4647,,cell high voltage limit ,,,,0.01v,
 ,USHORT,x4647.2,,cell low voltage limit ,,,,0.01v,
