@@ -25,7 +25,7 @@ import os
 import logging
 import sys
 import traceback
-from configparser import RawConfigParser, ConfigParser
+from configparser import ConfigParser, NoOptionError
 
 from classes.protocol_settings import protocol_settings,Data_Type,registry_map_entry,Registry_Type,WriteMode
 from classes.transports.transport_base import transport_base
@@ -49,6 +49,29 @@ __logo = """
                                                                                                                                      
 """
 
+
+class CustomConfigParser(ConfigParser):
+    def get(self, section, option, *args, **kwargs):
+        if isinstance(option, list):
+            fallback = None
+
+            if 'fallback' in kwargs: #override kwargs fallback, for manually handling here
+                fallback = kwargs['fallback']
+                kwargs['fallback'] = None
+                
+            for name in option:
+                value = super().get(section, name, *args, **kwargs)
+                if value:
+                    break
+
+            if not value:
+                value = fallback
+
+            if value == None:
+                raise NoOptionError(option[0], section)
+        else:
+            value = super().get(section, option, *args, **kwargs)
+        return value.strip() if value is not None else value
 
 class Protocol_Gateway:
     """
@@ -86,7 +109,7 @@ class Protocol_Gateway:
 
         self.__log.info("Loading...")
 
-        self.__settings = ConfigParser()
+        self.__settings = CustomConfigParser()
         self.__settings.read(self.config_file)
 
         ##[general]

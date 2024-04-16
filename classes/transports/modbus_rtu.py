@@ -20,7 +20,7 @@ class modbus_rtu(modbus_base):
         if not self.port:
             raise ValueError("Port is not set")
 
-        self.baudrate = settings.getint("buadrate", 9600)
+        self.baudrate = settings.getint("baudrate", 9600)
 
         address : int = settings.getint("address", 0)
         self.addresses = [address]

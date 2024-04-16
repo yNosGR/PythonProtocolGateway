@@ -1,0 +1,25 @@
+variable name,data type,register,read command,documented name,description,writable,values,unit,note
+,BYTE,x464F,,version,protocol version,,0~255,,
+,ASCII.10,x4651,,battery name,,,,,
+,USHORT,x4651.10,,software version,,,,,
+,ASCII.20,x4651.12,,manufacturer name,,,,,
+,BYTE,x4642,0x01,Battery 1 number of cells,,,,,todo
+,,,,,,,,,
+,USHORT,x4647,,cell high voltage limit ,,,,0.01v,
+,USHORT,x4647.2,,cell low voltage limit ,,,,0.01v,
+,USHORT,X4642.4,,cell under voltage limit,,,,0.01v,
+,USHORT,X4642.6,,charge high temperature limit ,,,,K,
+,USHORT,X4642.8,,charge low temperature limit ,,,,K,
+,USHORT,X4642.10,,charge current limit ,,,,0.01A,
+,USHORT,X4642.12,,module high voltage limit,,,,0.01v,
+,USHORT,X4642.14,,module low voltage limit ,,,,0.01v,
+,USHORT,X4642.16,,module under voltage limit ,,,,0.01v,
+,USHORT,X4642.18,,discharge high temperature limit ,,,,K,
+,USHORT,X4642.20,,discharge low temperature limit ,,,,K,
+,USHORT,X4642.22,,discharge current limit ,,,,0.01A,
+,ASCII,x4644,0x01,Battery 1 alarm,,,,,todo
+,,x4692,,Battery 1 charge info,,,,,todo
+,,x4693,,Battery 1 Serial Number,,,,,todo
+,,x4694,,Battery 1 charge settings,,,,,todo
+,,x4695,,Battery 1 Turn Off,,RD,,,todo
+,,x4696,,Battery 1 Software Info,,,,,todo

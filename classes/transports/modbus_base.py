@@ -107,7 +107,7 @@ class modbus_base(transport_base):
         info = {}
         for registry_type in Registry_Type:
             registry = self.read_modbus_registers(ranges=self.protocolSettings.get_registry_ranges(registry_type=registry_type), registry_type=registry_type)
-            new_info = self.process_registery(registry, self.protocolSettings.get_registry_map(registry_type))
+            new_info = self.protocolSettings.process_registery(registry, self.protocolSettings.get_registry_map(registry_type))
 
             if False:
                 new_info = {self.__input_register_prefix + key: value for key, value in new_info.items()}
@@ -260,8 +260,8 @@ class modbus_base(transport_base):
             holding_valid_count[name] = 0
 
             #process registry based on protocol
-            input_info = self.process_registery(input_registry, protocol.registry_map[Registry_Type.INPUT])
-            holding_info = self.process_registery(input_registry, protocol.registry_map[Registry_Type.HOLDING])
+            input_info = protocol.process_registery(input_registry, protocol.registry_map[Registry_Type.INPUT])
+            holding_info = protocol.process_registery(input_registry, protocol.registry_map[Registry_Type.HOLDING])
             
 
             for entry in protocol.registry_map[Registry_Type.INPUT]:
@@ -302,7 +302,7 @@ class modbus_base(transport_base):
 
         #read current value
         current_registers = self.read_modbus_registers(start=entry.register, end=entry.register, registry_type=registry_type)
-        results = self.process_registery(current_registers, self.protocolSettings.get_registry_map(registry_type))
+        results = self.protocolSettings.process_registery(current_registers, self.protocolSettings.get_registry_map(registry_type))
         current_value = current_registers[entry.register]
 
       
@@ -381,7 +381,7 @@ class modbus_base(transport_base):
                 end = max(entry.concatenate_registers)
             
             registers = self.read_modbus_registers(start=start, end=end, registry_type=registry_type)
-            results = self.process_registery(registers, registry_map)
+            results = self.protocolSettings.process_registery(registers, registry_map)
             return results[entry.variable_name]
     
     def read_modbus_registers(self, ranges : list[tuple] = None, start : int = 0, end : int = None, batch_size : int = 45, registry_type : Registry_Type = Registry_Type.INPUT ) -> dict:
@@ -452,128 +452,6 @@ class modbus_base(transport_base):
                 registry[i+range[0]] = register.registers[i]
 
         return registry
-
-    def process_registery(self, registry : dict, map : list[registry_map_entry]) -> dict[str,str]:
-        '''process registry into appropriate datatypes and names'''
-        
-        concatenate_registry : dict = {}
-        info = {}
-        for item in map:
-
-            if item.register not in registry:
-                continue
-            value = ''    
-
-            if item.data_type == Data_Type.UINT: #read uint
-                if item.register + 1 not in registry:
-                    continue
-                value = float((registry[item.register] << 16) + registry[item.register + 1])
-            elif item.data_type == Data_Type.SHORT: #read signed short
-                val = registry[item.register]
-
-                # Convert the combined unsigned value to a signed integer if necessary
-                if val & (1 << 15):  # Check if the sign bit (bit 31) is set
-                    # Perform two's complement conversion to get the signed integer
-                    value = val - (1 << 16)
-                else:
-                    value = val
-                value = -value
-            elif item.data_type == Data_Type.INT: #read int
-                if item.register + 1 not in registry:
-                    continue
-                
-                combined_value_unsigned = (registry[item.register] << 16) + registry[item.register + 1]
-
-                # Convert the combined unsigned value to a signed integer if necessary
-                if combined_value_unsigned & (1 << 31):  # Check if the sign bit (bit 31) is set
-                    # Perform two's complement conversion to get the signed integer
-                    value = combined_value_unsigned - (1 << 32)
-                else:
-                    value = combined_value_unsigned
-                value = -value
-                #value = struct.unpack('<h', bytes([min(max(registry[item.register], 0), 255), min(max(registry[item.register+1], 0), 255)]))[0]
-                #value = int.from_bytes(bytes([registry[item.register], registry[item.register + 1]]), byteorder='little', signed=True)
-            elif item.data_type == Data_Type._16BIT_FLAGS or item.data_type == Data_Type._8BIT_FLAGS:
-                val = registry[item.register]
-                #16 bit flags
-                start_bit : int = 0
-                if item.data_type == Data_Type._8BIT_FLAGS:
-                    start_bit = 8
-                
-                if item.documented_name+'_codes' in self.protocolSettings.codes:
-                    flags : list[str] = []
-                    for i in range(start_bit, 16):  # Iterate over each bit position (0 to 15)
-                        # Check if the i-th bit is set
-                        if (val >> i) & 1:
-                            flag_index = "b"+str(i)
-                            if flag_index in self.protocolSettings.codes[item.documented_name+'_codes']:
-                                flags.append(self.protocolSettings.codes[item.documented_name+'_codes'][flag_index])
-                            
-                    value = ",".join(flags)
-                else:
-                    flags : list[str] = []
-                    for i in range(start_bit, 16):  # Iterate over each bit position (0 to 15)
-                        # Check if the i-th bit is set
-                        if (val >> i) & 1:
-                            flags.append("1")
-                        else:
-                            flags.append("0")
-                    value = ''.join(flags)
-            elif item.data_type.value > 200 or item.data_type == Data_Type.BYTE: #bit types
-                    bit_size = Data_Type.getSize(item.data_type)
-                    bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
-                    bit_index = item.register_bit
-                    value = (registry[item.register] >> bit_index) & bit_mask
-            elif item.data_type == Data_Type.ASCII:
-                value = registry[item.register].to_bytes((16 + 7) // 8, byteorder='big') #convert to ushort to bytes
-                try:
-                    value = value.decode("utf-8") #convert bytes to ascii
-                except UnicodeDecodeError as e:
-                    print("UnicodeDecodeError:", e)
-
-            else: #default, Data_Type.USHORT
-                value = float(registry[item.register])
-
-            if item.unit_mod != float(1):
-                value = value * item.unit_mod
-
-            #move this to transport level
-            #if  isinstance(value, float) and self.max_precision > -1:
-            #   value = round(value, self.max_precision)
-
-            if (item.data_type != Data_Type._16BIT_FLAGS and
-                item.documented_name+'_codes' in self.protocolSettings.codes):
-                try:
-                    cleanval = str(int(value))
-            
-                    if cleanval in self.protocolSettings.codes[item.documented_name+'_codes']:
-                        value = self.protocolSettings.codes[item.documented_name+'_codes'][cleanval]
-                except:
-                    #do nothing; try is for intval
-                    value = value
-            
-            #if item.unit:
-            #    value = str(value) + item.unit
-            if item.concatenate:
-                concatenate_registry[item.register] = value
-
-                all_exist = True
-                for key in item.concatenate_registers:
-                    if key not in concatenate_registry:
-                        all_exist = False
-                        break
-                if all_exist:
-                #if all(key in concatenate_registry for key in item.concatenate_registers):
-                    concatenated_value = ""
-                    for key in item.concatenate_registers:
-                        concatenated_value = concatenated_value + str(concatenate_registry[key])
-                        del concatenate_registry[key]
-
-                    info[item.variable_name] = concatenated_value
-            else:
-                info[item.variable_name] = value
-
-        return info
     
     def read_registry(self, registry_type : Registry_Type = Registry_Type.INPUT) -> dict[str,str]:
         map = self.protocolSettings.get_registry_map(registry_type)
@@ -581,5 +459,5 @@ class modbus_base(transport_base):
             return {}
         
         registry = self.read_modbus_registers(self.protocolSettings.get_registry_ranges(registry_type), registry_type=registry_type)
-        info = self.process_registery(registry, map)
+        info = self.protocolSettings.process_registery(registry, map)
         return info
