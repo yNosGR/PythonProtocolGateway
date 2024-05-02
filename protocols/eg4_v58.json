@@ -1,3 +1,4 @@
 {
-    "transport" : "modbus_rtu"
+    "transport" : "modbus_rtu",
+    "baud" : 19200
 }
