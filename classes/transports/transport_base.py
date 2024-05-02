@@ -19,6 +19,7 @@ class transport_base:
     device_model : str = 'hotnoob'
     bridge : str = ''
     write_enabled : bool = False
+    max_precision : int = 2
 
     read_interval : float = 0
     last_read_time : float = 0
@@ -56,10 +57,13 @@ class transport_base:
             self.device_name = settings.get(['device_name', 'name'], fallback=self.device_manufacturer+"_"+self.device_serial_number)
             self.bridge = settings.get("bridge", self.bridge)
             self.read_interval = settings.getfloat("read_interval", self.read_interval)
+            self.max_precision = settings.get(["max_precision", "precision"], self.max_precision)
             if "write_enabled" in settings:
                 self.write_enabled = settings.getboolean("write_enabled", self.write_enabled)
             else:
                 self.write_enabled = settings.getboolean("write", self.write_enabled)
+            
+
 
     def init_bridge(self, from_transport : 'transport_base'):
         pass

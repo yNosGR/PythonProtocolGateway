@@ -173,6 +173,9 @@ class mqtt(transport_base):
             self.client.publish(self.base_topic, json_object, 0, properties=self.__properties)
         else:
             for entry, val in data.items():
+                if isinstance(val, float) and self.max_precision >= 0: #apply max_precision on mqtt transport 
+                    val = round(val, self.max_precision)
+
                 self.client.publish(str(self.base_topic+'/'+entry).lower(), str(val))
 
     def client_on_message(self, client, userdata, msg):
