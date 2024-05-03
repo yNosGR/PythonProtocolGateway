@@ -170,7 +170,7 @@ class mqtt(transport_base):
         if(self.json):
             # Serializing json
             json_object = json.dumps(data, indent=4)
-            self.client.publish(self.base_topic, json_object, 0, properties=self.__properties)
+            self.client.publish(self.base_topic, json_object, 0, properties=self.mqtt_properties)
         else:
             for entry, val in data.items():
                 if isinstance(val, float) and self.max_precision >= 0: #apply max_precision on mqtt transport 

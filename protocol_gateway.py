@@ -71,6 +71,10 @@ class CustomConfigParser(ConfigParser):
                 raise NoOptionError(option[0], section)
         else:
             value = super().get(section, option, *args, **kwargs)
+
+        if isinstance(value, int):
+            return value
+        
         return value.strip() if value is not None else value
 
 class Protocol_Gateway:
