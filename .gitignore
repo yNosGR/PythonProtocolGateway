@@ -13,6 +13,7 @@ log.txt
 variable_mask.txt
 .~lock.*
 protocols/*custom*
+classes/transports/*custom*
 
 input_registry.json
 holding_registry.json
