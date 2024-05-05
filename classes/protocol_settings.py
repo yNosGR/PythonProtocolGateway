@@ -42,6 +42,23 @@ class Data_Type(Enum):
     _14BIT = 214
     _15BIT = 215
     _16BIT = 216
+    #signed bits
+    _2SBIT = 302
+    _3SBIT = 303
+    _4SBIT = 304
+    _5SBIT = 305
+    _6SBIT = 306
+    _7SBIT = 307
+    _8SBIT = 308
+    _9SBIT = 309
+    _10SBIT = 310
+    _11SBIT = 311
+    _12SBIT = 312
+    _13SBIT = 313
+    _14SBIT = 314
+    _15SBIT = 315
+    _16SBIT = 316
+
     @classmethod
     def fromString(cls, name : str):
         name = name.strip().upper()
@@ -74,7 +91,10 @@ class Data_Type(Enum):
         if data_type in sizes:
             return sizes[data_type]
 
-        if data_type.value > 200: 
+        if data_type.value > 300:  #signed bits
+            return data_type.value-300
+        
+        if data_type.value > 200: #unsigned bits
             return data_type.value-200
 
         return -1 #should never happen
@@ -616,6 +636,20 @@ class protocol_settings:
                     else:
                         flags.append("0")
                 value = ''.join(flags)
+        elif entry.data_type.value > 300: #signed bit types
+            bit_size = Data_Type.getSize(entry.data_type)
+            bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
+            bit_index = entry.register_bit
+
+            # Check if the value is negative
+            if (register >> (bit_index + bit_size - 1)) & 1:
+                # If negative, extend the sign bit to fill out the value
+                sign_extension = 0xFFFFFFFFFFFFFFFF << bit_size
+                value = (register >> bit_index) | sign_extension
+            else:
+                # If positive, simply extract the value using the bit mask
+                value = (register >> bit_index) & bit_mask
+
         elif entry.data_type.value > 200 or entry.data_type == Data_Type.BYTE: #bit types
             bit_size = Data_Type.getSize(entry.data_type)
             bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
