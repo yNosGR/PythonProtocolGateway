@@ -636,6 +636,21 @@ class protocol_settings:
                     else:
                         flags.append("0")
                 value = ''.join(flags)
+
+
+        elif entry.data_type.value > 400: #signed-magnitude bit types ( sign bit is the last bit instead of front )
+            bit_size = Data_Type.getSize(entry.data_type)
+            bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
+            bit_index = entry.register_bit
+
+            # Check if the value is negative
+            if (register >> bit_index) & 1:
+                # If negative, extend the sign bit to fill out the value
+                sign_extension = 0xFFFFFFFFFFFFFFFF << bit_size
+                value = (register >> (bit_index + 1)) | sign_extension
+            else:
+                # If positive, simply extract the value using the bit mask
+                value = (register >> bit_index) & bit_mask
         elif entry.data_type.value > 300: #signed bit types
             bit_size = Data_Type.getSize(entry.data_type)
             bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
