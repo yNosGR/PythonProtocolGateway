@@ -59,6 +59,23 @@ class Data_Type(Enum):
     _15SBIT = 315
     _16SBIT = 316
 
+    #signed magnitude  bits
+    _2SMBIT = 402
+    _3SMBIT = 403
+    _4SMBIT = 404
+    _5SMBIT = 405
+    _6SMBIT = 406
+    _7SMBIT = 407
+    _8SMBIT = 408
+    _9SMBIT = 409
+    _10SMBIT = 410
+    _11SMBIT = 411
+    _12SMBIT = 412
+    _13SMBIT = 413
+    _14SMBIT = 414
+    _15SMBIT = 415
+    _16SMBIT = 416
+
     @classmethod
     def fromString(cls, name : str):
         name = name.strip().upper()
@@ -91,6 +108,9 @@ class Data_Type(Enum):
         if data_type in sizes:
             return sizes[data_type]
 
+        if data_type.value > 400:  #signed magnitude bits
+            return data_type.value-400
+        
         if data_type.value > 300:  #signed bits
             return data_type.value-300
         
