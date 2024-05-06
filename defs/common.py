@@ -16,6 +16,9 @@ def strtoint(val : str) -> int:
     if val and val[0] == 'x':
         return int.from_bytes(bytes.fromhex(val[1:]), byteorder='big')
     
+    if val and val.startswith("0x"):
+        return int.from_bytes(bytes.fromhex(val[2:]), byteorder='big')
+    
     if not val: #empty
         return 0
     

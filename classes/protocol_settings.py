@@ -292,13 +292,13 @@ class protocol_settings:
 
     def load__registry(self, path, registry_type : Registry_Type = Registry_Type.INPUT) -> list[registry_map_entry]: 
         registry_map : list[registry_map_entry] = []
-        register_regex = re.compile(r'(?P<register>x?\d+)\.(b(?P<bit>x?\d{1,2})|(?P<byte>x?\d{1,2}))')
+        register_regex = re.compile(r'(?P<register>(?:0?x[\dA-Z]+|[\d]+))\.(b(?P<bit>x?\d{1,2})|(?P<byte>x?\d{1,2}))')
 
         data_type_regex = re.compile(r'(?P<datatype>\w+)\.(?P<length>\d+)')
 
-        range_regex = re.compile(r'(?P<reverse>r|)(?P<start>x?\d+)[\-~](?P<end>x?\d+)')
+        range_regex = re.compile(r'(?P<reverse>r|)(?P<start>(?:0?x[\dA-Z]+|[\d]+))[\-~](?P<end>(?:0?x[\dA-Z]+|[\d]+))')
         ascii_value_regex = re.compile(r'(?P<regex>^\[.+\]$)')
-        list_regex = re.compile(r'\s*(?:(?P<range_start>x?\d+)-(?P<range_end>x?\d+)|(?P<element>[^,\s][^,]*?))\s*(?:,|$)')
+        list_regex = re.compile(r'\s*(?:(?P<range_start>(?:0?x[\dA-Z]+|[\d]+))-(?P<range_end>(?:0?x[\dA-Z]+|[\d]+))|(?P<element>[^,\s][^,]*?))\s*(?:,|$)')
 
 
         if not os.path.exists(path): #return empty is file doesnt exist.
