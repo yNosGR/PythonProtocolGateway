@@ -41,7 +41,8 @@ protocol_version = {{version}}
 v0.14 = growatt inverters 2020+
 sigineer_v0.11 = sigineer inverters
 growatt_2020_v1.24 = alt protocol for large growatt inverters - currently untested
-eg4_v58 = eg4 inverters ( EG4-6000XP ) - implemented but untested
+eg4_v58 = eg4 inverters ( EG4-6000XP ) - confirmed working
+srne_v3.9 = SRNE inverters - Untested
 hdhk_16ch_ac_module = some chinese current monitoring device :P
 ```
 
@@ -105,10 +106,17 @@ you can also find the original documented variable names there; to use the origi
 the csvs are using ";" as the delimeter, because that is what open office uses. 
 
 ### variable_mask.txt
-if you want to only send/get specific variables, put them in this file. one variable per line. if list is empty all variables will be sent
+if you want to only send/get specific variables, put them in variable_mask.txt file. one variable per line. if list is empty all variables will be sent
 ```
 variable1
 variable2
+```
+
+### variable_screen.txt
+if you want to exclude specific variables, put them in the variable_screen.txt file. one variable per line.
+```
+variable_to_exclude
+variable_to_exclude2
 ```
 
 ### Any ModBus RTU Device

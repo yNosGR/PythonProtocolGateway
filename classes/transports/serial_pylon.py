@@ -7,6 +7,7 @@ from ..Object import Object
 
 from .serial_frame_client import serial_frame_client
 from .transport_base import transport_base
+from defs.common import find_usb_serial_port, get_usb_serial_port_info
 
 
 
@@ -63,6 +64,9 @@ class serial_pylon(transport_base):
         self.port = settings.get("port", "")
         if not self.port:
             raise ValueError("Port is not set")
+        
+        self.port = find_usb_serial_port(self.port) 
+        print("Serial Port : " + self.port + " = "+get_usb_serial_port_info(self.port)) #print for config convience
 
         self.baudrate = settings.getint("baudrate", 9600)
 

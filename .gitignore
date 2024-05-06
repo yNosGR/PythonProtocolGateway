@@ -11,8 +11,10 @@ config.cfg
 invertermodbustomqtt.service
 log.txt
 variable_mask.txt
+variable_screen.txt
 .~lock.*
 protocols/*custom*
+classes/transports/*custom*
 
 input_registry.json
 holding_registry.json

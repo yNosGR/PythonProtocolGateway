@@ -31,7 +31,7 @@ class mqtt(transport_base):
 
     reconnect_attempts : int = 21
     
-    max_precision : int = - 1
+    #max_precision : int = - 1
 
 
     holding_register_prefix : str = ""
@@ -56,7 +56,7 @@ class mqtt(transport_base):
         self.discovery_enabled = strtobool(settings.get('discovery_enabled', self.discovery_enabled))
         self.json = strtobool(settings.get('json', self.json))
         self.reconnect_delay = settings.getint('reconnect_delay', fallback=7)
-        self.max_precision = settings.getint('max_precision', fallback=self.max_precision)
+        #self.max_precision = settings.getint('max_precision', fallback=self.max_precision)
 
         if not isinstance( self.reconnect_delay , int) or self.reconnect_delay < 1: #minumum 1 second
             self.reconnect_delay = 1
@@ -170,9 +170,12 @@ class mqtt(transport_base):
         if(self.json):
             # Serializing json
             json_object = json.dumps(data, indent=4)
-            self.client.publish(self.base_topic, json_object, 0, properties=self.__properties)
+            self.client.publish(self.base_topic, json_object, 0, properties=self.mqtt_properties)
         else:
             for entry, val in data.items():
+                if isinstance(val, float) and self.max_precision >= 0: #apply max_precision on mqtt transport 
+                    val = round(val, self.max_precision)
+
                 self.client.publish(str(self.base_topic+'/'+entry).lower(), str(val))
 
     def client_on_message(self, client, userdata, msg):

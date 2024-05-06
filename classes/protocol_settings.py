@@ -42,6 +42,40 @@ class Data_Type(Enum):
     _14BIT = 214
     _15BIT = 215
     _16BIT = 216
+    #signed bits
+    _2SBIT = 302
+    _3SBIT = 303
+    _4SBIT = 304
+    _5SBIT = 305
+    _6SBIT = 306
+    _7SBIT = 307
+    _8SBIT = 308
+    _9SBIT = 309
+    _10SBIT = 310
+    _11SBIT = 311
+    _12SBIT = 312
+    _13SBIT = 313
+    _14SBIT = 314
+    _15SBIT = 315
+    _16SBIT = 316
+
+    #signed magnitude  bits
+    _2SMBIT = 402
+    _3SMBIT = 403
+    _4SMBIT = 404
+    _5SMBIT = 405
+    _6SMBIT = 406
+    _7SMBIT = 407
+    _8SMBIT = 408
+    _9SMBIT = 409
+    _10SMBIT = 410
+    _11SMBIT = 411
+    _12SMBIT = 412
+    _13SMBIT = 413
+    _14SMBIT = 414
+    _15SMBIT = 415
+    _16SMBIT = 416
+
     @classmethod
     def fromString(cls, name : str):
         name = name.strip().upper()
@@ -74,7 +108,13 @@ class Data_Type(Enum):
         if data_type in sizes:
             return sizes[data_type]
 
-        if data_type.value > 200: 
+        if data_type.value > 400:  #signed magnitude bits
+            return data_type.value-400
+        
+        if data_type.value > 300:  #signed bits
+            return data_type.value-300
+        
+        if data_type.value > 200: #unsigned bits
             return data_type.value-200
 
         return -1 #should never happen
@@ -172,6 +212,9 @@ class protocol_settings:
     transport : str
     settings_dir : str
     variable_mask : list[str]
+    ''' list of variables to allow and exclude all others '''
+    variable_screen : list[str]
+    ''' list of variables to exclude '''
     registry_map : dict[Registry_Type, list[registry_map_entry]] = {}
     registry_map_size : dict[Registry_Type, int] = {}
     registry_map_ranges : dict[Registry_Type, list[tuple]] = {}
@@ -184,6 +227,7 @@ class protocol_settings:
         self.protocol = protocol
         self.settings_dir = settings_dir
 
+        #load variable mask
         self.variable_mask = []
         if os.path.isfile('variable_mask.txt'):
             with open('variable_mask.txt') as f:
@@ -192,6 +236,16 @@ class protocol_settings:
                         continue
 
                     self.variable_mask.append(line.strip().lower())
+
+        #load variable screen
+        self.variable_screen = []
+        if os.path.isfile('variable_screen.txt'):
+            with open('variable_screen.txt') as f:
+                for line in f:
+                    if line[0] == '#': #skip comment
+                        continue
+
+                    self.variable_screen.append(line.strip().lower())
 
         self.load__json() #load first, so priority to json codes
 
@@ -252,13 +306,13 @@ class protocol_settings:
 
     def load__registry(self, path, registry_type : Registry_Type = Registry_Type.INPUT) -> list[registry_map_entry]: 
         registry_map : list[registry_map_entry] = []
-        register_regex = re.compile(r'(?P<register>x?\d+)\.(b(?P<bit>x?\d{1,2})|(?P<byte>x?\d{1,2}))')
+        register_regex = re.compile(r'(?P<register>(?:0?x[\dA-Z]+|[\d]+))\.(b(?P<bit>x?\d{1,2})|(?P<byte>x?\d{1,2}))')
 
         data_type_regex = re.compile(r'(?P<datatype>\w+)\.(?P<length>\d+)')
 
-        range_regex = re.compile(r'(?P<reverse>r|)(?P<start>x?\d+)[\-~](?P<end>x?\d+)')
+        range_regex = re.compile(r'(?P<reverse>r|)(?P<start>(?:0?x[\dA-Z]+|[\d]+))[\-~](?P<end>(?:0?x[\dA-Z]+|[\d]+))')
         ascii_value_regex = re.compile(r'(?P<regex>^\[.+\]$)')
-        list_regex = re.compile(r'\s*(?:(?P<range_start>x?\d+)-(?P<range_end>x?\d+)|(?P<element>[^,\s][^,]*?))\s*(?:,|$)')
+        list_regex = re.compile(r'\s*(?:(?P<range_start>(?:0?x[\dA-Z]+|[\d]+))-(?P<range_end>(?:0?x[\dA-Z]+|[\d]+))|(?P<element>[^,\s][^,]*?))\s*(?:,|$)')
 
 
         if not os.path.exists(path): #return empty is file doesnt exist.
@@ -513,7 +567,17 @@ class protocol_settings:
                         item.documented_name.strip().lower() not in self.variable_mask 
                         and item.variable_name.strip().lower() not in self.variable_mask
                         ):
-                        del registry_map[index]                  
+                        del registry_map[index]
+
+            #apply variable screen     
+            if self.variable_screen:
+                for index in reversed(range(len(registry_map))):
+                    item = registry_map[index]
+                    if (
+                        item.documented_name.strip().lower() in self.variable_mask 
+                        and item.variable_name.strip().lower() in self.variable_mask
+                        ):
+                        del registry_map[index]      
 
             return registry_map
         
@@ -616,6 +680,35 @@ class protocol_settings:
                     else:
                         flags.append("0")
                 value = ''.join(flags)
+
+
+        elif entry.data_type.value > 400: #signed-magnitude bit types ( sign bit is the last bit instead of front )
+            bit_size = Data_Type.getSize(entry.data_type)
+            bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
+            bit_index = entry.register_bit
+
+            # Check if the value is negative
+            if (register >> bit_index) & 1:
+                # If negative, extend the sign bit to fill out the value
+                sign_extension = 0xFFFFFFFFFFFFFFFF << bit_size
+                value = (register >> (bit_index + 1)) | sign_extension
+            else:
+                # If positive, simply extract the value using the bit mask
+                value = (register >> bit_index) & bit_mask
+        elif entry.data_type.value > 300: #signed bit types
+            bit_size = Data_Type.getSize(entry.data_type)
+            bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
+            bit_index = entry.register_bit
+
+            # Check if the value is negative
+            if (register >> (bit_index + bit_size - 1)) & 1:
+                # If negative, extend the sign bit to fill out the value
+                sign_extension = 0xFFFFFFFFFFFFFFFF << bit_size
+                value = (register >> bit_index) | sign_extension
+            else:
+                # If positive, simply extract the value using the bit mask
+                value = (register >> bit_index) & bit_mask
+
         elif entry.data_type.value > 200 or entry.data_type == Data_Type.BYTE: #bit types
             bit_size = Data_Type.getSize(entry.data_type)
             bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits

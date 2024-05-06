@@ -3,6 +3,7 @@ from classes.protocol_settings import Registry_Type, protocol_settings
 from pymodbus.client.sync import ModbusSerialClient
 from .modbus_base import modbus_base
 from configparser import SectionProxy
+from defs.common import find_usb_serial_port, get_usb_serial_port_info
 
 class modbus_rtu(modbus_base):
     port : str = "/dev/ttyUSB0"
@@ -19,6 +20,9 @@ class modbus_rtu(modbus_base):
         self.port = settings.get("port", "")
         if not self.port:
             raise ValueError("Port is not set")
+        
+        self.port = find_usb_serial_port(self.port) 
+        print("Serial Port : " + self.port + " = "+get_usb_serial_port_info(self.port)) #print for config convience
 
         self.baudrate = settings.getint("baudrate", 9600)
 
