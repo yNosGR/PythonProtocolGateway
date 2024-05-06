@@ -43,6 +43,7 @@ sigineer_v0.11 = sigineer inverters
 growatt_2020_v1.24 = alt protocol for large growatt inverters - currently untested
 eg4_v58 = eg4 inverters ( EG4-6000XP ) - confirmed working
 srne_v3.9 = SRNE inverters - Untested
+victron_gx_3.3 = Victron GX Devices - Untested
 hdhk_16ch_ac_module = some chinese current monitoring device :P
 ```
 
