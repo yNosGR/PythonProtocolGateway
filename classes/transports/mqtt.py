@@ -31,7 +31,7 @@ class mqtt(transport_base):
 
     reconnect_attempts : int = 21
     
-    max_precision : int = - 1
+    #max_precision : int = - 1
 
 
     holding_register_prefix : str = ""
@@ -56,7 +56,7 @@ class mqtt(transport_base):
         self.discovery_enabled = strtobool(settings.get('discovery_enabled', self.discovery_enabled))
         self.json = strtobool(settings.get('json', self.json))
         self.reconnect_delay = settings.getint('reconnect_delay', fallback=7)
-        self.max_precision = settings.getint('max_precision', fallback=self.max_precision)
+        #self.max_precision = settings.getint('max_precision', fallback=self.max_precision)
 
         if not isinstance( self.reconnect_delay , int) or self.reconnect_delay < 1: #minumum 1 second
             self.reconnect_delay = 1
