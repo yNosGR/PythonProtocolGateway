@@ -106,10 +106,17 @@ you can also find the original documented variable names there; to use the origi
 the csvs are using ";" as the delimeter, because that is what open office uses. 
 
 ### variable_mask.txt
-if you want to only send/get specific variables, put them in this file. one variable per line. if list is empty all variables will be sent
+if you want to only send/get specific variables, put them in variable_mask.txt file. one variable per line. if list is empty all variables will be sent
 ```
 variable1
 variable2
+```
+
+### variable_screen.txt
+if you want to exclude specific variables, put them in the variable_screen.txt file. one variable per line.
+```
+variable_to_exclude
+variable_to_exclude2
 ```
 
 ### Any ModBus RTU Device
