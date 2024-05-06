@@ -86,7 +86,9 @@ class Data_Type(Enum):
         alias : dict[str,str] = {
             "UINT8" : "BYTE",
             "INT16" : "SHORT",
-            "UINT16" : "USHORT"
+            "UINT16" : "USHORT",
+            "UINT32" : "UINT",
+            "INT32" : "INT"
         }
         
         if name in alias:
