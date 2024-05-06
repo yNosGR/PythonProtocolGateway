@@ -212,6 +212,9 @@ class protocol_settings:
     transport : str
     settings_dir : str
     variable_mask : list[str]
+    ''' list of variables to allow and exclude all others '''
+    variable_screen : list[str]
+    ''' list of variables to exclude '''
     registry_map : dict[Registry_Type, list[registry_map_entry]] = {}
     registry_map_size : dict[Registry_Type, int] = {}
     registry_map_ranges : dict[Registry_Type, list[tuple]] = {}
@@ -224,6 +227,7 @@ class protocol_settings:
         self.protocol = protocol
         self.settings_dir = settings_dir
 
+        #load variable mask
         self.variable_mask = []
         if os.path.isfile('variable_mask.txt'):
             with open('variable_mask.txt') as f:
@@ -232,6 +236,16 @@ class protocol_settings:
                         continue
 
                     self.variable_mask.append(line.strip().lower())
+
+        #load variable screen
+        self.variable_screen = []
+        if os.path.isfile('variable_screen.txt'):
+            with open('variable_screen.txt') as f:
+                for line in f:
+                    if line[0] == '#': #skip comment
+                        continue
+
+                    self.variable_screen.append(line.strip().lower())
 
         self.load__json() #load first, so priority to json codes
 
@@ -553,7 +567,17 @@ class protocol_settings:
                         item.documented_name.strip().lower() not in self.variable_mask 
                         and item.variable_name.strip().lower() not in self.variable_mask
                         ):
-                        del registry_map[index]                  
+                        del registry_map[index]
+
+            #apply variable screen     
+            if self.variable_screen:
+                for index in reversed(range(len(registry_map))):
+                    item = registry_map[index]
+                    if (
+                        item.documented_name.strip().lower() in self.variable_mask 
+                        and item.variable_name.strip().lower() in self.variable_mask
+                        ):
+                        del registry_map[index]      
 
             return registry_map
         
