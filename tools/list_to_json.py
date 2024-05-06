@@ -2,7 +2,7 @@ import json
 import re
 
 # Given string
-input_string = "0: 208VAC 1: 230VAC 2: 240VAC 3:220VAC 4:100VAC 5:110VAC 6:120VAC"
+input_string = "1=Charger Only;2=Inverter Only;3=On;4=Off"
 while True:
     user_input = input("Enter Data: ")
     user_input  = re.sub(r'\s+', " ", user_input)
@@ -15,6 +15,8 @@ while True:
         pairs = user_input.split(";")
     elif user_input.find("；") != -1:
         pairs = user_input.split("；")
+    elif user_input.find("=") != -1:
+        pairs = user_input.split("=")
     else:
         pairs = user_input.split()
     
@@ -27,6 +29,8 @@ while True:
 
         if pair.find("：") != -1:
             key, value = pair.split("：")
+        elif pair.find("=") != -1:
+            key, value = pair.split("=")
         else:
             key, value = pair.split(":")
 

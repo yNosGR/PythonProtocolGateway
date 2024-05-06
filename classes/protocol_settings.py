@@ -134,6 +134,7 @@ class WriteMode(Enum):
         #common alternative names
         alias : dict[str,WriteMode] = {
             "R"     : "READ",
+            "NO"    : "READ",
             "READ"  : "READ",
             "WD"    : "READ",
             "RD"            : "READDISABLED",
@@ -143,6 +144,7 @@ class WriteMode(Enum):
             "RW"    : "WRITE",
             "W"     : "WRITE",
             "WRITE" : "WRITE"
+            "YES"   : "WRITE"
         }
         
         if name in alias:
