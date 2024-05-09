@@ -51,7 +51,9 @@ more details on these protocols can be found in the wiki
 
 ### run as script
 ```python3 -u protocol_gateway.py```
+
 or
+
 ```python3 -u protocol_gateway.py config.cfg```
 
 ### install as service
