@@ -93,7 +93,7 @@ class mqtt(transport_base):
         self.mqtt_properties = paho.mqtt.properties.Properties(paho.mqtt.packettypes.PacketTypes.PUBLISH)
         self.mqtt_properties.MessageExpiryInterval = 30  # in seconds
 
-        self.write_enabled = False #set default
+        self.write_enabled = True #set default
         super().__init__(settings)
         
 
