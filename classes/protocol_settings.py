@@ -145,7 +145,6 @@ class WriteMode(Enum):
             "D"             : "READDISABLED",
             "RW"    : "WRITE",
             "W"     : "WRITE",
-            "WRITE" : "WRITE"
             "YES"   : "WRITE"
         }
         
