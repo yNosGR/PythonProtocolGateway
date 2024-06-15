@@ -22,7 +22,7 @@ class modbus_rtu(modbus_base):
             raise ValueError("Port is not set")
         
         self.port = find_usb_serial_port(self.port) 
-        print("Serial Port : " + self.port + " = "+get_usb_serial_port_info(self.port)) #print for config convience
+        print("Serial Port : " + self.port + " = ", get_usb_serial_port_info(self.port)) #print for config convience
 
         self.baudrate = settings.getint("baudrate", 9600)
 
