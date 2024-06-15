@@ -439,8 +439,8 @@ class protocol_settings:
                         matched : bool = False
                         val_match = range_regex.search(row['values'])
                         if val_match:
-                            value_min = int(val_match.group('start'))
-                            value_max = int(val_match.group('end'))
+                            value_min = strtoint(val_match.group('start'))
+                            value_max = strtoint(val_match.group('end'))
                             matched = True
 
                         if data_type == Data_Type.ASCII:
