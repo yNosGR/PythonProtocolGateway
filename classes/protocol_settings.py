@@ -625,6 +625,10 @@ class protocol_settings:
 
         path = settings_dir + '/' + file
 
+        #if path does not exist; nothing to load. skip.
+        if not os.path.exists(path):
+            return
+
         self.registry_map[registry_type] = self.load__registry(path, registry_type)
 
         size : int = 0
