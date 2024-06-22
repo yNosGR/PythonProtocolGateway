@@ -28,6 +28,8 @@ def get_usb_serial_port_info(port : str = '') -> str:
     for p in serial.tools.list_ports.comports():
         if str(p.device).upper() == port.upper():
             return "["+hex(p.vid)+":"+hex(p.pid)+":"+str(p.serial_number)+":"+str(p.location)+"]"
+        
+    return ""
 
 def find_usb_serial_port(port : str =  '', vendor_id : str = '', product_id : str = '', serial_number : str = '', location : str = '') -> str:
     if not port.startswith('['):
