@@ -40,10 +40,14 @@ def find_usb_serial_port(port : str =  '', vendor_id : str = '', product_id : st
         serial_number = match.group("serial") if match.group("serial") else ''
         location = match.group("location") if match.group("location") else ''
 
-    for port in serial.tools.list_ports.comports():
-        if ((not vendor_id or port.vid == vendor_id) and
-            ( not product_id or port.pid == product_id) and
-            ( not serial_number or port.serial_number == serial_number) and
-            ( not location or port.location == location)):
-            return port.device
+        for port in serial.tools.list_ports.comports():
+            if ((not vendor_id or port.vid == vendor_id) and
+                ( not product_id or port.pid == product_id) and
+                ( not serial_number or port.serial_number == serial_number) and
+                ( not location or port.location == location)):
+                return port.device
+    else:
+        print("Bad Port Pattern", port)
+        return None
+            
     return None
