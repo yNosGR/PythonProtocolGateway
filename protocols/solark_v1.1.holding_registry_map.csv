@@ -1,0 +1,66 @@
+variable name,data type,register,documented name,description,writable,values,unit,Initial value,note
+serial number,ASCII,3~7,SN,,,,,,
+,SHORT,60,Day Active Power Wh,,R,,0.1kWh,,Signed int. Inverter Grid port energy
+,INT,63-64,Total Active Power_Wh,,R,,0.1kWh,,Signed int. Inverter Grid port energy
+,,79,Grid frequency,,R,0~9999,0.01Hz,,
+,,90,DC_DC Transformer temperature,,R,0~3000,0.1C,,
+,,91,IGBT Heat Sink temperature,,R,0~3000,0.1C,,-56.2? indicated as 438 0? indicated as 1000 50.5 ? indicated as 1505
+,16BIT_FLAGS,103,Fault information word 1,,R,"{""b7"": ""GFDI_Relay_Failure - F08"", ""b12"": ""Grid_Mode_changed - F13"", ""b13"": ""DC_OverCurr_Fault - F14"", ""b14"": ""SW_AC_OverCurr_Fault - F15"", ""b15"": ""GFCI_Failure - F16""}
+",,,"See ﾓFault Tableﾔ at the end of the document for values Uses bit flags, 64 separate bits One bit for each fault"
+,16BIT_FLAGS,104,Fault information word 2,,R,"{""b1"": ""HW_Ac_OverCurr_Fault - F18"", ""b3"": ""Tz_Dc_OverCurr_Fault - F20"", ""b5"": ""Tz_EmergStop_Fault - F22"", ""b6"": ""Tz_GFCI_OC_Fault - F23"", ""b7"": ""DC_Insulation_ISO_Fault - F24"", ""b9"": ""BusUnbalance_Fault - F26"", ""b12"": ""Parallel_Fault - F29""}
+",,,
+,16BIT_FLAGS,105,Fault information word 3,,R,"{“b0”:”AC_OverCurr_Fault” - F33, ""b1"": ""AC_Overload_Fault - F34"", ""b8"": ""AC_WU_OverVolt_Fault - F41"", ""b10"": ""AC_VW_OverVolt_Fault - F43"", ""b12"": ""AC_UV_OverVolt_Fault - F45"", ""b13"": ""Parallel_Aux_Fault - F46"", ""b14"": ""AC_OverFreq_Fault - F47"", ""b15"": ""AC_UnderFreq_Fault – F48""}",,,
+,16BIT_FLAGS,106,Fault information word 4,,R,"{""b6"": ""DC_VoltHigh_Fault - F55"", ""b7"": ""DC_VoltLow_Fault - F56"", ""b9"": ""AC_U_GridCurr_High_Fault - F58"", ""b12"": ""Button_Manual_OFF - F61"", ""b13"": ""AC_B_InductCurr_High_Fault - F62"", ""b14"": ""Arc_Fault - F63"", ""b15"": ""Heatsink_HighTemp_Fault - F64""}
+",,,
+,,107,Corrected Batt Capacity,,R,0~1000,1AH,,100 is 100AH
+,,108,Daily PV Power_Wh_,,R,,0.1kWh,,
+,,109,Dc voltage 1,,R,,0.1V,,
+,,110,Dc current 1,,R,,0.1A,,
+,,111,Dc voltage 2,,R,,0.1V,,
+,,112,Dc current 2,,R,,0.1A,,
+,,150,Grid side voltage L1_N,,R,,0.1V,,
+,,151,Grid side voltage L2_N,,R,,0.1V,,
+,,152,Grid side voltage L1_L2,,R,,0.1V,,
+,,153,Voltage at middle side of relay L1_L2,,R,,0.1V,,
+,,154,Inverter output voltage L1_N,,R,,0.1V,,
+,,155,Inverter output voltage L2_N,,R,,0.1V,,
+,,156,Inverter output voltage L1_L2,,R,,0.1V,,
+,,157,Load voltage L1,,R,,0.1V,,
+,,158,Load voltage L2,,R,,0.1V,,
+,SHORT,160,Grid side current L1,,R,,0.01A,,Signed int
+,SHORT,161,Grid side current L2,,R,,0.01A,,Signed int
+,SHORT,162,Grid external Limiter current L1,,R,,0.01A,,Signed int
+,SHORT,163,Grid external Limiter current L2,,R,,0.01A,,Signed int
+,SHORT,164,Inverter output current L1,,R,,0.01A,,Signed int
+,SHORT,165,Inverter output current L2,,R,,0.01A,,Signed int
+,SHORT,166,Gen or AC Coupled power input,,R,,1W,,As load output: Output P is positive As AC input: Input P is negative
+,SHORT,167,Grid side L1 power,,R,,1W,,Signed int
+,SHORT,168,Grid side L2 power,,R,,1W,,Signed int
+,SHORT,169,Total power of grid side L1_L2,,R,,1W,,Signed int > 0 BUY < 0 SELL
+,SHORT,170,Grid external Limter1 power_CT1_,,R,,1W,,Signed int
+,SHORT,171,Grid external Limter2 power_CT2_,,R,,1W,,Signed int
+,SHORT,172,Grid external Total Power,,R,,1W,,Signed int
+,SHORT,173,Inverter outputs L1 power,,R,,1W,,Signed int
+,SHORT,174,Inverter outputs L2 power,,R,,1W,,Signed int
+,SHORT,175,Inverter output Total power,,R,,1W,,Signed int
+,SHORT,176,Load side L1 power,,R,,1W,,Signed int
+,SHORT,177,Load side L2 power,,R,,1W,,Signed int
+,SHORT,178,Load side Total power,,R,,1W,,Signed int
+,SHORT,179,Load current L1,,R,,0.01A,,Signed int
+,SHORT,180,Load current L2,,R,,0.01A,,Signed int
+,,181,Gen Port Voltage L1_L2,,R,,,,
+,,182,Battery temperature,,R,0~3000,0.1C,,Real value of offset  Plus 1000 1200 is 20.0 ?
+,,183,Battery voltage,,R,,0.01V,,4100 mark of 41.0 V
+,,184,Battery capacity SOC,,R,0~100,1.00%,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,186,PV1 input power,,R,,1W,,
+,,187,PV2 input power,,R,,1W,,
+,SHORT,190,Battery output power,,R,,1W,,Signed int
+,SHORT,191,Battery output current,,R,,0.01A,,Signed int
+,,192,Load frequency,,R,,0.01Hz,,
+,,193,Inverter output frequency,,R,,0.01Hz,,
+,,194,Grid side relay status,,R,"{""1"": ""Open (Disconnect)"", ""2"": ""Closed""}",,,1 is Open (Disconnect) 2 is Closed
+,16BIT_FLAGS,195,Generator side relay status,,R,"{""b0"": ""Open"", ""b1"": ""Closed"", ""b2"": ""No Connection"", ""b3"": ""Closed when Generator is on""}",,,Low 4 indicates the state of generator relay 0 Open 1 Closed 2 No Connection 3 Closed when Generator is on.
+,,196,Generator relay Frequency,,R,,0.01Hz,,
