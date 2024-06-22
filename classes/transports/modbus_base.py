@@ -71,7 +71,7 @@ class modbus_base(transport_base):
                 sn2 = sn2 + str(data_bytes.decode('utf-8')) 
                 sn3 = str(data_bytes.decode('utf-8')) + sn3
 
-            time.sleep(self.modbus_delay) #sleep inbetween requests so modbus can rest
+            time.sleep(self.modbus_delay*2) #sleep inbetween requests so modbus can rest
         
         print(sn2)
         print(sn3)
