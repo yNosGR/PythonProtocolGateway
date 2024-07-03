@@ -43,14 +43,23 @@ sigineer_v0.11 = sigineer inverters
 growatt_2020_v1.24 = alt protocol for large growatt inverters - currently untested
 eg4_v58 = eg4 inverters ( EG4-6000XP ) - confirmed working
 srne_v3.9 = SRNE inverters - Untested
+victron_gx_3.3 = Victron GX Devices - Untested
+solark_v1.1 = SolarArk 8/12K Inverters - Untested
 hdhk_16ch_ac_module = some chinese current monitoring device :P
 ```
 
 more details on these protocols can be found in the wiki
 
 ### run as script
-```python3 -u protocol_gateway.py```
+```
+python3 -u protocol_gateway.py
+```
 
+or
+
+```
+python3 -u protocol_gateway.py config.cfg
+```
 
 ### install as service
 ppg can be used as a shorter service name ;)

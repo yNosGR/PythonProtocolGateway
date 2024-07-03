@@ -68,8 +68,8 @@ class mqtt(transport_base):
         self.holding_register_prefix = settings.get("holding_register_prefix", fallback="")
         self.input_register_prefix = settings.get("input_register_prefix", fallback="")
 
-        username = settings.get('user')
-        password = settings.get('pass')
+        username = settings.get('user', fallback="")
+        password = settings.get('pass', fallback="")
 
         if not username:
             raise ValueError("User is not set")

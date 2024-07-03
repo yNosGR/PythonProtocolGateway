@@ -3,7 +3,7 @@ from classes.protocol_settings import Registry_Type, protocol_settings
 from pymodbus.client.sync import ModbusSerialClient
 from .modbus_base import modbus_base
 from configparser import SectionProxy
-from defs.common import find_usb_serial_port, get_usb_serial_port_info
+from defs.common import find_usb_serial_port, get_usb_serial_port_info, strtoint
 
 class modbus_rtu(modbus_base):
     port : str = "/dev/ttyUSB0"
@@ -15,16 +15,20 @@ class modbus_rtu(modbus_base):
         #logger = logging.getLogger(__name__)
         #logging.basicConfig(level=logging.DEBUG)
 
-        #todo: implement send holding/input option? here?
+        super().__init__(settings, protocolSettings=protocolSettings)
+
 
         self.port = settings.get("port", "")
         if not self.port:
             raise ValueError("Port is not set")
         
         self.port = find_usb_serial_port(self.port) 
-        print("Serial Port : " + self.port + " = "+get_usb_serial_port_info(self.port)) #print for config convience
+        print("Serial Port : " + self.port + " = ", get_usb_serial_port_info(self.port)) #print for config convience
 
-        self.baudrate = settings.getint("baudrate", 9600)
+        if "baud" in self.protocolSettings.settings:
+            self.baudrate = strtoint(self.protocolSettings.settings["baud"])
+
+        self.baudrate = settings.getint("baudrate", self.baudrate)
 
         address : int = settings.getint("address", 0)
         self.addresses = [address]
@@ -33,7 +37,6 @@ class modbus_rtu(modbus_base):
                                      baudrate=int(self.baudrate), 
                                      stopbits=1, parity='N', bytesize=8, timeout=2
                                      )
-        super().__init__(settings, protocolSettings=protocolSettings)
         
     def read_registers(self, start, count=1, registry_type : Registry_Type = Registry_Type.INPUT, **kwargs):
 

@@ -86,7 +86,9 @@ class Data_Type(Enum):
         alias : dict[str,str] = {
             "UINT8" : "BYTE",
             "INT16" : "SHORT",
-            "UINT16" : "USHORT"
+            "UINT16" : "USHORT",
+            "UINT32" : "UINT",
+            "INT32" : "INT"
         }
         
         if name in alias:
@@ -134,6 +136,7 @@ class WriteMode(Enum):
         #common alternative names
         alias : dict[str,WriteMode] = {
             "R"     : "READ",
+            "NO"    : "READ",
             "READ"  : "READ",
             "WD"    : "READ",
             "RD"            : "READDISABLED",
@@ -142,7 +145,7 @@ class WriteMode(Enum):
             "D"             : "READDISABLED",
             "RW"    : "WRITE",
             "W"     : "WRITE",
-            "WRITE" : "WRITE"
+            "YES"   : "WRITE"
         }
         
         if name in alias:
@@ -436,8 +439,8 @@ class protocol_settings:
                         matched : bool = False
                         val_match = range_regex.search(row['values'])
                         if val_match:
-                            value_min = int(val_match.group('start'))
-                            value_max = int(val_match.group('end'))
+                            value_min = strtoint(val_match.group('start'))
+                            value_max = strtoint(val_match.group('end'))
                             matched = True
 
                         if data_type == Data_Type.ASCII:
@@ -621,6 +624,10 @@ class protocol_settings:
                 file = self.protocol + '.'+registry_type.name.lower()+'_registry_map.csv'
 
         path = settings_dir + '/' + file
+
+        #if path does not exist; nothing to load. skip.
+        if not os.path.exists(path):
+            return
 
         self.registry_map[registry_type] = self.load__registry(path, registry_type)
 

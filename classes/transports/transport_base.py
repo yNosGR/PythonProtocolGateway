@@ -59,7 +59,7 @@ class transport_base:
             self.read_interval = settings.getfloat("read_interval", self.read_interval)
             self.max_precision = settings.getint(["max_precision", "precision"], self.max_precision)
             if "write_enabled" in settings:
-                self.write_enabled = settings.getboolean("write_enabled", self.write_enabled)
+                self.write_enabled = settings.getboolean(["write_enabled", "enable_write"], self.write_enabled)
             else:
                 self.write_enabled = settings.getboolean("write", self.write_enabled)
             

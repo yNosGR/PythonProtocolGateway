@@ -1,4 +1,5 @@
 {
     "transport" : "modbus_rtu",
-    "baud" : 19200
+    "baud" : 19200,
+    "batch_size" : 40
 }

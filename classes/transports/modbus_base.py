@@ -7,6 +7,7 @@ from pymodbus.exceptions import ModbusIOException
 
 from .transport_base import transport_base
 from ..protocol_settings import Data_Type, Registry_Type, registry_map_entry, protocol_settings
+from defs.common import strtobool
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -20,11 +21,26 @@ class modbus_base(transport_base):
     analyze_protocol_save_load : bool = False
     first_connect : bool = True
 
+    send_holding_register : bool = True
+    send_input_register : bool = True
+
     def __init__(self, settings : 'SectionProxy', protocolSettings : 'protocol_settings' = None):
         super().__init__(settings, protocolSettings=protocolSettings)
 
-        self.analyze_protocol_enabled = settings.getboolean('analyze_protocol', fallback=self.analyze_protocol)
+        self.analyze_protocol_enabled = settings.getboolean('analyze_protocol', fallback=self.analyze_protocol_enabled)
         self.analyze_protocol_save_load = settings.getboolean('analyze_protocol_save_load', fallback=self.analyze_protocol_save_load)
+
+
+        #get defaults from protocol settings
+        if 'send_input_register' in self.protocolSettings.settings:
+            self.send_input_register = strtobool(self.protocolSettings.settings['send_input_register'])
+
+        if 'send_holding_register' in self.protocolSettings.settings:
+            self.send_holding_register = strtobool(self.protocolSettings.settings['send_holding_register'])
+
+        #allow enable/disable of which registers to send
+        self.send_holding_register = settings.getboolean('send_holding_register', fallback=self.send_holding_register)
+        self.send_input_register = settings.getboolean('send_input_register', fallback=self.send_input_register)
 
 
         if self.analyze_protocol_enabled:
@@ -71,7 +87,7 @@ class modbus_base(transport_base):
                 sn2 = sn2 + str(data_bytes.decode('utf-8')) 
                 sn3 = str(data_bytes.decode('utf-8')) + sn3
 
-            time.sleep(self.modbus_delay) #sleep inbetween requests so modbus can rest
+            time.sleep(self.modbus_delay*2) #sleep inbetween requests so modbus can rest
         
         print(sn2)
         print(sn3)
@@ -105,7 +121,16 @@ class modbus_base(transport_base):
 
     def read_data(self) -> dict[str, str]:
         info = {}
-        for registry_type in Registry_Type:
+        #modbus - only read input/holding registries
+        for registry_type in (Registry_Type.INPUT, Registry_Type.HOLDING):
+
+            #enable / disable input/holding register
+            if registry_type == Registry_Type.INPUT and not self.send_input_register:
+                continue
+
+            if registry_type == Registry_Type.HOLDING and not self.send_holding_register:
+                continue
+
             registry = self.read_modbus_registers(ranges=self.protocolSettings.get_registry_ranges(registry_type=registry_type), registry_type=registry_type)
             new_info = self.protocolSettings.process_registery(registry, self.protocolSettings.get_registry_map(registry_type))
 
