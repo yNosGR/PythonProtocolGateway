@@ -1,0 +1,7 @@
+{
+    "transport" : "modbus_rtu",
+    "baud" : 9600,
+    "batch_size" : 40,
+    "send_holding_register": true,
+    "send_input_register" : false
+}

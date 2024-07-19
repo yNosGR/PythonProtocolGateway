@@ -22,6 +22,8 @@ class Data_Type(Enum):
     '''32 bit signed int'''
     _16BIT_FLAGS = 7
     _8BIT_FLAGS = 8
+    _32BIT_FLAGS = 9
+
 
     ASCII = 84
     ''' 2 characters '''
@@ -104,7 +106,9 @@ class Data_Type(Enum):
                     Data_Type.UINT : 32,
                     Data_Type.SHORT : 16,
                     Data_Type.INT : 32,
-                    Data_Type._16BIT_FLAGS : 16
+                    Data_Type._8BIT_FLAGS : 8,
+                    Data_Type._16BIT_FLAGS : 16,
+                    Data_Type._32BIT_FLAGS : 32
                  }
         
         if data_type in sizes:
@@ -143,6 +147,7 @@ class WriteMode(Enum):
             "READDISABLED"  : "READDISABLED",
             "DISABLED"      : "READDISABLED",
             "D"             : "READDISABLED",
+            "R/W"    : "WRITE",
             "RW"    : "WRITE",
             "W"     : "WRITE",
             "YES"   : "WRITE"
@@ -659,15 +664,21 @@ class protocol_settings:
             value = int.from_bytes(register[:2], byteorder='big', signed=False)
         elif entry.data_type == Data_Type.SHORT:
             value = int.from_bytes(register[:2], byteorder='big', signed=True)
-        elif entry.data_type == Data_Type._16BIT_FLAGS or entry.data_type == Data_Type._8BIT_FLAGS:
+        elif entry.data_type == Data_Type._16BIT_FLAGS or entry.data_type == Data_Type._8BIT_FLAGS or entry.data_type == Data_Type._32BIT_FLAGS:
             #16 bit flags
             start_bit : int = 0
-            if entry.data_type == Data_Type._8BIT_FLAGS:
-                start_bit = 8
+            end_bit : int = 16 #default 16 bit
+            flag_size : int = Data_Type.getSize(entry.data_type)
+
+            if entry.register_bit > 0: #handle custom bit offset
+                start_bit = entry.register_bit
+
+            #handle custom sizes, less than 1 register
+            end_bit = flag_size + start_bit
             
             if entry.documented_name+'_codes' in self.protocolSettings.codes:
                 flags : list[str] = []
-                for i in range(start_bit, 16):  # Iterate over each bit position (0 to 15)
+                for i in range(start_bit, end_bit):  # Iterate over each bit position (0 to 15)
                     byte = i // 8 
                     bit = i % 8
                     val = register[byte]
@@ -680,7 +691,7 @@ class protocol_settings:
                 value = ",".join(flags)
             else:
                 flags : list[str] = []
-                for i in range(start_bit, 16):  # Iterate over each bit position (0 to 15)
+                for i in range(start_bit, end_bit):  # Iterate over each bit position (0 to 15)
                     # Check if the i-th bit is set
                     if (val >> i) & 1:
                         flags.append("1")
