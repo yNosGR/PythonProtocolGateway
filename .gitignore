@@ -2,7 +2,13 @@
 *.pyc
 .vscode
 settings.json
+
+# Ignore Python virtual environment directories
 virtualenv/*
+venv/
+env/
+.venv/
+.env/
 
 growatt2mqtt.cfg
 growatt2mqtt.service
