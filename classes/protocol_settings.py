@@ -773,32 +773,53 @@ class protocol_settings:
             value = -value
             #value = struct.unpack('<h', bytes([min(max(registry[item.register], 0), 255), min(max(registry[item.register+1], 0), 255)]))[0]
             #value = int.from_bytes(bytes([registry[item.register], registry[item.register + 1]]), byteorder='little', signed=True)
-        elif entry.data_type == Data_Type._16BIT_FLAGS or entry.data_type == Data_Type._8BIT_FLAGS:
-            val = registry[entry.register]
+        elif entry.data_type == Data_Type._16BIT_FLAGS or entry.data_type == Data_Type._8BIT_FLAGS or entry.data_type == Data_Type._32BIT_FLAGS:
+            
             #16 bit flags
             start_bit : int = 0
-            if entry.data_type == Data_Type._8BIT_FLAGS:
-                start_bit = 8
+            end_bit : int = 16 #default 16 bit
+            flag_size : int = Data_Type.getSize(entry.data_type)
+
+            if entry.register_bit > 0: #handle custom bit offset
+                start_bit = entry.register_bit
+
+            #handle custom sizes, less than 1 register
+            end_bit = flag_size + start_bit
             
             if entry.documented_name+'_codes' in self.codes:
                 flags : list[str] = []
-                for i in range(start_bit, 16):  # Iterate over each bit position (0 to 15)
-                    # Check if the i-th bit is set
-                    if (val >> i) & 1:
-                        flag_index = "b"+str(i)
-                        if flag_index in self.codes[entry.documented_name+'_codes']:
-                            flags.append(self.codes[entry.documented_name+'_codes'][flag_index])
+                offset : int = 0
+
+                while end_bit > 0:
+                    val = registry[entry.register + offset]
+                    end : int = 16 if end_bit >= 16 else end_bit
+                    for i in range(start_bit, end):  # Iterate over each bit position (0 to 15)
+                        # Check if the i-th bit is set
+                        if (val >> i) & 1:
+                            flag_index = "b"+str(i+offset)
+                            if flag_index in self.codes[entry.documented_name+'_codes']:
+                                flags.append(self.codes[entry.documented_name+'_codes'][flag_index])
+                    offset += 1
+                    end_bit -= 16
+
                         
                 value = ",".join(flags)
             else:
                 flags : list[str] = []
-                for i in range(start_bit, 16):  # Iterate over each bit position (0 to 15)
-                    # Check if the i-th bit is set
-                    if (val >> i) & 1:
-                        flags.append("1")
-                    else:
-                        flags.append("0")
+                offset : int = 0
+
+                while end_bit > 0:
+                    val = registry[entry.register + offset]
+                    end : int = 16 if end_bit >= 16 else end_bit
+                    for i in range(start_bit, end):  # Iterate over each bit position (0 to 15)
+                        # Check if the i-th bit is set
+                        if (val >> i) & 1:
+                            flags.append("1")
+                        else:
+                            flags.append("0")
+
                 value = ''.join(flags)
+                
         elif entry.data_type.value > 200 or entry.data_type == Data_Type.BYTE: #bit types
                 bit_size = Data_Type.getSize(entry.data_type)
                 bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
