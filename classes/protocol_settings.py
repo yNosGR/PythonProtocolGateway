@@ -817,9 +817,12 @@ class protocol_settings:
                             flags.append("1")
                         else:
                             flags.append("0")
+                    
+                    offset += 1
+                    end_bit -= 16
 
                 value = ''.join(flags)
-                
+
         elif entry.data_type.value > 200 or entry.data_type == Data_Type.BYTE: #bit types
                 bit_size = Data_Type.getSize(entry.data_type)
                 bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
