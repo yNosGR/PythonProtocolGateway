@@ -785,13 +785,21 @@ class protocol_settings:
 
             #handle custom sizes, less than 1 register
             end_bit = flag_size + start_bit
+
+            #calculate current offset for mutliregiter values, were assuming concatenate registers is in order, 0 being the first / lowest
+            #offset should always be >= 0
+            offset : int = entry.register - entry.concatenate_registers[0]
+
+            #compensate for current offset
+            end_bit = end_bit - (offset * 16)
+
+            val = registry[entry.register]
             
             if entry.documented_name+'_codes' in self.codes:
                 flags : list[str] = []
                 offset : int = 0
 
-                while end_bit > 0:
-                    val = registry[entry.register + offset]
+                if end_bit > 0:
                     end : int = 16 if end_bit >= 16 else end_bit
                     for i in range(start_bit, end):  # Iterate over each bit position (0 to 15)
                         # Check if the i-th bit is set
@@ -799,17 +807,12 @@ class protocol_settings:
                             flag_index = "b"+str(i+offset)
                             if flag_index in self.codes[entry.documented_name+'_codes']:
                                 flags.append(self.codes[entry.documented_name+'_codes'][flag_index])
-                    offset += 1
-                    end_bit -= 16
 
                         
                 value = ",".join(flags)
             else:
                 flags : list[str] = []
-                offset : int = 0
-
-                while end_bit > 0:
-                    val = registry[entry.register + offset]
+                if end_bit > 0:
                     end : int = 16 if end_bit >= 16 else end_bit
                     for i in range(start_bit, end):  # Iterate over each bit position (0 to 15)
                         # Check if the i-th bit is set
@@ -817,9 +820,6 @@ class protocol_settings:
                             flags.append("1")
                         else:
                             flags.append("0")
-                    
-                    offset += 1
-                    end_bit -= 16
 
                 value = ''.join(flags)
 
