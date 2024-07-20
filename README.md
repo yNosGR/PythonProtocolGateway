@@ -47,7 +47,7 @@ solark_v1.1 = SolarArk 8/12K Inverters - Untested
 hdhk_16ch_ac_module = some chinese current monitoring device :P
 
 eg4_v58 = eg4 inverters ( EG4-6000XP ) - confirmed working
-eg4_eg4_3000ehv_v1 = eg4 inverters ( EG4_3000EHV )
+eg4_3000ehv_v1 = eg4 inverters ( EG4_3000EHV )
 ```
 
 more details on these protocols can be found in the wiki
