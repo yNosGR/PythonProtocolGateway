@@ -16,6 +16,10 @@ def strtobool (val):
 
 def strtoint(val : str) -> int:
     ''' converts str to int, but allows for hex string input, identified by x prefix'''
+
+    if isinstance(val, int): #is already int. 
+        return val
+
     if val and val[0] == 'x':
         return int.from_bytes(bytes.fromhex(val[1:]), byteorder='big')
     
