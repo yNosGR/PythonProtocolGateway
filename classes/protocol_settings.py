@@ -786,9 +786,11 @@ class protocol_settings:
             #handle custom sizes, less than 1 register
             end_bit = flag_size + start_bit
 
+            offset : int = 0
             #calculate current offset for mutliregiter values, were assuming concatenate registers is in order, 0 being the first / lowest
             #offset should always be >= 0
-            offset : int = entry.register - entry.concatenate_registers[0]
+            if entry.concatenate:
+                offset : int = entry.register - entry.concatenate_registers[0]
 
             #compensate for current offset
             end_bit = end_bit - (offset * 16)
