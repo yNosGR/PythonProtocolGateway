@@ -362,7 +362,7 @@ class protocol_settings:
                     character_part = row['unit']
                 else:
                     # Use regular expressions to extract numeric and character parts
-                    matches = re.findall(r'([0-9.]+)|(.*?)$', row['unit'])
+                    matches = re.findall(r'(\-?[0-9.]+)|(.*?)$', row['unit'])
 
                     # Iterate over the matches and assign them to appropriate variables
                     for match in matches:
