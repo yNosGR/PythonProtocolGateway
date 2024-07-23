@@ -893,6 +893,10 @@ class protocol_settings:
                         concatenated_value = concatenated_value + str(concatenate_registry[key])
                         del concatenate_registry[key]
 
+                    #replace null characters with spaces and trim
+                    if entry.data_type == Data_Type.ASCII:
+                        concatenated_value = concatenated_value.replace("\x00", " ").strip()
+
                     info[entry.variable_name] = concatenated_value
             else:
                 info[entry.variable_name] = value
