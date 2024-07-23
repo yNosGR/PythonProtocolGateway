@@ -96,7 +96,7 @@ class Protocol_Gateway:
     def __init__(self, config_file : str):
         self.__log = logging.getLogger('invertermodbustomqqt_log')
         handler = logging.StreamHandler(sys.stdout)
-        self.__log.setLevel(logging.DEBUG)
+        #self.__log.setLevel(logging.DEBUG)
         formatter = logging.Formatter('[%(asctime)s]  {%(filename)s:%(lineno)d}  %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
         self.__log.addHandler(handler)
