@@ -343,7 +343,7 @@ class protocol_settings:
             if first_row.count(';') < first_row.count(','):
                 delimeter = ','
 
-            first_row = re.sub(r"\s+" + re.escape(delimeter) +"|" + re.escape(delimeter) +"\s+", delimeter, first_row) #trim values
+            first_row = re.sub(r"\s+" + re.escape(delimeter) +"|" + re.escape(delimeter) +r"\s+", delimeter, first_row) #trim values
 
             csvfile = itertools.chain([first_row], csvfile) #add clean header to begining of iterator 
 
@@ -379,7 +379,7 @@ class protocol_settings:
                 variable_name = row['variable name'] if row['variable name'] else row['documented name']
                 variable_name = variable_name = variable_name.strip().lower().replace(' ', '_').replace('__', '_') #clean name
                 
-                if re.search("[^a-zA-Z0-9\_]", variable_name) :
+                if re.search(r"[^a-zA-Z0-9\_]", variable_name) :
                     print("WARNING Invalid Name : " + str(variable_name) + " reg: " + str(row['register']) + " doc name: " + str(row['documented name']) + " path: " + str(path))
 
                 #convert to float
@@ -913,7 +913,7 @@ class protocol_settings:
                     return 0
 
             if entry.data_type == Data_Type.ASCII:
-                if val and not re.match('[^a-zA-Z0-9\_\-]', val): #validate ascii
+                if val and not re.match(r'[^a-zA-Z0-9\_\-]', val): #validate ascii
                     if entry.value_regex: #regex validation
                         if re.match(entry.value_regex, val):
                             if entry.concatenate:
