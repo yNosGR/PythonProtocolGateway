@@ -1,6 +1,7 @@
 import csv
 from dataclasses import dataclass
 from enum import Enum
+from typing import Union
 from defs.common import strtoint
 import itertools
 import json
@@ -860,7 +861,7 @@ class protocol_settings:
                 
         return value
 
-    def process_registery(self, registry : dict[int,int] | dict[int,bytes] , map : list[registry_map_entry]) -> dict[str,str]:
+    def process_registery(self, registry : Union[dict[int, int], dict[int, bytes]] , map : list[registry_map_entry]) -> dict[str,str]:
         '''process registry into appropriate datatypes and names -- maybe add func for single entry later?'''
         
         concatenate_registry : dict = {}
