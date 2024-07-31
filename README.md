@@ -1,9 +1,4 @@
-For advanced configuration help, please checkout the wiki :)
 
-### Rebranding Again... last time.
-if you installed this when it was called growatt2mqtt-hotnoob or InverterModBusToMQTT, you'll need to reinstall if you want to update. 
-
-# Python Protocol Gateway
 ![Python 3.9](https://github.com/HotNoob/PythonProtocolGateway/actions/workflows/python-3.9.yml/badge.svg)
 ![Python 3.10](https://github.com/HotNoob/PythonProtocolGateway/actions/workflows/python-3.10.yml/badge.svg)
 ![Python 3.11](https://github.com/HotNoob/PythonProtocolGateway/actions/workflows/python-3.11.yml/badge.svg)
@@ -11,7 +6,9 @@ if you installed this when it was called growatt2mqtt-hotnoob or InverterModBusT
 
 [![CodeQL](https://github.com/HotNoob/PythonProtocolGateway/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/HotNoob/PythonProtocolGateway/actions/workflows/github-code-scanning/codeql)
 
+For advanced configuration help, please checkout the wiki :)
 
+# Python Protocol Gateway
 
 Python Protocol Gateway is a python-based service that reads data via Modbus RTU or other protocols and translates the data for MQTT. 
 Configuration is handled via a small config files. 
@@ -142,6 +139,10 @@ variable_to_exclude2
 As i dive deeper into solar monitoring and general automation, i've come to the realization that ModBus RTU is the "standard" and basically... everything uses it. With how this is setup, it can be used with basically anything running ModBus RTU so long as you have the documentation. 
 
 So... don't mind me as i may add other devices such as battery bms' and... i have a home energy monitor on the way! so i'll be adding that when it arrives.
+
+### Rebranding Again... last time.
+if you installed this when it was called growatt2mqtt-hotnoob or InverterModBusToMQTT, you'll need to reinstall if you want to update. 
+
 
 ### donate
 this took me a while to make; and i had to make it because there werent any working solutions. 
