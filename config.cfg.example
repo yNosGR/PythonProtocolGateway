@@ -2,6 +2,9 @@
 log_level = DEBUG
 
 [transport.0] #name must be unique, ie: transport.modbus
+#logging level for transport
+log_level = DEBUG
+
 #rs485 / modbus device
 #protocol config files are located in protocols/
 protocol_version = v0.14

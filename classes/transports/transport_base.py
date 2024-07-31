@@ -33,8 +33,12 @@ class transport_base:
 
     def __init__(self, settings : 'SectionProxy', protocolSettings : 'protocol_settings' = None) -> None:
         
+        #apply log level to logger
+        self._log_level = logging.getLevelName(settings.get('log_level', fallback='INFO'))
         self._log : logging.Logger = logging.getLogger(__name__)
-        logging.basicConfig(level=logging.DEBUG)
+
+        self._log.setLevel(self._log_level)
+        logging.basicConfig(level=self._log_level)
 
         self.transport_name = settings.name #section name
         

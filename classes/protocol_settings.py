@@ -1,6 +1,7 @@
 import csv
 from dataclasses import dataclass
 from enum import Enum
+from typing import Union
 from defs.common import strtoint
 import itertools
 import json
@@ -22,6 +23,8 @@ class Data_Type(Enum):
     '''32 bit signed int'''
     _16BIT_FLAGS = 7
     _8BIT_FLAGS = 8
+    _32BIT_FLAGS = 9
+
 
     ASCII = 84
     ''' 2 characters '''
@@ -104,7 +107,9 @@ class Data_Type(Enum):
                     Data_Type.UINT : 32,
                     Data_Type.SHORT : 16,
                     Data_Type.INT : 32,
-                    Data_Type._16BIT_FLAGS : 16
+                    Data_Type._8BIT_FLAGS : 8,
+                    Data_Type._16BIT_FLAGS : 16,
+                    Data_Type._32BIT_FLAGS : 32
                  }
         
         if data_type in sizes:
@@ -143,6 +148,7 @@ class WriteMode(Enum):
             "READDISABLED"  : "READDISABLED",
             "DISABLED"      : "READDISABLED",
             "D"             : "READDISABLED",
+            "R/W"    : "WRITE",
             "RW"    : "WRITE",
             "W"     : "WRITE",
             "YES"   : "WRITE"
@@ -337,7 +343,7 @@ class protocol_settings:
             if first_row.count(';') < first_row.count(','):
                 delimeter = ','
 
-            first_row = re.sub(r"\s+" + re.escape(delimeter) +"|" + re.escape(delimeter) +"\s+", delimeter, first_row) #trim values
+            first_row = re.sub(r"\s+" + re.escape(delimeter) +"|" + re.escape(delimeter) +r"\s+", delimeter, first_row) #trim values
 
             csvfile = itertools.chain([first_row], csvfile) #add clean header to begining of iterator 
 
@@ -357,7 +363,7 @@ class protocol_settings:
                     character_part = row['unit']
                 else:
                     # Use regular expressions to extract numeric and character parts
-                    matches = re.findall(r'([0-9.]+)|(.*?)$', row['unit'])
+                    matches = re.findall(r'(\-?[0-9.]+)|(.*?)$', row['unit'])
 
                     # Iterate over the matches and assign them to appropriate variables
                     for match in matches:
@@ -373,7 +379,7 @@ class protocol_settings:
                 variable_name = row['variable name'] if row['variable name'] else row['documented name']
                 variable_name = variable_name = variable_name.strip().lower().replace(' ', '_').replace('__', '_') #clean name
                 
-                if re.search("[^a-zA-Z0-9\_]", variable_name) :
+                if re.search(r"[^a-zA-Z0-9\_]", variable_name) :
                     print("WARNING Invalid Name : " + str(variable_name) + " reg: " + str(row['register']) + " doc name: " + str(row['documented name']) + " path: " + str(path))
 
                 #convert to float
@@ -659,15 +665,21 @@ class protocol_settings:
             value = int.from_bytes(register[:2], byteorder='big', signed=False)
         elif entry.data_type == Data_Type.SHORT:
             value = int.from_bytes(register[:2], byteorder='big', signed=True)
-        elif entry.data_type == Data_Type._16BIT_FLAGS or entry.data_type == Data_Type._8BIT_FLAGS:
+        elif entry.data_type == Data_Type._16BIT_FLAGS or entry.data_type == Data_Type._8BIT_FLAGS or entry.data_type == Data_Type._32BIT_FLAGS:
             #16 bit flags
             start_bit : int = 0
-            if entry.data_type == Data_Type._8BIT_FLAGS:
-                start_bit = 8
+            end_bit : int = 16 #default 16 bit
+            flag_size : int = Data_Type.getSize(entry.data_type)
+
+            if entry.register_bit > 0: #handle custom bit offset
+                start_bit = entry.register_bit
+
+            #handle custom sizes, less than 1 register
+            end_bit = flag_size + start_bit
             
             if entry.documented_name+'_codes' in self.protocolSettings.codes:
                 flags : list[str] = []
-                for i in range(start_bit, 16):  # Iterate over each bit position (0 to 15)
+                for i in range(start_bit, end_bit):  # Iterate over each bit position (0 to 15)
                     byte = i // 8 
                     bit = i % 8
                     val = register[byte]
@@ -680,7 +692,7 @@ class protocol_settings:
                 value = ",".join(flags)
             else:
                 flags : list[str] = []
-                for i in range(start_bit, 16):  # Iterate over each bit position (0 to 15)
+                for i in range(start_bit, end_bit):  # Iterate over each bit position (0 to 15)
                     # Check if the i-th bit is set
                     if (val >> i) & 1:
                         flags.append("1")
@@ -762,32 +774,58 @@ class protocol_settings:
             value = -value
             #value = struct.unpack('<h', bytes([min(max(registry[item.register], 0), 255), min(max(registry[item.register+1], 0), 255)]))[0]
             #value = int.from_bytes(bytes([registry[item.register], registry[item.register + 1]]), byteorder='little', signed=True)
-        elif entry.data_type == Data_Type._16BIT_FLAGS or entry.data_type == Data_Type._8BIT_FLAGS:
-            val = registry[entry.register]
+        elif entry.data_type == Data_Type._16BIT_FLAGS or entry.data_type == Data_Type._8BIT_FLAGS or entry.data_type == Data_Type._32BIT_FLAGS:
+            
             #16 bit flags
             start_bit : int = 0
-            if entry.data_type == Data_Type._8BIT_FLAGS:
-                start_bit = 8
+            end_bit : int = 16 #default 16 bit
+            flag_size : int = Data_Type.getSize(entry.data_type)
+
+            if entry.register_bit > 0: #handle custom bit offset
+                start_bit = entry.register_bit
+
+            #handle custom sizes, less than 1 register
+            end_bit = flag_size + start_bit
+
+            offset : int = 0
+            #calculate current offset for mutliregiter values, were assuming concatenate registers is in order, 0 being the first / lowest
+            #offset should always be >= 0
+            if entry.concatenate:
+                offset : int = entry.register - entry.concatenate_registers[0]
+
+            #compensate for current offset
+            end_bit = end_bit - (offset * 16)
+
+            val = registry[entry.register]
             
             if entry.documented_name+'_codes' in self.codes:
                 flags : list[str] = []
-                for i in range(start_bit, 16):  # Iterate over each bit position (0 to 15)
-                    # Check if the i-th bit is set
-                    if (val >> i) & 1:
-                        flag_index = "b"+str(i)
-                        if flag_index in self.codes[entry.documented_name+'_codes']:
-                            flags.append(self.codes[entry.documented_name+'_codes'][flag_index])
+                offset : int = 0
+
+                if end_bit > 0:
+                    end : int = 16 if end_bit >= 16 else end_bit
+                    for i in range(start_bit, end):  # Iterate over each bit position (0 to 15)
+                        # Check if the i-th bit is set
+                        if (val >> i) & 1:
+                            flag_index = "b"+str(i+offset)
+                            if flag_index in self.codes[entry.documented_name+'_codes']:
+                                flags.append(self.codes[entry.documented_name+'_codes'][flag_index])
+
                         
                 value = ",".join(flags)
             else:
                 flags : list[str] = []
-                for i in range(start_bit, 16):  # Iterate over each bit position (0 to 15)
-                    # Check if the i-th bit is set
-                    if (val >> i) & 1:
-                        flags.append("1")
-                    else:
-                        flags.append("0")
+                if end_bit > 0:
+                    end : int = 16 if end_bit >= 16 else end_bit
+                    for i in range(start_bit, end):  # Iterate over each bit position (0 to 15)
+                        # Check if the i-th bit is set
+                        if (val >> i) & 1:
+                            flags.append("1")
+                        else:
+                            flags.append("0")
+
                 value = ''.join(flags)
+
         elif entry.data_type.value > 200 or entry.data_type == Data_Type.BYTE: #bit types
                 bit_size = Data_Type.getSize(entry.data_type)
                 bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
@@ -823,7 +861,7 @@ class protocol_settings:
                 
         return value
 
-    def process_registery(self, registry : dict[int,int] | dict[int,bytes] , map : list[registry_map_entry]) -> dict[str,str]:
+    def process_registery(self, registry : Union[dict[int, int], dict[int, bytes]] , map : list[registry_map_entry]) -> dict[str,str]:
         '''process registry into appropriate datatypes and names -- maybe add func for single entry later?'''
         
         concatenate_registry : dict = {}
@@ -856,6 +894,10 @@ class protocol_settings:
                         concatenated_value = concatenated_value + str(concatenate_registry[key])
                         del concatenate_registry[key]
 
+                    #replace null characters with spaces and trim
+                    if entry.data_type == Data_Type.ASCII:
+                        concatenated_value = concatenated_value.replace("\x00", " ").strip()
+
                     info[entry.variable_name] = concatenated_value
             else:
                 info[entry.variable_name] = value
@@ -871,7 +913,7 @@ class protocol_settings:
                     return 0
 
             if entry.data_type == Data_Type.ASCII:
-                if val and not re.match('[^a-zA-Z0-9\_\-]', val): #validate ascii
+                if val and not re.match(r'[^a-zA-Z0-9\_\-]', val): #validate ascii
                     if entry.value_regex: #regex validation
                         if re.match(entry.value_regex, val):
                             if entry.concatenate:
