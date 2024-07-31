@@ -9,6 +9,8 @@ if you installed this when it was called growatt2mqtt-hotnoob or InverterModBusT
 ![Python 3.11](https://github.com/HotNoob/PythonProtocolGateway/actions/workflows/python-3.11.yml/badge.svg)
 ![Python 3.12](https://github.com/HotNoob/PythonProtocolGateway/actions/workflows/python-3.12.yml/badge.svg)
 
+[![CodeQL](https://github.com/HotNoob/PythonProtocolGateway/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/HotNoob/PythonProtocolGateway/actions/workflows/github-code-scanning/codeql)
+
 
 
 Python Protocol Gateway is a python-based service that reads data via Modbus RTU or other protocols and translates the data for MQTT. 
