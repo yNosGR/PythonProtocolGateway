@@ -1,0 +1,857 @@
+[
+    {
+        "id": "ad61139ef3586516",
+        "type": "tab",
+        "label": "Power",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "b8060c08be29d9e1",
+        "type": "mqtt in",
+        "z": "ad61139ef3586516",
+        "name": "",
+        "topic": "home/inverter",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "72f44d8d5dc652b9",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 150,
+        "y": 300,
+        "wires": [
+            [
+                "88878b9756918f5f",
+                "d36e85b8bc53af06"
+            ]
+        ]
+    },
+    {
+        "id": "88878b9756918f5f",
+        "type": "json",
+        "z": "ad61139ef3586516",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 310,
+        "y": 340,
+        "wires": [
+            [
+                "78b4433cec878827",
+                "e1e9cbf1350096c8",
+                "86c6d17041f2003b",
+                "da6d947baa1da42c",
+                "e08d4093dda99ad0",
+                "1d7f17b3d2b029b6"
+            ]
+        ]
+    },
+    {
+        "id": "78b4433cec878827",
+        "type": "function",
+        "z": "ad61139ef3586516",
+        "name": "Battery%",
+        "func": "msg.payload = parseInt(msg.payload.battery_percentage);\nreturn  msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 80,
+        "wires": [
+            [
+                "1d38585bc5621771",
+                "bd96e579e0812186"
+            ]
+        ]
+    },
+    {
+        "id": "e1e9cbf1350096c8",
+        "type": "function",
+        "z": "ad61139ef3586516",
+        "name": "PV watts",
+        "func": "msg.payload = parseInt(msg.payload.pv_average_power);\nreturn  msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 580,
+        "wires": [
+            [
+                "8f5b9f02b433df96",
+                "43fbe3bfd3853b75"
+            ]
+        ]
+    },
+    {
+        "id": "86c6d17041f2003b",
+        "type": "function",
+        "z": "ad61139ef3586516",
+        "name": "Inverter watts",
+        "func": "msg.payload = parseInt(msg.payload.average_inverter_power);\nreturn  msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 180,
+        "wires": [
+            [
+                "0105090ce29ddaf8",
+                "ba9e797d845d405f"
+            ]
+        ]
+    },
+    {
+        "id": "da6d947baa1da42c",
+        "type": "function",
+        "z": "ad61139ef3586516",
+        "name": "Battery current",
+        "func": "msg.payload = parseInt(msg.payload.battery_average_current);\nreturn  msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 280,
+        "wires": [
+            [
+                "cc296b2f715a23d0",
+                "c46dd39782b7060e"
+            ]
+        ]
+    },
+    {
+        "id": "e08d4093dda99ad0",
+        "type": "function",
+        "z": "ad61139ef3586516",
+        "name": "PV volts",
+        "func": "msg.payload = parseInt(msg.payload.pv_average_voltage);\nreturn  msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 380,
+        "wires": [
+            [
+                "09c25755d07f1d4c",
+                "a92ddca6789a2b07"
+            ]
+        ]
+    },
+    {
+        "id": "1d7f17b3d2b029b6",
+        "type": "function",
+        "z": "ad61139ef3586516",
+        "name": "PV amps",
+        "func": "msg.payload = parseInt(msg.payload.pv_average_current);\nreturn  msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 480,
+        "wires": [
+            [
+                "f6fc199b69b78a85",
+                "daae263b537e292d"
+            ]
+        ]
+    },
+    {
+        "id": "d36e85b8bc53af06",
+        "type": "influxdb out",
+        "z": "ad61139ef3586516",
+        "influxdb": "d96c8f45d69c34f7",
+        "name": "solar",
+        "measurement": "solar",
+        "precision": "s",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "organisation",
+        "bucket": "bucket",
+        "x": 310,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "cc296b2f715a23d0",
+        "type": "ui-text",
+        "z": "ad61139ef3586516",
+        "group": "c1ae7cf29d96619f",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "name": "Battery Current",
+        "label": "Battery Current",
+        "format": "{{msg.payload}}",
+        "layout": "row-left",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#717171",
+        "className": "",
+        "x": 740,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "09c25755d07f1d4c",
+        "type": "ui-text",
+        "z": "ad61139ef3586516",
+        "group": "c1ae7cf29d96619f",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "name": "PV Volts",
+        "label": "PV Volts",
+        "format": "{{msg.payload}}",
+        "layout": "row-left",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#717171",
+        "className": "",
+        "x": 720,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "f6fc199b69b78a85",
+        "type": "ui-text",
+        "z": "ad61139ef3586516",
+        "group": "c1ae7cf29d96619f",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "name": "PV Amps",
+        "label": "PV Amps",
+        "format": "{{msg.payload}}",
+        "layout": "row-left",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#717171",
+        "className": "",
+        "x": 720,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "c46dd39782b7060e",
+        "type": "ui-chart",
+        "z": "ad61139ef3586516",
+        "group": "1e8a657e6df71c26",
+        "name": "Battery Current weekly",
+        "label": "Battery Current weekly",
+        "order": 2,
+        "chartType": "line",
+        "category": "topic",
+        "categoryType": "msg",
+        "xAxisLabel": "",
+        "xAxisProperty": "",
+        "xAxisPropertyType": "property",
+        "xAxisType": "time",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "yAxisLabel": "",
+        "yAxisProperty": "",
+        "ymin": "",
+        "ymax": "",
+        "action": "append",
+        "stackSeries": false,
+        "pointShape": "line",
+        "pointRadius": 4,
+        "showLegend": true,
+        "removeOlder": "1",
+        "removeOlderUnit": "604800",
+        "removeOlderPoints": "",
+        "colors": [
+            "#0095ff",
+            "#ff0000",
+            "#ff7f0e",
+            "#2ca02c",
+            "#a347e1",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": "25",
+        "height": 8,
+        "className": "",
+        "x": 760,
+        "y": 280,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "bd96e579e0812186",
+        "type": "ui-chart",
+        "z": "ad61139ef3586516",
+        "group": "1e8a657e6df71c26",
+        "name": "Battery % weekly",
+        "label": "Battery % weekly",
+        "order": 1,
+        "chartType": "line",
+        "category": "topic",
+        "categoryType": "msg",
+        "xAxisLabel": "",
+        "xAxisProperty": "",
+        "xAxisPropertyType": "property",
+        "xAxisType": "time",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "yAxisLabel": "",
+        "yAxisProperty": "",
+        "ymin": "20",
+        "ymax": "100",
+        "action": "append",
+        "stackSeries": false,
+        "pointShape": "line",
+        "pointRadius": 4,
+        "showLegend": true,
+        "removeOlder": "1",
+        "removeOlderUnit": "604800",
+        "removeOlderPoints": "",
+        "colors": [
+            "#0095ff",
+            "#ff0000",
+            "#ff7f0e",
+            "#2ca02c",
+            "#a347e1",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": "25",
+        "height": "8",
+        "className": "",
+        "x": 750,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ba9e797d845d405f",
+        "type": "ui-chart",
+        "z": "ad61139ef3586516",
+        "group": "1e8a657e6df71c26",
+        "name": "Inverter Watts weekly",
+        "label": "Inverter Watts yearly",
+        "order": 3,
+        "chartType": "line",
+        "category": "topic",
+        "categoryType": "msg",
+        "xAxisLabel": "",
+        "xAxisProperty": "",
+        "xAxisPropertyType": "property",
+        "xAxisType": "time",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "yAxisLabel": "",
+        "yAxisProperty": "",
+        "ymin": "",
+        "ymax": "",
+        "action": "append",
+        "stackSeries": false,
+        "pointShape": "line",
+        "pointRadius": 4,
+        "showLegend": true,
+        "removeOlder": "1",
+        "removeOlderUnit": "604800",
+        "removeOlderPoints": "",
+        "colors": [
+            "#0095ff",
+            "#ff0000",
+            "#ff7f0e",
+            "#2ca02c",
+            "#a347e1",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": "27",
+        "height": 8,
+        "className": "",
+        "x": 760,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a92ddca6789a2b07",
+        "type": "ui-chart",
+        "z": "ad61139ef3586516",
+        "group": "1e8a657e6df71c26",
+        "name": "PV volts weekly",
+        "label": "PV volts weekly",
+        "order": 5,
+        "chartType": "line",
+        "category": "topic",
+        "categoryType": "msg",
+        "xAxisLabel": "",
+        "xAxisProperty": "",
+        "xAxisPropertyType": "property",
+        "xAxisType": "time",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "yAxisLabel": "",
+        "yAxisProperty": "",
+        "ymin": "",
+        "ymax": "",
+        "action": "append",
+        "stackSeries": false,
+        "pointShape": "line",
+        "pointRadius": 4,
+        "showLegend": true,
+        "removeOlder": "1",
+        "removeOlderUnit": "604800",
+        "removeOlderPoints": "",
+        "colors": [
+            "#0095ff",
+            "#ff0000",
+            "#ff7f0e",
+            "#2ca02c",
+            "#a347e1",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": "25",
+        "height": 8,
+        "className": "",
+        "x": 740,
+        "y": 420,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "daae263b537e292d",
+        "type": "ui-chart",
+        "z": "ad61139ef3586516",
+        "group": "1e8a657e6df71c26",
+        "name": "PV Amps weekly",
+        "label": "PV Amps weekly",
+        "order": 6,
+        "chartType": "line",
+        "category": "topic",
+        "categoryType": "msg",
+        "xAxisLabel": "",
+        "xAxisProperty": "",
+        "xAxisPropertyType": "property",
+        "xAxisType": "time",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "yAxisLabel": "",
+        "yAxisProperty": "",
+        "ymin": "",
+        "ymax": "",
+        "action": "append",
+        "stackSeries": false,
+        "pointShape": "line",
+        "pointRadius": 4,
+        "showLegend": true,
+        "removeOlder": "1",
+        "removeOlderUnit": "604800",
+        "removeOlderPoints": "",
+        "colors": [
+            "#0095ff",
+            "#ff0000",
+            "#ff7f0e",
+            "#2ca02c",
+            "#a347e1",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": "25",
+        "height": 8,
+        "className": "",
+        "x": 750,
+        "y": 520,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8f5b9f02b433df96",
+        "type": "ui-chart",
+        "z": "ad61139ef3586516",
+        "group": "1e8a657e6df71c26",
+        "name": "PV watts weekly",
+        "label": "PV watts weekly",
+        "order": 4,
+        "chartType": "line",
+        "category": "topic",
+        "categoryType": "msg",
+        "xAxisLabel": "",
+        "xAxisProperty": "",
+        "xAxisPropertyType": "property",
+        "xAxisType": "time",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "yAxisLabel": "",
+        "yAxisProperty": "",
+        "ymin": "",
+        "ymax": "",
+        "action": "append",
+        "stackSeries": false,
+        "pointShape": "line",
+        "pointRadius": 4,
+        "showLegend": true,
+        "removeOlder": "1",
+        "removeOlderUnit": "604800",
+        "removeOlderPoints": "",
+        "colors": [
+            "#0095ff",
+            "#ff0000",
+            "#ff7f0e",
+            "#2ca02c",
+            "#a347e1",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": "25",
+        "height": 8,
+        "className": "",
+        "x": 740,
+        "y": 620,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "1d38585bc5621771",
+        "type": "ui-gauge",
+        "z": "ad61139ef3586516",
+        "name": "Battery%",
+        "group": "c1ae7cf29d96619f",
+        "order": 1,
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "Battery",
+        "units": "percent",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#ed333b"
+            },
+            {
+                "from": "30",
+                "color": "#00b500"
+            },
+            {
+                "from": "100",
+                "color": "#00b500"
+            }
+        ],
+        "min": 0,
+        "max": "100",
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 720,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "0105090ce29ddaf8",
+        "type": "ui-gauge",
+        "z": "ad61139ef3586516",
+        "name": "Inverter Watts",
+        "group": "c1ae7cf29d96619f",
+        "order": 3,
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "Inverter Watts",
+        "units": "Watts",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#5cd65c"
+            },
+            {
+                "from": "2000",
+                "color": "#ffc800"
+            },
+            {
+                "from": "2500",
+                "color": "#ea5353"
+            }
+        ],
+        "min": 0,
+        "max": "3000",
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 740,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "43fbe3bfd3853b75",
+        "type": "ui-gauge",
+        "z": "ad61139ef3586516",
+        "name": "PV Watts",
+        "group": "c1ae7cf29d96619f",
+        "order": 2,
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "PV Watts",
+        "units": "watts",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#00b500"
+            },
+            {
+                "from": "2000",
+                "color": "#00b500"
+            }
+        ],
+        "min": 0,
+        "max": "2000",
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 720,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "72f44d8d5dc652b9",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "solar.local",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "d96c8f45d69c34f7",
+        "type": "influxdb",
+        "hostname": "localhost",
+        "port": "8086",
+        "protocol": "http",
+        "database": "solar",
+        "name": "Local InfluxDB",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "1.x",
+        "url": "http://localhost:8086",
+        "timeout": "",
+        "rejectUnauthorized": true
+    },
+    {
+        "id": "c1ae7cf29d96619f",
+        "type": "ui-group",
+        "name": "Solar",
+        "page": "6c94012c0f659b4a",
+        "width": "27",
+        "height": "27",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "1e8a657e6df71c26",
+        "type": "ui-group",
+        "name": "History",
+        "page": "6ffaf41a8a97aea4",
+        "width": "27",
+        "height": "27",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "6c94012c0f659b4a",
+        "type": "ui-page",
+        "name": "Home",
+        "ui": "27422c9ae99871f3",
+        "path": "/Home",
+        "icon": "",
+        "layout": "flex",
+        "theme": "b16fbb4fa652ab1c",
+        "order": 1,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "6ffaf41a8a97aea4",
+        "type": "ui-page",
+        "name": "History",
+        "ui": "27422c9ae99871f3",
+        "path": "/History",
+        "icon": "",
+        "layout": "grid",
+        "theme": "b16fbb4fa652ab1c",
+        "order": 2,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "27422c9ae99871f3",
+        "type": "ui-base",
+        "name": "My Dashboard",
+        "path": "/dashboard",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "showPageTitle": true,
+        "navigationStyle": "default",
+        "titleBarStyle": "default"
+    },
+    {
+        "id": "b16fbb4fa652ab1c",
+        "type": "ui-theme",
+        "name": "Default Theme",
+        "colors": {
+            "surface": "#3d3846",
+            "primary": "#9a9996",
+            "bgPage": "#241f31",
+            "groupBg": "#241f31",
+            "groupOutline": "#3d3846"
+        },
+        "sizes": {
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "4px",
+            "widgetGap": "12px"
+        }
+    }
+]
