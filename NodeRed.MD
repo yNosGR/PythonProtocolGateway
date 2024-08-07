@@ -42,22 +42,27 @@ Create a new `mosquitto` password file while adding an mqtt user `sudo mosquitto
 
 ## Optional: Install/Enable InfluxDB
 If you want to do some historical logging, InfluxDB is a better solution than the node-red internal db.
-`sudo apt install influxdb && sudo systemctl enable influxdb && sudo systemctl start  
+1. Install influx `sudo apt install influxdb influxdb-client && sudo systemctl enable influxdb && sudo systemctl start  `
+2. Create the `solar` db in influx `echo "CREATE DATABASE solar" | influx`
+3. Drag an `InfluxDB Out Node` out into the workspace, connect a wire from the `mqtt in` node to the `InfluxDB Out` node. Double click the node, click the `+`, give it a name and the name of the database from above (solar). Click add. It will return you to the node setup, where you will give it a name and a measurement (`solar` in my setup), click `save` or `done`.
+
+### TODO: create some nodes that consume the DB info.
 
 ## Create your flow or import the example flow (for EG4 users)
 ### Import example
-Goi to the hamburger, down to `Import`, click `select a file to import`, find `nodered-example-flow.json` in the repo.
+Go to the hamburger, down to `Import`, click `select a file to import`, find `nodered-example-flow.json` in the repo.
 
 ### Create your own flow
-1. Drag an `mqtt in` node out to the workspace. click the pencil to create a new mqtt-broker-node. Give it a name, enter the hostname in the server field (`solar.local` in our example), click security, add the username and password, click `add` orf `update`. Under `Topic`, enter `home/inverter`. Click done.
-hh
-2. Drag a json node out onto the workspace, connect the input (left) side of the `json` node to the output of the `mqtt in` node.
-3. For each of the things you want on the dashboard, add in a `function` node. this is to filter out the thing you want displayed, in this example, battery percentage.
+1. Drag a `debug` node out - we will be using this throughout to see how the data flows. You can see the debug output by dragging a wire from an output to the debug's input and turning it on.
+2. Drag an `mqtt in` node out to the workspace. click the pencil to create a new mqtt-broker-node. Give it a name, enter the hostname in the server field (`solar.local` in our example), click security, add the username and password, click `add` orf `update`. Under `Topic`, enter `home/inverter`. Click done.
+3. Drag a json node out onto the workspace, connect the input (left) side of the `json` node to the output of the `mqtt in` node.
+4. For each of the things you want on the dashboard, add in a `function` node. This is to filter out the thing you want displayed, in this example, battery percentage. Drag a wire from the `json` node to the function you just created.
 ```
 msg.payload = parseInt(msg.payload.battery_percentage);
 return  msg;
 ```
 click done.
+4. From here on out, you will be setting up the wigets you want to see. Checkout the [flowfuse dashboard wiki](https://dashboard.flowfuse.com/getting-started.html) for more info.  For each of the functions you just created, create a `chart`, `gauge`, or `text` node to display the things the way you want them displayed. You will need to create a group and page node on the first, the ui will help you throuhg that.
 
 ## Edit the nginx config file to point at the dashboard
 Use sudo and your favorite editor to edit `/etc/nginx/sites-enabled/default`. jump down to the `server_name _` section and replace everything between the `{` and `}` so it's like below.
@@ -71,4 +76,5 @@ Use sudo and your favorite editor to edit `/etc/nginx/sites-enabled/default`. ju
 ``` 
 
 You should now be able to browse to [Solar.local/Home](http://solar.local/Home/)
+
 
