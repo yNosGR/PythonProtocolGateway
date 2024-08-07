@@ -59,3 +59,16 @@ return  msg;
 ```
 click done.
 
+## Edit the nginx config file to point at the dashboard
+Use sudo and your favorite editor to edit `/etc/nginx/sites-enabled/default`. jump down to the `server_name _` section and replace everything between the `{` and `}` so it's like below.
+
+```        server_name _;
+                location / {
+                include proxy_params;
+                rewrite ^/(.*) /dashboard/$1 break;
+                proxy_pass http://127.0.0.1:1880;
+        }
+``` 
+
+You should now be able to browse to [Solar.local/Home](http://solar.local/Home/)
+
