@@ -50,6 +50,7 @@ srne_v3.9 = SRNE inverters - Untested
 victron_gx_3.3 = Victron GX Devices - Untested
 solark_v1.1 = SolarArk 8/12K Inverters - Untested
 hdhk_16ch_ac_module = some chinese current monitoring device :P
+srne_2021_v1.96 = SRNE inverters 2021+ (tested at ASF48100S200-H)
 
 eg4_v58 = eg4 inverters ( EG4-6000XP ) - confirmed working
 eg4_3000ehv_v1 = eg4 inverters ( EG4_3000EHV )
