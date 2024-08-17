@@ -1,3 +1,5 @@
+# EG4 to MQTT
+
 ## Hardware
 1. USB to RS485 Adapter (RJ45) from EG4 **or** USB to RS485 Adapter & RJ45 Ethernet cable ( or 3 wires ) 
 2. Connect RJ45 ethernet cable to an avaiable RS485/Modbus port:
