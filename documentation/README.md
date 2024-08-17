@@ -9,29 +9,29 @@ This README file contains an index of all files in the documentation directory.
 
 - [grafana.md](dashboards/grafana.md)
 - [homeassistant.md](dashboards/homeassistant.md)
-- [nodered.md](dashboards/nodered.md) - # Setting up PythonProtocolGateway on a RasPi with NodeRed Dashboard 2.0
+- [nodered.md](dashboards/nodered.md) -  Setting up PythonProtocolGateway on a RasPi with NodeRed Dashboard 2.0
 
 **devices**
 
 
-- [EG4.md](devices/EG4.md) - ## Hardware
-- [Growatt.md](devices/Growatt.md) - ## Hardware
-- [Sigineer.md](devices/Sigineer.md) - ## Hardware
-- [SOK.md](devices/SOK.md) - ### rs485a pinout ###
-- [SolArk.md](devices/SolArk.md) - ## Hardware
+- [EG4.md](devices/EG4.md) -  Hardware
+- [Growatt.md](devices/Growatt.md) -  Hardware
+- [Sigineer.md](devices/Sigineer.md) -  Hardware
+- [SOK.md](devices/SOK.md) -  rs485a pinout 
+- [SolArk.md](devices/SolArk.md) -  Hardware
 
 **usage**
 
 
-- [creating_and_editing_protocols.md](usage/creating_and_editing_protocols.md) - # CSV
-- [protocols.md](usage/protocols.md) - ## Custom / Editing Protocols
-- [transports.md](usage/transports.md) - ## Protocol
+- [creating_and_editing_protocols.md](usage/creating_and_editing_protocols.md) -  CSV
+- [protocols.md](usage/protocols.md) -  Custom / Editing Protocols
+- [transports.md](usage/transports.md) -  Protocol
 
 **usage/configuration_examples**
 
 
-- [modbus_rtu_to_modbus_tcp.md](usage/configuration_examples/modbus_rtu_to_modbus_tcp.md) - ### ModBus RTU to ModBus TCP
-- [modbus_rtu_to_mqtt.md](usage/configuration_examples/modbus_rtu_to_mqtt.md) - ### ModBus RTU to MQTT
+- [modbus_rtu_to_modbus_tcp.md](usage/configuration_examples/modbus_rtu_to_modbus_tcp.md) -  ModBus RTU to ModBus TCP
+- [modbus_rtu_to_mqtt.md](usage/configuration_examples/modbus_rtu_to_mqtt.md) -  ModBus RTU to MQTT
 
 **3rdparty**
 

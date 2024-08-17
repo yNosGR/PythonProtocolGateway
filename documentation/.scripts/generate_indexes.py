@@ -8,7 +8,7 @@ def extract_first_header(file_path):
         for line in file:
             line = line.strip()
             if line.startswith("#"):
-                return line
+                return line.replace('#', '')
     return None
 
 
