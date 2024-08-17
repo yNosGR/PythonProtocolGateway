@@ -1,3 +1,5 @@
+# Creating and Editing Protocols ‐ JSON ‐ CSV
+
 "Protocols" are defined through 2 file types. 
 
 The first is .json, which contains the default settings and optionally codes. 

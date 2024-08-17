@@ -1,3 +1,5 @@
+# Transports
+
 A transport is configured by creating a configuration section, starting with "transport."
 ```
 [transport.0]

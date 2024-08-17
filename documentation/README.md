@@ -23,9 +23,9 @@ This README file contains an index of all files in the documentation directory.
 **usage**
 
 
-- [creating_and_editing_protocols.md](usage/creating_and_editing_protocols.md) -  CSV
+- [creating_and_editing_protocols.md](usage/creating_and_editing_protocols.md) -  Creating and Editing Protocols ‐ JSON ‐ CSV
 - [protocols.md](usage/protocols.md) -  Custom / Editing Protocols
-- [transports.md](usage/transports.md) -  Protocol
+- [transports.md](usage/transports.md) -  Transports
 
 **usage/configuration_examples**
 
