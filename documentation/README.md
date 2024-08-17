@@ -14,11 +14,11 @@ This README file contains an index of all files in the documentation directory.
 **devices**
 
 
-- [EG4.md](devices/EG4.md) -  Hardware
-- [Growatt.md](devices/Growatt.md) -  Hardware
-- [Sigineer.md](devices/Sigineer.md) -  Hardware
-- [SOK.md](devices/SOK.md) -  rs485a pinout 
-- [SolArk.md](devices/SolArk.md) -  Hardware
+- [EG4.md](devices/EG4.md) -  EG4 to MQTT
+- [Growatt.md](devices/Growatt.md) -  Growatt To MQTT
+- [Sigineer.md](devices/Sigineer.md) -  Sigineer to MQTT
+- [SOK.md](devices/SOK.md) -  SOK to MQTT
+- [SolArk.md](devices/SolArk.md) -  SolArk to MQTT
 
 **usage**
 
@@ -49,7 +49,7 @@ This README file contains an index of all files in the documentation directory.
 - [hdhk_16ch_ac_module_modbus_rtu.jpeg](3rdparty/protocols/hdhk_16ch_ac_module_modbus_rtu.jpeg)
 - [hdhk_16ch_ac_module_modbus_rtu_chinese.pdf](3rdparty/protocols/hdhk_16ch_ac_module_modbus_rtu_chinese.pdf)
 - [hdhk_16ch_ac_module_modbus_rtu_translated_english.pdf](3rdparty/protocols/hdhk_16ch_ac_module_modbus_rtu_translated_english.pdf)
-- [MAX Series Modbus RTU Protocol.pdf]("3rdparty/protocols/MAX Series Modbus RTU Protocol.pdf")
+- [MAX Series Modbus RTU Protocol.pdf](3rdparty/protocols/MAX Series Modbus RTU Protocol.pdf)
 - [OffGrid-Modbus-RS485RS232-RTU-Protocol-V0.14-20210420.pdf](3rdparty/protocols/OffGrid-Modbus-RS485RS232-RTU-Protocol-V0.14-20210420.pdf)
 - [PACE-BMS-Modbus-Protocol-for-RS485-V1.3-20170627.pdf](3rdparty/protocols/PACE-BMS-Modbus-Protocol-for-RS485-V1.3-20170627.pdf)
 - [PACE-BMS-RS485-communication-protocol-20180615.pdf](3rdparty/protocols/PACE-BMS-RS485-communication-protocol-20180615.pdf)

@@ -1,3 +1,5 @@
+# SolArk to MQTT
+
 Currently untested / unconfirmed. ppg version 1.1.3 and higher
 
 ## Hardware

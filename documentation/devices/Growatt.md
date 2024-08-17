@@ -1,3 +1,5 @@
+# Growatt To MQTT
+
 ## Hardware
 1. USB-B or USB-A cable
 2. for models with a DB9 port a DB9 RS232 adapter is required. "Before use RS232 communication, you should make sure the follow PIN1 and PIN2 are OFF"
