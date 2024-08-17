@@ -1,6 +1,9 @@
 import logging
 from classes.protocol_settings import Registry_Type, protocol_settings
 
+import inspect
+
+
 try:
     from pymodbus.client.sync import ModbusSerialClient
 except ImportError:
@@ -38,10 +41,19 @@ class modbus_rtu(modbus_base):
         address : int = settings.getint("address", 0)
         self.addresses = [address]
 
-        self.client = ModbusSerialClient(method='rtu', port=self.port, 
-                                     baudrate=int(self.baudrate), 
-                                     stopbits=1, parity='N', bytesize=8, timeout=2
-                                     )
+        # Get the signature of the __init__ method
+        init_signature = inspect.signature(ModbusSerialClient.__init__)
+
+        if 'method' in init_signature.parameters:
+            self.client = ModbusSerialClient(method='rtu', port=self.port, 
+                                        baudrate=int(self.baudrate), 
+                                        stopbits=1, parity='N', bytesize=8, timeout=2
+                                        )
+        else:
+            self.client = ModbusSerialClient(port=self.port, 
+                            baudrate=int(self.baudrate), 
+                            stopbits=1, parity='N', bytesize=8, timeout=2
+                            )
         
     def read_registers(self, start, count=1, registry_type : Registry_Type = Registry_Type.INPUT, **kwargs):
 
