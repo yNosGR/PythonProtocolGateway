@@ -23,7 +23,7 @@ def generate_readme(directory : str, folder_order : str = [], output_file : str 
         folder_lines : dict[str, list[str]] = {}
 
         for root, dirs, files in os.walk(directory):
-            relative_folder = os.path.relpath(root, directory).replace("\\", "/") #use linux path structre
+            relative_folder = os.path.relpath(root, directory).replace("\\", "/") #use linux path structure
 
             #exclude . folders
             if relative_folder[0] == '.':
@@ -37,7 +37,7 @@ def generate_readme(directory : str, folder_order : str = [], output_file : str 
                 previous_folder = relative_folder
 
             for file in files:
-                file_path = os.path.relpath(os.path.join(root, file), directory)
+                file_path = os.path.relpath(os.path.join(root, file), directory).replace("\\", "/") #use linux path structure
                 
                 if file.endswith(".md"):
                     first_header = extract_first_header(os.path.join(root, file))
