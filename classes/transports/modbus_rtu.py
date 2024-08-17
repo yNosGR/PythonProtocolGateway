@@ -19,6 +19,8 @@ class modbus_rtu(modbus_base):
     baudrate : int = 9600
     client : ModbusSerialClient 
 
+    pymodbus_address_arg = 'unit'
+
     def __init__(self, settings : SectionProxy, protocolSettings : protocol_settings = None):
         #logger = logging.getLogger(__name__)
         #logging.basicConfig(level=logging.DEBUG)
@@ -41,6 +43,11 @@ class modbus_rtu(modbus_base):
         address : int = settings.getint("address", 0)
         self.addresses = [address]
 
+        # pymodbus compatability; unit was renamed to address
+        if 'address' in inspect.signature(ModbusSerialClient.read_holding_registers).parameters:
+            self.pymodbus_address_arg = 'address'
+
+
         # Get the signature of the __init__ method
         init_signature = inspect.signature(ModbusSerialClient.__init__)
 
@@ -60,6 +67,10 @@ class modbus_rtu(modbus_base):
         if 'unit' not in kwargs:
             kwargs = {'unit': int(self.addresses[0]), **kwargs}
 
+        #compatability
+        if self.pymodbus_address_arg != 'unit':
+            kwargs['address'] = kwargs.pop('unit')
+
         if registry_type == Registry_Type.INPUT:
             return self.client.read_input_registers(start, count, **kwargs)
         elif registry_type == Registry_Type.HOLDING:
@@ -71,6 +82,10 @@ class modbus_rtu(modbus_base):
         
         if 'unit' not in kwargs:
             kwargs = {'unit': self.addresses[0], **kwargs}
+
+        #compatability
+        if self.pymodbus_address_arg != 'unit':
+            kwargs['address'] = kwargs.pop('unit')
 
         self.client.write_register(register, value, **kwargs) #function code 0x06 writes to holding register
 
