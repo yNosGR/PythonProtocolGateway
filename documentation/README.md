@@ -49,7 +49,7 @@ This README file contains an index of all files in the documentation directory.
 - [hdhk_16ch_ac_module_modbus_rtu.jpeg](3rdparty/protocols/hdhk_16ch_ac_module_modbus_rtu.jpeg)
 - [hdhk_16ch_ac_module_modbus_rtu_chinese.pdf](3rdparty/protocols/hdhk_16ch_ac_module_modbus_rtu_chinese.pdf)
 - [hdhk_16ch_ac_module_modbus_rtu_translated_english.pdf](3rdparty/protocols/hdhk_16ch_ac_module_modbus_rtu_translated_english.pdf)
-- [MAX Series Modbus RTU Protocol.pdf](3rdparty/protocols/MAX Series Modbus RTU Protocol.pdf)
+- [MAX Series Modbus RTU Protocol.pdf]("3rdparty/protocols/MAX Series Modbus RTU Protocol.pdf")
 - [OffGrid-Modbus-RS485RS232-RTU-Protocol-V0.14-20210420.pdf](3rdparty/protocols/OffGrid-Modbus-RS485RS232-RTU-Protocol-V0.14-20210420.pdf)
 - [PACE-BMS-Modbus-Protocol-for-RS485-V1.3-20170627.pdf](3rdparty/protocols/PACE-BMS-Modbus-Protocol-for-RS485-V1.3-20170627.pdf)
 - [PACE-BMS-RS485-communication-protocol-20180615.pdf](3rdparty/protocols/PACE-BMS-RS485-communication-protocol-20180615.pdf)
