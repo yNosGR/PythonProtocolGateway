@@ -50,6 +50,9 @@ def generate_readme(directory : str, folder_order : str = [], output_file : str 
                 file_path = os.path.relpath(os.path.join(root, file), directory).replace("\\", "/") #use linux path structure
                 file_path = urllib.parse.quote(file_path)
                 
+                if file == "README.md": #skip
+                    continue
+
                 if file.endswith(".md"):
                     first_header = extract_first_header(os.path.join(root, file))
                     if first_header:
