@@ -1,6 +1,6 @@
-
-
 import os
+import urllib
+
 
 def extract_first_header(file_path):
     """Extract the first header from a markdown file."""
@@ -38,6 +38,7 @@ def generate_readme(directory : str, folder_order : str = [], output_file : str 
 
             for file in files:
                 file_path = os.path.relpath(os.path.join(root, file), directory).replace("\\", "/") #use linux path structure
+                file_path = urllib.parse.quote(file_path)
                 
                 if file.endswith(".md"):
                     first_header = extract_first_header(os.path.join(root, file))
