@@ -1,6 +1,7 @@
 import csv
 from dataclasses import dataclass
 from enum import Enum
+import glob
 from typing import Union
 from defs.common import strtoint
 import itertools
@@ -300,7 +301,12 @@ class protocol_settings:
         if not file:
             file = self.protocol + '.json'
 
-        path = settings_dir + '/' + file
+        path = self.find_protocol_file(file, settings_dir)
+
+        #if path does not exist; nothing to load. skip.
+        if not path:
+            print("ERROR: '"+file+"' not found")
+            return
 
         with open(path) as f:
             self.codes = json.loads(f.read())
@@ -618,6 +624,23 @@ class protocol_settings:
                 ranges.append((min(registers), max(registers)-min(registers)+1)) ## APPENDING A TUPLE!
 
         return ranges
+    def find_protocol_file(self, file : str, base_dir : str = '' ) -> str:
+
+        path = base_dir + '/' + file
+        if os.path.exists(path):
+            return path
+        
+        suffix = file.split('_', 1)[0]
+
+        path = base_dir + '/' + suffix +'/' + file
+        if os.path.exists(path):
+            return path
+        
+        #find file by name, recurisvely. last resort
+        search_pattern = os.path.join(base_dir, '**', file)
+        matches = glob.glob(search_pattern, recursive=True)
+        return matches[0] if matches else None
+
 
     def load_registry_map(self, registry_type : Registry_Type, file : str = '', settings_dir : str = ''):
         if not settings_dir:
@@ -629,10 +652,10 @@ class protocol_settings:
             else:
                 file = self.protocol + '.'+registry_type.name.lower()+'_registry_map.csv'
 
-        path = settings_dir + '/' + file
+        path = self.find_protocol_file(file, settings_dir)
 
         #if path does not exist; nothing to load. skip.
-        if not os.path.exists(path):
+        if not path:
             return
 
         self.registry_map[registry_type] = self.load__registry(path, registry_type)
