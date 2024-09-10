@@ -2,10 +2,17 @@
 #pip install "python-can[gs_usb]"
 
 import can #v4.2.0+
-import usb #pyusb - requires https://github.com/mcuee/libusb-win32 - windows only.
+
+if False:
+    import usb #pyusb - requires https://github.com/mcuee/libusb-win32
 
 
-bus = can.interface.Bus(bustype='gs_usb', channel='can0', bitrate=500000)
+
+# Candlelight firmware on Linux
+bus = can.interface.Bus(interface='socketcan', channel='can0', bitrate=500000)
+
+# Stock slcan firmware on Linux
+#bus = can.interface.Bus(bustype='slcan', channel='/dev/ttyACM0', bitrate=500000)
 
 
 # Stock slcan firmware on Windows
@@ -26,6 +33,8 @@ try:
     while True:
         msg = bus.recv()  # Block until a message is received
 
+        print(str(msg.arbitration_id) + "- "+ hex(msg.arbitration_id))
+
         # Check if it's the State of Charge (SoC) message (ID: 0x0FFF)
         if msg.arbitration_id == 0x0FFF:
             # The data is a 2-byte value (un16)
@@ -33,6 +42,19 @@ try:
             soc = int.from_bytes(soc_bytes, byteorder='big', signed=False) / 100.0
             
             print(f"State of Charge: {soc:.2f}%")
+
+        if msg.arbitration_id == 0x0355:
+            # Extract and print SOC value (U16, 0.01%)
+            soc_value = int.from_bytes(msg.data[0:0 + 2], byteorder='little')
+            print(f"State of Charge (SOC) Value: {soc_value / 100:.2f}%")
+
+            # Extract and print SOH value (U16, 1%)
+            soh_value = int.from_bytes(msg.data[2:2 + 2], byteorder='little')
+            print(f"State of Health (SOH) Value: {soh_value:.2f}%")
+
+            # Extract and print HiRes SOC value (U16, 0.01%)
+            hires_soc_value = int.from_bytes(msg.data[4:4 + 2], byteorder='little')
+            print(f"High Resolution SOC Value: {hires_soc_value / 100:.2f}%")
 
 except KeyboardInterrupt:
     print("Listening stopped.")
