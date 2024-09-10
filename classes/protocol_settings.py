@@ -673,7 +673,11 @@ class protocol_settings:
     def process_register_bytes(self, registry : dict[int,bytes], entry : registry_map_entry):
         ''' process bytes into data'''
 
-        register = registry[entry.register]
+        if isinstance(registry[entry.register], tuple):
+            register = registry[entry.register][0] #can bus uses tuple for timestamp
+        else:
+            register = registry[entry.register]
+            
         if entry.register_byte > 0:
             register = register[entry.register_byte:]
 
