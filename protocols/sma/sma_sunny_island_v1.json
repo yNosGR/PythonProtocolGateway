@@ -1,0 +1,4 @@
+{
+    "transport" : "canbus",
+    "baud" : 500000
+}
