@@ -233,6 +233,8 @@ class protocol_settings:
     settings : dict[str, str]
     ''' default settings provided by protocol json '''
 
+    byteorder : str = "big"
+
     def __init__(self, protocol : str, settings_dir : str = 'protocols'):
         self.protocol = protocol
         self.settings_dir = settings_dir
@@ -265,6 +267,9 @@ class protocol_settings:
             self.transport = self.settings["reader"]
         else:
             self.transport = "modbus_rtu"
+
+        if "byteorder" in self.settings: #handle byte order for ints n stuff
+            self.byteorder = self.settings["byteorder"]
 
 
         for registry_type in Registry_Type:
@@ -321,13 +326,13 @@ class protocol_settings:
 
     def load__registry(self, path, registry_type : Registry_Type = Registry_Type.INPUT) -> list[registry_map_entry]: 
         registry_map : list[registry_map_entry] = []
-        register_regex = re.compile(r'(?P<register>(?:0?x[\dA-Z]+|[\d]+))\.(b(?P<bit>x?\d{1,2})|(?P<byte>x?\d{1,2}))')
+        register_regex = re.compile(r'(?P<register>(?:0?x[\da-z]+|[\d]+))\.(b(?P<bit>x?\d{1,2})|(?P<byte>x?\d{1,2}))')
 
         data_type_regex = re.compile(r'(?P<datatype>\w+)\.(?P<length>\d+)')
 
-        range_regex = re.compile(r'(?P<reverse>r|)(?P<start>(?:0?x[\dA-Z]+|[\d]+))[\-~](?P<end>(?:0?x[\dA-Z]+|[\d]+))')
+        range_regex = re.compile(r'(?P<reverse>r|)(?P<start>(?:0?x[\da-z]+|[\d]+))[\-~](?P<end>(?:0?x[\da-z]+|[\d]+))')
         ascii_value_regex = re.compile(r'(?P<regex>^\[.+\]$)')
-        list_regex = re.compile(r'\s*(?:(?P<range_start>(?:0?x[\dA-Z]+|[\d]+))-(?P<range_end>(?:0?x[\dA-Z]+|[\d]+))|(?P<element>[^,\s][^,]*?))\s*(?:,|$)')
+        list_regex = re.compile(r'\s*(?:(?P<range_start>(?:0?x[\da-z]+|[\d]+))-(?P<range_end>(?:0?x[\da-z]+|[\d]+))|(?P<element>[^,\s][^,]*?))\s*(?:,|$)')
 
 
         if not os.path.exists(path): #return empty is file doesnt exist.
@@ -471,6 +476,7 @@ class protocol_settings:
                 register : int = -1
                 register_bit : int = 0
                 register_byte : int = -1
+                row['register'] = row['register'].lower() #ensure is all lower case
                 match = register_regex.search(row['register'])
                 if match:
                     register = strtoint(match.group('register'))
@@ -685,13 +691,13 @@ class protocol_settings:
             register = register[:entry.data_type_size]
 
         if entry.data_type == Data_Type.UINT:
-            value = int.from_bytes(register[:4], byteorder='big', signed=False)
+            value = int.from_bytes(register[:4], byteorder=self.byteorder, signed=False)
         elif entry.data_type == Data_Type.INT:
-            value = int.from_bytes(register[:4], byteorder='big', signed=True)
+            value = int.from_bytes(register[:4], byteorder=self.byteorder, signed=True)
         elif entry.data_type == Data_Type.USHORT:
-            value = int.from_bytes(register[:2], byteorder='big', signed=False)
+            value = int.from_bytes(register[:2], byteorder=self.byteorder, signed=False)
         elif entry.data_type == Data_Type.SHORT:
-            value = int.from_bytes(register[:2], byteorder='big', signed=True)
+            value = int.from_bytes(register[:2], byteorder=self.byteorder, signed=True)
         elif entry.data_type == Data_Type._16BIT_FLAGS or entry.data_type == Data_Type._8BIT_FLAGS or entry.data_type == Data_Type._32BIT_FLAGS:
             #16 bit flags
             start_bit : int = 0
@@ -704,7 +710,7 @@ class protocol_settings:
             #handle custom sizes, less than 1 register
             end_bit = flag_size + start_bit
             
-            if entry.documented_name+'_codes' in self.protocolSettings.codes:
+            if entry.documented_name+'_codes' in self.codes:
                 flags : list[str] = []
                 for i in range(start_bit, end_bit):  # Iterate over each bit position (0 to 15)
                     byte = i // 8 
@@ -713,8 +719,8 @@ class protocol_settings:
                     # Check if the i-th bit is set
                     if (val >> bit) & 1:
                         flag_index = "b"+str(i)
-                        if flag_index in self.protocolSettings.codes[entry.documented_name+'_codes']:
-                            flags.append(self.protocolSettings.codes[entry.documented_name+'_codes'][flag_index])
+                        if flag_index in self.codes[entry.documented_name+'_codes']:
+                            flags.append(self.codes[entry.documented_name+'_codes'][flag_index])
                         
                 value = ",".join(flags)
             else:
@@ -765,6 +771,22 @@ class protocol_settings:
                 value = register.decode("utf-8") #convert bytes to ascii
             except UnicodeDecodeError as e:
                 print("UnicodeDecodeError:", e)
+
+        #apply unit mod
+        if entry.unit_mod != float(1):
+            value = value * entry.unit_mod
+
+        #apply codes
+        if (entry.data_type != Data_Type._16BIT_FLAGS and
+            entry.documented_name+'_codes' in self.codes):
+            try:
+                cleanval = str(int(value))
+        
+                if cleanval in self.codes[entry.documented_name+'_codes']:
+                    value = self.codes[entry.documented_name+'_codes'][cleanval]
+            except:
+                #do nothing; try is for intval
+                value = value
 
         return value
 
@@ -859,7 +881,7 @@ class protocol_settings:
                 bit_index = entry.register_bit
                 value = (registry[entry.register] >> bit_index) & bit_mask
         elif entry.data_type == Data_Type.ASCII:
-            value = registry[entry.register].to_bytes((16 + 7) // 8, byteorder='big') #convert to ushort to bytes
+            value = registry[entry.register].to_bytes((16 + 7) // 8, byteorder=self.byteorder) #convert to ushort to bytes
             try:
                 value = value.decode("utf-8") #convert bytes to ascii
             except UnicodeDecodeError as e:

@@ -79,7 +79,7 @@ class transport_base:
         else:
             return cls._get_top_class_name(cls_obj.__bases__[0])
 
-    def connect(self, transports : 'transport_base'):
+    def connect(self):
         pass
 
     def write_data(self, data : dict[str, registry_map_entry]):
