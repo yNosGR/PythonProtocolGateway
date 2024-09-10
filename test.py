@@ -1,3 +1,44 @@
+
+#pip install "python-can[gs_usb]"
+
+import can #v4.2.0+
+import usb #pyusb - requires https://github.com/mcuee/libusb-win32 - windows only.
+
+
+bus = can.interface.Bus(bustype='gs_usb', channel='can0', bitrate=500000)
+
+
+# Stock slcan firmware on Windows
+#bus = can.interface.Bus(bustype='slcan', channel='COM0', bitrate=500000)
+
+# Candlelight firmware on windows
+#USB\VID_1D50&PID_606F&REV_0000&MI_00
+if False:
+    dev = usb.core.find(idVendor=0x1D50, idProduct=0x606F)
+    bus = can.Bus(interface="gs_usb", channel=dev.product, index=0, bitrate=250000)
+
+
+
+
+
+# Listen for messages
+try:
+    while True:
+        msg = bus.recv()  # Block until a message is received
+
+        # Check if it's the State of Charge (SoC) message (ID: 0x0FFF)
+        if msg.arbitration_id == 0x0FFF:
+            # The data is a 2-byte value (un16)
+            soc_bytes = msg.data[:2]
+            soc = int.from_bytes(soc_bytes, byteorder='big', signed=False) / 100.0
+            
+            print(f"State of Charge: {soc:.2f}%")
+
+except KeyboardInterrupt:
+    print("Listening stopped.")
+
+quit()
+
 import re
 import ast
 

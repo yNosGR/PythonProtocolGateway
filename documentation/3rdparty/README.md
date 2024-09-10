@@ -26,6 +26,7 @@ This README file contains an index of all files in the documentation directory.
 - [PYLON LFP Battery communication protocol - RS485 V2.8 20161216.pdf](protocols/PYLON%20LFP%20Battery%20communication%20protocol%20-%20RS485%20V2.8%2020161216.pdf)
 - [RS485-protocol-pylon-low-voltage-V3.3-20180821.pdf](protocols/RS485-protocol-pylon-low-voltage-V3.3-20180821.pdf)
 - [Sigineer-Solar-Inverter-RS485-Port-Modbus-RTU-Protocol-v0.11-20200302.pdf](protocols/Sigineer-Solar-Inverter-RS485-Port-Modbus-RTU-Protocol-v0.11-20200302.pdf)
+- [SMA CAN protocol.pdf](protocols/SMA%20CAN%20protocol.pdf)
 - [Sol-Ark ModBus V1.1.pdf](protocols/Sol-Ark%20ModBus%20V1.1.pdf)
 - [SRNE_MODBUS_v3.9.pdf](protocols/SRNE_MODBUS_v3.9.pdf)
 - [Victron VE-Bus-products-MK2-Protocol-3-14.pdf](protocols/Victron%20VE-Bus-products-MK2-Protocol-3-14.pdf)
