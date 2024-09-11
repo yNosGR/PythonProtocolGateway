@@ -19,12 +19,24 @@ def strtoint(val : str) -> int:
 
     if isinstance(val, int): #is already int. 
         return val
+    
+    val = val.lower()
 
     if val and val[0] == 'x':
-        return int.from_bytes(bytes.fromhex(val[1:]), byteorder='big')
+        val = val[1:]
+        # Pad the string with a leading zero
+        if len(val) % 2 != 0:
+            val = '0' + val
+
+        return int.from_bytes(bytes.fromhex(val), byteorder='big')
     
     if val and val.startswith("0x"):
-        return int.from_bytes(bytes.fromhex(val[2:]), byteorder='big')
+        val = val[2:]
+        # Pad the string with a leading zero
+        if len(val) % 2 != 0:
+            val = '0' + val
+
+        return int.from_bytes(bytes.fromhex(val), byteorder='big')
     
     if not val: #empty
         return 0

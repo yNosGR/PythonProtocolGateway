@@ -2,6 +2,8 @@ import re
 import time
 import can
 import asyncio
+import threading
+
 
 
 from .transport_base import transport_base
@@ -27,7 +29,13 @@ class canbus(transport_base):
     bus : can.BusABC = None
     ''' holds canbus interface'''
 
-    lock : asyncio.Lock = asyncio.Lock()
+    reader = can.AsyncBufferedReader()
+
+
+    thread : threading.Thread
+    ''' main thread for async loop'''
+
+    lock : threading.Lock = threading.Lock()
     loop : asyncio.AbstractEventLoop = None
 
     cache : dict [int,(bytes, float)] = {}
@@ -53,23 +61,38 @@ class canbus(transport_base):
         self.cacheTimeout = settings.getint(["cacheTimeout", "cache_timeout"], self.cacheTimeout)
 
         self.bus = can.interface.Bus(interface=self.interface, channel=self.port, bitrate=self.baudrate)
+        self.reader = can.AsyncBufferedReader()
+
 
         # Set up an event loop and run the async function
         self.loop = asyncio.get_event_loop()
-        self.loop.run_until_complete(self.read_bus(self.bus))
+
+        notifier = can.Notifier(self.bus, [self.reader], loop=self.loop)
+
+
+        thread = threading.Thread(target=self.start_loop)
+        thread.start()
+
+        self.connected = True
 
         self.init_after_connect()
-        
+    
+    def start_loop(self):
+        self.loop.run_until_complete(self.read_bus(self.bus))
 
     async def read_bus(self, bus : can.BusABC):
         ''' read canbus asynco and store results in cache'''
         while True:
-            msg : can.Message = await bus.recv()  # This will be non-blocking with asyncio
+            msg = await self.reader.get_message()  # This will be non-blocking with asyncio
             if msg:
                 print(f"Received message: {msg.arbitration_id:X}, data: {msg.data}")
                 
-                async with self.lock:
-                    self.cache[msg.arbitration_id] = (msg.data, time.time())
+                with self.lock: 
+                    #convert bytearray to bytes; were working with bytes. 
+                    self.cache[msg.arbitration_id] = (bytes(msg.data), time.time())
+                
+            await asyncio.sleep(0.5)
+
 
     def clean_cache(self):
         current_time = time.time()
@@ -78,9 +101,9 @@ class canbus(transport_base):
             # Create a list of keys to remove (don't remove while iterating)
             keys_to_delete = [msg_id for msg_id, (_, timestamp) in self.cache.items() if current_time - timestamp > self.cacheTimeout]
         
-        # Remove old messages from the dictionary
-        for key in keys_to_delete:
-            del self.cache[key]
+            # Remove old messages from the dictionary
+            for key in keys_to_delete:
+                del self.cache[key]
 
     def init_after_connect(self):
         return True
@@ -142,21 +165,19 @@ class canbus(transport_base):
     def read_data(self) -> dict[str, str]:
         ''' because canbus is passive / broadcast, were just going to read from the cache '''
 
-        self.clean_cache() #clean cache of old data
-
         info = {}
-        #modbus - only read input/holding registries
-        for registry_type in (Registry_Type.ZERO):
 
-            #remove timestamp for processing
-            registry = {key: value[0] for key, value in self.cache.items()}
+        #remove timestamp for processing
+        registry = {key: value[0] for key, value in self.cache.items()}
 
-            new_info = self.protocolSettings.process_registery(registry, self.protocolSettings.get_registry_map(registry_type))
+        new_info = self.protocolSettings.process_registery(registry, self.protocolSettings.get_registry_map(Registry_Type.ZERO))
 
-            info.update(new_info) 
+        info.update(new_info) 
 
         if not info:
             self._log.info("Register/Cache is Empty; no new information reported.")
+
+        self.clean_cache() #clean cache of old data
 
         return info
 

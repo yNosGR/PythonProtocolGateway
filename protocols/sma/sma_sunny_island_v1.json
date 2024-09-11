@@ -1,4 +1,5 @@
 {
     "transport" : "canbus",
-    "baud" : 500000
+    "baud" : 500000,
+    "byteorder" : "little"
 }
