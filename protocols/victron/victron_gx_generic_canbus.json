@@ -1,0 +1,6 @@
+{
+    "transport" : "canbus",
+    "baud" : 500000,
+    "note" : "this appears to be a common 'generic' victron canbus implementation used by various batteries, built upon the sma sunny island protocol. some documentation leads me to believe this is for victron gx devices"
+
+}
