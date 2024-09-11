@@ -7,8 +7,9 @@ AOLithium has multiple protocols, which are set via the dip switches.
 ## SMA / Victron CanBus
 ```
 protocol_version = victron_gx_generic_canbus
-
 ```
+
+sma_sunny_island_v1 can also be used, but provides less information
 
 ### CanBus pinout
 see manual
