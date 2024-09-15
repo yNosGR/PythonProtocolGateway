@@ -111,17 +111,17 @@ variable name,data type,register,documented_name,description,customer write,valu
 ,ASCII,0150~0159,Version_information,,RW,,,
 ,ASCII,0160~0169,Model_SN,,RW,,,BMS Manufacturer
 ,ASCII,0170~0179,PACK_SN,,RW,,,PACK Manufacturer
-,,200,LOG_read_control,,,,,
-,BYTE,201,Year,,RW,,,2018=18(Year)+2000
-,BYTE,201.b8,Month,,RW,,,
-,BYTE,202,Day,,RW,,,
-,BYTE,202.b8,Hour,,RW,,,
-,BYTE,203,Minute,,RW,,,
-,BYTE,203.b8,Second,,RW,,,
-,SHORT,204,Current,,R,10mA,,Positive: charging Negative: discharging
-,,205,Voltage_of_pack,,R,10mV,,
-,,206,Remain_capacity,,R,10mAH,,
-,,207,Full_capacity,,R,10mAH,,
+,,200,LOG_read_control,,D,,,
+,BYTE,201,Year,,D,,,2018=18(Year)+2000
+,BYTE,201.b8,Month,,D,,,
+,BYTE,202,Day,,D,,,
+,BYTE,202.b8,Hour,,D,,,
+,BYTE,203,Minute,,D,,,
+,BYTE,203.b8,Second,,D,,,
+,SHORT,204,Current,,RD,10mA,,Positive: charging Negative: discharging
+,,205,Voltage_of_pack,,RD,10mV,,
+,,206,Remain_capacity,,RD,10mAH,,
+,,207,Full_capacity,,RD,10mAH,,
 ,,208,Cell_voltage_1,,RD,mV,,"Voltage of 16 cells, 2 byte for each cell"
 ,,209,Cell_voltage_2,,RD,mV,,
 ,,210,Cell_voltage_3,,RD,mV,,
