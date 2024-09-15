@@ -3,6 +3,8 @@ import time
 import can
 import asyncio
 import threading
+import platform
+import os
 
 
 
@@ -17,7 +19,6 @@ if TYPE_CHECKING:
 class canbus(transport_base):
     ''' canbus is a more passive protocol; todo to include active commands to trigger canbus responses '''
 
-
     interface : str = 'socketcan'
     ''' bustype / interface for canbus device '''
 
@@ -31,7 +32,6 @@ class canbus(transport_base):
 
     reader = can.AsyncBufferedReader()
 
-
     thread : threading.Thread
     ''' main thread for async loop'''
 
@@ -44,11 +44,20 @@ class canbus(transport_base):
     cacheTimeout : int = 120
     ''' seconds to keep message in cache '''
 
+    retries : int = 7
+    retry : int = 0
+
+    linux : bool = True
+
 
     def __init__(self, settings : 'SectionProxy', protocolSettings : 'protocol_settings' = None):
         super().__init__(settings, protocolSettings=protocolSettings)
 
-        self.port = settings.get(["port", "channel"], "")
+        #check if running on windows or linux
+        self.linux = platform.system() != 'Windows'
+
+
+        self.port = settings.get(["port", "channel"], "").lower()
         if not self.port:
             raise ValueError("Port/Channel is not set")
 
@@ -59,6 +68,9 @@ class canbus(transport_base):
         self.baudrate = settings.getint(["baudrate", "bitrate"], self.baudrate)
         self.interface = settings.getint(["interface", "bustype"], self.interface)
         self.cacheTimeout = settings.getint(["cacheTimeout", "cache_timeout"], self.cacheTimeout)
+
+        #setup / configure socketcan
+        self.setup_socketcan()
 
         self.bus = can.interface.Bus(interface=self.interface, channel=self.port, bitrate=self.baudrate)
         self.reader = can.AsyncBufferedReader()
@@ -76,14 +88,52 @@ class canbus(transport_base):
         self.connected = True
 
         self.init_after_connect()
-    
+
+    def setup_socketcan(self):
+        ''' ensures socketcan interface is up and applies some common hotfixes '''
+
+        if not self.linux:
+            print("socketcan setup not implemented for windows")
+            return
+
+        print("restart and configure socketcan")
+        os.system("ip link set can0 down")
+        os.system("ip link set can0 type can restart-ms 100")
+        os.system("ip link set can0 up type can bitrate " + str(self.baudrate))
+
+    def is_socketcan_up(self) -> bool:
+        if not self.linux:
+            print("socketcan status not implemented for windows")
+            return True
+        
+        try:
+            with open(f'/sys/class/net/{self.port}/operstate', 'r') as f:
+                state = f.read().strip()
+            return state == 'up'
+        except FileNotFoundError:
+            return False
+        
     def start_loop(self):
-        self.loop.run_until_complete(self.read_bus(self.bus))
+            self.loop.run_until_complete(self.read_bus(self.bus))
 
     async def read_bus(self, bus : can.BusABC):
         ''' read canbus asynco and store results in cache'''
         while True:
-            msg = await self.reader.get_message()  # This will be non-blocking with asyncio
+            try:
+                msg = await self.reader.get_message()  # This will be non-blocking with asyncio
+
+            except can.CanError as e:
+                # Handle specific CAN errors
+                print(f"CAN error: {e}")
+            except asyncio.CancelledError:
+                # Handle the case where the task is cancelled
+                print("Read bus task was cancelled.")
+                break
+            except Exception as e:
+                # Handle unexpected errors
+                print(f"An unexpected error occurred: {e}")
+                
+
             if msg:
                 print(f"Received message: {msg.arbitration_id:X}, data: {msg.data}")
                 
