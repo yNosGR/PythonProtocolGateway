@@ -4,7 +4,7 @@
 
 AOLithium has multiple protocols, which are set via the dip switches. 
 
-## SMA / Victron CanBus
+## SMA / Victron CanBus - dip5 off, dip 6 off
 ```
 protocol_version = victron_gx_generic_canbus
 ```
