@@ -10,6 +10,7 @@ protocol_version = victron_gx_generic_canbus
 
 #canbus port or interface; varies based on usb adapter
 port = can0
+bustype = socketcan
 baudrate = 500000
 
 #the 'transport' that we want to share this with
