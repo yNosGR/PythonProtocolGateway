@@ -38,9 +38,13 @@ class modbus_base(transport_base):
         if 'send_holding_register' in self.protocolSettings.settings:
             self.send_holding_register = strtobool(self.protocolSettings.settings['send_holding_register'])
 
+        if 'batch_delay' in self.protocolSettings.settings:
+            self.modbus_delay = float(self.protocolSettings.settings['batch_delay'])
+
         #allow enable/disable of which registers to send
         self.send_holding_register = settings.getboolean('send_holding_register', fallback=self.send_holding_register)
         self.send_input_register = settings.getboolean('send_input_register', fallback=self.send_input_register)
+        self.modbus_delay = settings.getfloat(['batch_delay', 'modbus_delay'], fallback=self.modbus_delay)
 
 
         if self.analyze_protocol_enabled:
