@@ -217,3 +217,41 @@ analyze_protocol_save_load = true
 ```
 When enabled, the analyzer will save dump files containing the raw data found while scanning
 
+# CanBus
+
+```
+transport = canbus
+protocol_version =
+
+port = 
+bustype = socketcan
+buadrate = 
+
+```
+
+## Linux / Windows
+usb can adapters are a pain with windows, so primary focus is linux. 
+
+## CanBus USB Adapters
+
+currently only socketcan adapters are supported. slcan implementation is on the todo list. 
+
+there is a bit of a learning curve with canbus usb adapters. 
+
+the main adapter being used: https://github.com/FYSETC/UCAN
+theese are dime a dozen on aliexpress / ebay / wherever. 
+this adapter can utilize candlelight ( socketcan ) or slcan firmware
+candlelight is plug n play on linux. 
+
+some extra reading material to help on using a usb canbus adapter: https://canable.io/getting-started.html
+
+### candlelight / socketcan
+This adapter will appear as a gs_usb device, and the can inteface will appear as an ip interface
+
+``` ip link show ```
+
+
+### slcan
+not supported... yet
+
+documentation in progress... 
