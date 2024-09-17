@@ -141,7 +141,7 @@ class canbus(transport_base):
             if msg:
                 print(f"Received message: {msg.arbitration_id:X}, data: {msg.data}")
                 
-                with self.lock: 
+                async with self.lock: 
                     #convert bytearray to bytes; were working with bytes. 
                     self.cache[msg.arbitration_id] = (bytes(msg.data), time.time())
                 
