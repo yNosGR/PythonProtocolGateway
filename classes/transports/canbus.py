@@ -37,7 +37,7 @@ class canbus(transport_base):
     ''' main thread for async loop'''
 
     #lock : threading.Lock = threading.Lock()
-    lock : asyncio.Lock = None
+    lock : threading.Lock = None
     loop : asyncio.AbstractEventLoop = None
 
     cache : OrderedDict [int,(bytes, float)] = None
@@ -76,8 +76,9 @@ class canbus(transport_base):
 
         self.bus = can.interface.Bus(interface=self.interface, channel=self.port, bitrate=self.baudrate)
         self.reader = can.AsyncBufferedReader()
-        self.lock = asyncio.Lock()
-        self.cache = OrderedDict()
+        self.lock = threading.Lock()
+        with self.lock:
+            self.cache = OrderedDict()
 
 
         # Set up an event loop and run the async function
@@ -141,7 +142,7 @@ class canbus(transport_base):
             if msg:
                 print(f"Received message: {msg.arbitration_id:X}, data: {msg.data}")
                 
-                async with self.lock: 
+                with self.lock: 
                     #convert bytearray to bytes; were working with bytes. 
                     self.cache[msg.arbitration_id] = (bytes(msg.data), time.time())
                 
@@ -222,7 +223,8 @@ class canbus(transport_base):
         info = {}
 
         #remove timestamp for processing
-        registry = {key: value[0] for key, value in self.cache.items()}
+        with self.lock:
+            registry = {key: value[0] for key, value in self.cache.items()}
 
         new_info = self.protocolSettings.process_registery(registry, self.protocolSettings.get_registry_map(Registry_Type.ZERO))
 
@@ -251,8 +253,9 @@ class canbus(transport_base):
 
         if entry:
             #no concat for canbus or concat on todo
-            if entry.register in self.cache:
-                results = self.protocolSettings.process_register_bytes(self.cache, entry)
-                return results[entry.variable_name]
-            else:
-                return None #empty
+            with self.lock:
+                if entry.register in self.cache:
+                    results = self.protocolSettings.process_register_bytes(self.cache, entry)
+                    return results[entry.variable_name]
+                else:
+                    return None #empty
