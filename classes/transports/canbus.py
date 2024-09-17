@@ -82,9 +82,9 @@ class canbus(transport_base):
 
 
         # Set up an event loop and run the async function
-        self.loop = asyncio.get_event_loop()
+        #self.loop = asyncio.get_event_loop()
 
-        notifier = can.Notifier(self.bus, [self.reader], loop=self.loop)
+        #notifier = can.Notifier(self.bus, [self.reader], loop=self.loop)
 
 
         thread = threading.Thread(target=self.start_loop)
@@ -119,13 +119,13 @@ class canbus(transport_base):
             return False
         
     def start_loop(self):
-            self.loop.run_until_complete(self.read_bus(self.bus))
+        self.read_bus(self.bus)
 
-    async def read_bus(self, bus : can.BusABC):
+    def read_bus(self, bus : can.BusABC):
         ''' read canbus asynco and store results in cache'''
         while True:
             try:
-                msg = await self.reader.get_message()  # This will be non-blocking with asyncio
+                msg = self.bus.recv()  # This will be non-blocking with asyncio
 
             except can.CanError as e:
                 # Handle specific CAN errors
@@ -146,7 +146,7 @@ class canbus(transport_base):
                     #convert bytearray to bytes; were working with bytes. 
                     self.cache[msg.arbitration_id] = (bytes(msg.data), time.time())
                 
-            await asyncio.sleep(0.5)
+            time.sleep(1)
 
 
     def clean_cache(self):
