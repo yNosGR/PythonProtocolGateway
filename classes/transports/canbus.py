@@ -11,6 +11,7 @@ import os
 from .transport_base import transport_base
 from ..protocol_settings import Data_Type, Registry_Type, registry_map_entry, protocol_settings
 from defs.common import strtobool, strtoint
+from collections import OrderedDict
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -35,10 +36,11 @@ class canbus(transport_base):
     thread : threading.Thread
     ''' main thread for async loop'''
 
-    lock : threading.Lock = threading.Lock()
+    #lock : threading.Lock = threading.Lock()
+    lock : asyncio.Lock = None
     loop : asyncio.AbstractEventLoop = None
 
-    cache : dict [int,(bytes, float)] = {}
+    cache : OrderedDict [int,(bytes, float)] = None
     ''' cache, key is id, value is touple (data, timestamp)'''
 
     cacheTimeout : int = 120
@@ -74,6 +76,8 @@ class canbus(transport_base):
 
         self.bus = can.interface.Bus(interface=self.interface, channel=self.port, bitrate=self.baudrate)
         self.reader = can.AsyncBufferedReader()
+        self.lock = asyncio.Lock()
+        self.cache = OrderedDict()
 
 
         # Set up an event loop and run the async function
