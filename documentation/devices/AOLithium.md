@@ -4,6 +4,12 @@
 
 AOLithium has multiple protocols, which are set via the dip switches. 
 
+
+## Voltronic RS485 
+```
+protocol_version = voltronic_bms_2020_03_25
+```
+
 ## SMA / Victron CanBus - dip5 off, dip 6 off
 ```
 protocol_version = victron_gx_generic_canbus
