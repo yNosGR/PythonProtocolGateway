@@ -4,5 +4,19 @@
     "send_holding_register" : "true",
     "send_input_register" : "false",
     "batch_size" : 21,
-    "batch_delay" : 1.4
+    "batch_delay" : 1.4,
+    "cell_voltage_state_codes" : 
+    {
+        "0": "normal",
+        "1": "below lower limit",
+        "2": "above higher limit",
+        "240": "other error"
+    },
+    "bms_temperature_state_codes" : 
+    {
+        "0": "normal",
+        "1": "below lower limit",
+        "2": "above higher limit",
+        "240": "other error"
+    }
 }
