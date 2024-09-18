@@ -54,6 +54,8 @@ def find_usb_serial_port(port : str =  '', vendor_id : str = '', product_id : st
     if not port.startswith('['):
         return port
     
+    port = port.replace('None', '')
+    
     match  = re.match(r"\[(?P<vendor>[\da-zA-Z]+|):?(?P<product>[\da-zA-Z]+|):?(?P<serial>[\da-zA-Z]+|):?(?P<location>[\d\-]+|)\]", port)
     if match:
         vendor_id = int(match.group("vendor"), 16) if match.group("vendor") else ''
