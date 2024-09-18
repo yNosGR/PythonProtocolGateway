@@ -1,4 +1,4 @@
-variable name,data type,register,documented_name,description,customer write,values,unit,note
+variable name,data type,register,documented_name,description,writable,values,unit,note
 ,,0,Current,,R,,0.01A,Positive: charging Negative: discharging
 ,,1,Voltage_of_pack,,R,,0.01V,
 ,BYTE,2,SOC,,R,0~100,,0~100

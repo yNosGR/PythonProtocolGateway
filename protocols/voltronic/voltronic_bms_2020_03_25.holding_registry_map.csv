@@ -1,4 +1,4 @@
-variable name,data type,register,documented_name,description,write,values,unit,note
+variable name,data type,register,documented_name,description,writable,values,unit,note
 ,,1,Protocol_Type,,R,,,Positive: charging Negative: discharging
 ,,2,Protocol_Version,,R,,,
 ,ASCII,3~4,BMS_Firmware_Version,,,,,
