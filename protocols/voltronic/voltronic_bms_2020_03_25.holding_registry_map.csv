@@ -86,6 +86,6 @@ variable name,data type,register,documented_name,description,writable,values,uni
 ,,x71,Discharge_voltage_limit,,,,0.1V,
 ,,x72,Charge_current_limit,,,,0.1A,
 ,,x73,Discharge_current_limit,,,,0.1A,
-,16BIT_FLAGS,x74,"Charge,_discharge_status",,,"{""b7"":""Charge enable-"",""b6"":""Discharge enable-"",""b5"":""Charge immediately-"",""b4"":""Charge immediately2-"",""b3"":""Full charge request-"",""b2"":""Small current charge request-"",""b1"":""-"",""b0"":""-""}",,
+,16BIT_FLAGS,x74,Charge_discharge_status,,,"{""b7"":""Charge enable-"",""b6"":""Discharge enable-"",""b5"":""Charge immediately-"",""b4"":""Charge immediately2-"",""b3"":""Full charge request-"",""b2"":""Small current charge request-"",""b1"":""-"",""b0"":""-""}",,
 ,,x75,Run_Time_To_Empty,,,,min,
 ,UINT,x76,Module_remain_capacity,,,,mAh,
