@@ -145,8 +145,8 @@ class canbus(transport_base):
                 with self.lock: 
                     #convert bytearray to bytes; were working with bytes. 
                     self.cache[msg.arbitration_id] = (bytes(msg.data), time.time())
-                
-            time.sleep(1)
+
+                #time.sleep(1) no need for sleep because recv is blocking
 
 
     def clean_cache(self):
