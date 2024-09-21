@@ -46,8 +46,11 @@ class canbus(transport_base):
     cacheTimeout : int = 120
     ''' seconds to keep message in cache '''
 
-    retries : int = 7
-    retry : int = 0
+    emptyTime : float = None 
+    ''' the last time values were read for watchdog'''
+
+    watchDogTime : float = 120
+    ''' number of seconds of empty cache before restarting'''
 
     linux : bool = True
 
@@ -92,6 +95,7 @@ class canbus(transport_base):
         thread.start()
 
         self.connected = True
+        self.emptyTime =time.time()
 
         self.init_after_connect()
 
@@ -230,8 +234,16 @@ class canbus(transport_base):
 
         info.update(new_info) 
 
+        currentTime = time.time()
+
         if not info:
             self._log.info("Register/Cache is Empty; no new information reported.")
+            if currentTime - self.emptyTime > self.watchDogTime:
+                self._log.error("Register/Cache has been empty for over " + self.watchDogTime + "seconds. watchdog qutting application. ")
+                quit() #quit application, service should be configured to restart
+
+        else:
+            self.emptyTime = currentTime
 
         self.clean_cache() #clean cache of old data
 
