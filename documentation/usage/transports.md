@@ -253,4 +253,5 @@ This adapter will appear as a gs_usb device, and the can inteface will appear as
 
 ### slcan
 This adapter will appear as a serial device. 
+
 ``` bustype = slcan ```
