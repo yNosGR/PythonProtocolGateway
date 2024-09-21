@@ -92,6 +92,7 @@ class canbus(transport_base):
 
 
         thread = threading.Thread(target=self.start_loop)
+        thread.daemon = True 
         thread.start()
 
         self.connected = True
