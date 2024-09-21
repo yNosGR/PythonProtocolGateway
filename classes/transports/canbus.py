@@ -68,11 +68,12 @@ class canbus(transport_base):
             self.baudrate = strtoint(self.protocolSettings.settings["baud"])
 
         self.baudrate = settings.getint(["baudrate", "bitrate"], self.baudrate)
-        self.interface = settings.get(["interface", "bustype"], self.interface)
+        self.interface = settings.get(["interface", "bustype"], self.interface).lower()
         self.cacheTimeout = settings.getint(["cacheTimeout", "cache_timeout"], self.cacheTimeout)
 
         #setup / configure socketcan
-        self.setup_socketcan()
+        if self.interface == "socketcan":
+            self.setup_socketcan()
 
         self.bus = can.interface.Bus(interface=self.interface, channel=self.port, bitrate=self.baudrate)
         self.reader = can.AsyncBufferedReader()
@@ -96,16 +97,14 @@ class canbus(transport_base):
 
     def setup_socketcan(self):
         ''' ensures socketcan interface is up and applies some common hotfixes '''
+        if not self.linux:
+            print("socketcan setup not implemented for windows")
+            return
 
-        if self.interface == "socketcan":
-            if not self.linux:
-                print("socketcan setup not implemented for windows")
-                return
-
-            print("restart and configure socketcan")
-            os.system("ip link set can0 down")
-            os.system("ip link set can0 type can restart-ms 100")
-            os.system("ip link set can0 up type can bitrate " + str(self.baudrate))
+        print("restart and configure socketcan")
+        os.system("ip link set can0 down")
+        os.system("ip link set can0 type can restart-ms 100")
+        os.system("ip link set can0 up type can bitrate " + str(self.baudrate))
 
     def is_socketcan_up(self) -> bool:
         if not self.linux:
