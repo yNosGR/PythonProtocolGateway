@@ -97,14 +97,15 @@ class canbus(transport_base):
     def setup_socketcan(self):
         ''' ensures socketcan interface is up and applies some common hotfixes '''
 
-        if not self.linux:
-            print("socketcan setup not implemented for windows")
-            return
+        if self.interface == "socketcan":
+            if not self.linux:
+                print("socketcan setup not implemented for windows")
+                return
 
-        print("restart and configure socketcan")
-        os.system("ip link set can0 down")
-        os.system("ip link set can0 type can restart-ms 100")
-        os.system("ip link set can0 up type can bitrate " + str(self.baudrate))
+            print("restart and configure socketcan")
+            os.system("ip link set can0 down")
+            os.system("ip link set can0 type can restart-ms 100")
+            os.system("ip link set can0 up type can bitrate " + str(self.baudrate))
 
     def is_socketcan_up(self) -> bool:
         if not self.linux:
