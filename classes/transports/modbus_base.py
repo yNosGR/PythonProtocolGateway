@@ -68,7 +68,7 @@ class modbus_base(transport_base):
             
     def read_serial_number(self) -> str:
         serial_number = str(self.read_variable("Serial Number", Registry_Type.HOLDING))
-        print("read SN: " +serial_number)
+        self._log.info("read SN: " +serial_number)
         if serial_number:
             return serial_number
         
@@ -102,12 +102,12 @@ class modbus_base(transport_base):
         return serial_number
 
     def enable_write(self):
-        print("Validating Protocol for Writing")
+        self._log.info("Validating Protocol for Writing")
         self.write_enabled = False
         score_percent = self.validate_protocol(Registry_Type.HOLDING)
         if(score_percent > 90):
             self.write_enabled = True
-            print("enable write - validation passed")
+            self._log.warning("enable write - validation passed")
 
     def write_data(self, data : dict[str, str]) -> None:
         if not self.write_enabled:
@@ -171,7 +171,7 @@ class modbus_base(transport_base):
 
         maxScore = len(registry_map)
         percent = score*100/maxScore
-        print("validation score: " + str(score) + " of " + str(maxScore) + " : " + str(round(percent)) + "%")
+        self._log.info("validation score: " + str(score) + " of " + str(maxScore) + " : " + str(round(percent)) + "%")
         return percent
     
     def analyze_protocol(self, settings_dir : str = 'protocols'):
@@ -438,7 +438,7 @@ class modbus_base(transport_base):
         while (index := index + 1) < len(ranges) :
             range = ranges[index]
 
-            print("get registers("+str(index)+"): " + str(range[0]) + " to " + str(range[0]+range[1]-1) + " ("+str(range[1])+")")
+            self._log.info("get registers("+str(index)+"): " + str(range[0]) + " to " + str(range[0]+range[1]-1) + " ("+str(range[1])+")")
             time.sleep(self.modbus_delay) #sleep for 1ms to give bus a rest #manual recommends 1s between commands
 
             isError = False
@@ -446,7 +446,7 @@ class modbus_base(transport_base):
                 register = self.read_registers(range[0], range[1], registry_type=registry_type)
 
             except ModbusIOException as e: 
-                print("ModbusIOException : ", e.error_code)
+                self._log.error("ModbusIOException : ", e.error_code)
                 if e.error_code == 4: #if no response; probably time out. retry with increased delay
                     isError = True
                 else:
@@ -465,7 +465,7 @@ class modbus_base(transport_base):
                     #undo step in loop and retry read
                     retry = retry + 1
                     total_retries = total_retries + 1
-                    print("Retry("+str(retry)+" - ("+str(total_retries)+")) range("+str(index)+")")
+                    self._log.warning("Retry("+str(retry)+" - ("+str(total_retries)+")) range("+str(index)+")")
                     index = index - 1
                     continue
             

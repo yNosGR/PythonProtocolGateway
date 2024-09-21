@@ -112,7 +112,7 @@ class canbus(transport_base):
 
     def is_socketcan_up(self) -> bool:
         if not self.linux:
-            print("socketcan status not implemented for windows")
+            self._log.error("socketcan status not implemented for windows")
             return True
         
         try:
@@ -133,18 +133,18 @@ class canbus(transport_base):
 
             except can.CanError as e:
                 # Handle specific CAN errors
-                print(f"CAN error: {e}")
+                self._log.error(f"CAN error: {e}")
             except asyncio.CancelledError:
                 # Handle the case where the task is cancelled
-                print("Read bus task was cancelled.")
+                self._log.error("Read bus task was cancelled.")
                 break
             except Exception as e:
                 # Handle unexpected errors
-                print(f"An unexpected error occurred: {e}")
+                self._log.error(f"An unexpected error occurred: {e}")
                 
 
             if msg:
-                print(f"Received message: {msg.arbitration_id:X}, data: {msg.data}")
+                self._log.info(f"Received message: {msg.arbitration_id:X}, data: {msg.data}")
                 
                 with self.lock: 
                     #convert bytearray to bytes; were working with bytes. 
@@ -215,7 +215,7 @@ class canbus(transport_base):
 
     def enable_write(self):
         self.write_enabled = True
-        print("enable write - validation on the todo")
+        self._log.warning("enable write - validation on the todo")
 
     def write_data(self, data : dict[str, str]) -> None:
         if not self.write_enabled:
