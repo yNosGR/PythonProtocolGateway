@@ -68,7 +68,7 @@ class canbus(transport_base):
             self.baudrate = strtoint(self.protocolSettings.settings["baud"])
 
         self.baudrate = settings.getint(["baudrate", "bitrate"], self.baudrate)
-        self.interface = settings.getint(["interface", "bustype"], self.interface)
+        self.interface = settings.get(["interface", "bustype"], self.interface)
         self.cacheTimeout = settings.getint(["cacheTimeout", "cache_timeout"], self.cacheTimeout)
 
         #setup / configure socketcan
