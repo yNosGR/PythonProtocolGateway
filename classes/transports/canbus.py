@@ -128,6 +128,7 @@ class canbus(transport_base):
     def read_bus(self, bus : can.BusABC):
         ''' read canbus asynco and store results in cache'''
         while True:
+            msg = None #fix scope bug
             try:
                 msg = self.bus.recv()  # This will be non-blocking with asyncio
 
