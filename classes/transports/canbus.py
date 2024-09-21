@@ -105,7 +105,7 @@ class canbus(transport_base):
             print("socketcan setup not implemented for windows")
             return
 
-        print("restart and configure socketcan")
+        self._log.info("restart and configure socketcan")
         os.system("ip link set can0 down")
         os.system("ip link set can0 type can restart-ms 100")
         os.system("ip link set can0 up type can bitrate " + str(self.baudrate))
@@ -241,7 +241,7 @@ class canbus(transport_base):
         if not info:
             self._log.info("Register/Cache is Empty; no new information reported.")
             if currentTime - self.emptyTime > self.watchDogTime:
-                self._log.error("Register/Cache has been empty for over " + self.watchDogTime + "seconds. watchdog qutting application. ")
+                self._log.error("Register/Cache has been empty for over " + str(self.watchDogTime) + "seconds. watchdog qutting application. ")
                 quit() #quit application, service should be configured to restart
 
         else:
