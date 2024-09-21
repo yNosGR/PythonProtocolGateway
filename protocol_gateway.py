@@ -119,8 +119,9 @@ class Protocol_Gateway:
         ##[general]
         self.__log_level = self.__settings.get('general','log_level', fallback='INFO')
 
-        self.__log.setLevel(getattr(logging, self.__log_level, logging.INFO))
-        logging.basicConfig(level=self._log_level)
+        log_level = getattr(logging, self.__log_level, logging.INFO)
+        self.__log.setLevel(log_level)
+        logging.basicConfig(level=log_level)
 
         for section in self.__settings.sections():
             if section.startswith('transport'):
