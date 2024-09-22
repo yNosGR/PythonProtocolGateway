@@ -2,6 +2,7 @@ import csv
 from dataclasses import dataclass
 from enum import Enum
 import glob
+import logging
 from typing import Union
 from defs.common import strtoint
 import itertools
@@ -235,7 +236,16 @@ class protocol_settings:
 
     byteorder : str = "big"
 
+    _log : logging.Logger = None
+
+
     def __init__(self, protocol : str, settings_dir : str = 'protocols'):
+
+        #apply log level to logger
+        self._log_level = getattr(logging, logging.getLevelName(logging.getLogger().getEffectiveLevel()), logging.INFO)
+        self._log : logging.Logger = logging.getLogger(__name__)
+        self._log.setLevel(self._log_level)
+
         self.protocol = protocol
         self.settings_dir = settings_dir
 
@@ -270,7 +280,6 @@ class protocol_settings:
 
         if "byteorder" in self.settings: #handle byte order for ints n stuff
             self.byteorder = self.settings["byteorder"]
-
 
         for registry_type in Registry_Type:
             self.load_registry_map(registry_type)
@@ -310,7 +319,7 @@ class protocol_settings:
 
         #if path does not exist; nothing to load. skip.
         if not path:
-            print("ERROR: '"+file+"' not found")
+            self._log.error("ERROR: '"+file+"' not found")
             return
 
         with open(path) as f:
@@ -391,7 +400,7 @@ class protocol_settings:
                 variable_name = variable_name = variable_name.strip().lower().replace(' ', '_').replace('__', '_') #clean name
                 
                 if re.search(r"[^a-zA-Z0-9\_]", variable_name) :
-                    print("WARNING Invalid Name : " + str(variable_name) + " reg: " + str(row['register']) + " doc name: " + str(row['documented name']) + " path: " + str(path))
+                    self._log.warning("Invalid Name : " + str(variable_name) + " reg: " + str(row['register']) + " doc name: " + str(row['documented name']) + " path: " + str(path))
 
                 #convert to float
                 try:
@@ -407,7 +416,7 @@ class protocol_settings:
                
                 if 'values' not in row:
                     row['values'] = ""
-                    print("WARNING No Value Column : path: " + str(path)) 
+                    self._log.warning("No Value Column : path: " + str(path)) 
 
                 data_type_len : int = -1
                 #optional row, only needed for non-default data types
@@ -770,7 +779,7 @@ class protocol_settings:
             try:
                 value = register.decode("utf-8") #convert bytes to ascii
             except UnicodeDecodeError as e:
-                print("UnicodeDecodeError:", e)
+                self._log.error("UnicodeDecodeError:", e)
 
         #apply unit mod
         if entry.unit_mod != float(1):
@@ -885,7 +894,7 @@ class protocol_settings:
             try:
                 value = value.decode("utf-8") #convert bytes to ascii
             except UnicodeDecodeError as e:
-                print("UnicodeDecodeError:", e)
+                self._log.error("UnicodeDecodeError:", e)
 
         else: #default, Data_Type.USHORT
             value = float(registry[entry.register])
