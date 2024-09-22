@@ -242,6 +242,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # If '--config' is provided, use it; otherwise, fall back to the positional or default.
-    config_file = args.config if args.config else args.positional_config
+    args.config = args.config if args.config else args.positional_config
 
     main()
