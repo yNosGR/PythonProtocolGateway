@@ -233,8 +233,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Python Protocol Gateway')
 
     # Add arguments
-    parser.add_argument('--config', '-c', type=str, help='Specify Config File', default='config.cfg')
+    parser.add_argument('--config', '-c', type=str, help='Specify Config File')
+
+    # Add a positional argument with default
+    parser.add_argument('positional_config', type=str, help='Specify Config File', nargs='?', default='config.cfg')
+
     # Parse arguments
     args = parser.parse_args()
+
+    # If '--config' is provided, use it; otherwise, fall back to the positional or default.
+    config_file = args.config if args.config else args.positional_config
 
     main()
