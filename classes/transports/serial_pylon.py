@@ -94,11 +94,11 @@ class serial_pylon(transport_base):
             version = self.read_variable('version', attribute='ver')
             if version:
                 self.connected = True
-                print("pylon protocol version is "+str(version))
+                self._log.info("pylon protocol version is "+str(version))
                 self.VER = version
 
                 name = self.read_variable('battery_name')                    
-                print(name)
+                self._log.info(name)
             pass
 
     def read_data(self):
