@@ -438,7 +438,7 @@ class modbus_base(transport_base):
         while (index := index + 1) < len(ranges) :
             range = ranges[index]
 
-            self._log.info("get registers("+str(index)+"): " + str(range[0]) + " to " + str(range[0]+range[1]-1) + " ("+str(range[1])+")")
+            self._log.info("get registers ("+str(index)+"): " +str(registry_type)+ " - " + str(range[0]) + " to " + str(range[0]+range[1]-1) + " ("+str(range[1])+")")
             time.sleep(self.modbus_delay) #sleep for 1ms to give bus a rest #manual recommends 1s between commands
 
             isError = False
