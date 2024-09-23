@@ -14,6 +14,13 @@ if TYPE_CHECKING:
     from configparser import SectionProxy
 
 class modbus_base(transport_base):
+
+    modbus_delay_increament : float = 0.05 
+    ''' delay adjustment every error. todo: add a setting for this '''
+
+    modbus_delay_setting : float = 0.85
+    '''time inbetween requests, unmodified'''
+
     modbus_delay : float = 0.85
     '''time inbetween requests'''
 
@@ -45,6 +52,7 @@ class modbus_base(transport_base):
         self.send_holding_register = settings.getboolean('send_holding_register', fallback=self.send_holding_register)
         self.send_input_register = settings.getboolean('send_input_register', fallback=self.send_input_register)
         self.modbus_delay = settings.getfloat(['batch_delay', 'modbus_delay'], fallback=self.modbus_delay)
+        self.modbus_delay_setting = self.modbus_delay
 
 
         if self.analyze_protocol_enabled:
@@ -454,7 +462,7 @@ class modbus_base(transport_base):
 
             if register.isError() or isError:
                 self._log.error(register.__str__)
-                self.modbus_delay = self.modbus_delay + 0.050 #increase delay, error is likely due to modbus being busy
+                self.modbus_delay += self.modbus_delay_increament #increase delay, error is likely due to modbus being busy
 
                 if self.modbus_delay > 60: #max delay. 60 seconds between requests should be way over kill if it happens
                     self.modbus_delay = 60
@@ -468,6 +476,11 @@ class modbus_base(transport_base):
                     self._log.warning("Retry("+str(retry)+" - ("+str(total_retries)+")) range("+str(index)+")")
                     index = index - 1
                     continue
+            elif self.modbus_delay > self.modbus_delay_setting: #no error, decrease delay 
+                self.modbus_delay -= self.modbus_delay_increament
+                if self.modbus_delay < self.modbus_delay_setting:
+                    self.modbus_delay = self.modbus_delay_setting
+                
             
 
             retry -= 1
