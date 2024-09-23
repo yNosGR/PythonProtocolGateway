@@ -67,7 +67,6 @@ serial_number =
 bridge = 
 write_enabled = False
 Interval = 10
-Error_Interval = 60
 ```
 ### transport
 Transport is the type or method of reading and writing data

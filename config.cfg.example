@@ -32,7 +32,6 @@ model = HDHK 16CH AC
 serial_number = HDHK777
 
 read_interval = 10
-error_interval = 60
 
 
 [transport.1]
