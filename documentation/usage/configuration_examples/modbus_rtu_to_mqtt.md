@@ -30,8 +30,6 @@ model = {{Your device's model number here}}
 serial_number = 
 
 read_interval = 10
-error_interval = 60
-
 
 [transport.1]
 #connect mqtt
