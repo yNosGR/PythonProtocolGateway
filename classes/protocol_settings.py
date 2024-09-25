@@ -720,7 +720,9 @@ class protocol_settings:
             end_bit = flag_size + start_bit
             
             if entry.documented_name+'_codes' in self.codes:
+                code_key : str = entry.documented_name+'_codes'
                 flags : list[str] = []
+                flag_indexes : list[str] = []
                 for i in range(start_bit, end_bit):  # Iterate over each bit position (0 to 15)
                     byte = i // 8 
                     bit = i % 8
@@ -728,9 +730,20 @@ class protocol_settings:
                     # Check if the i-th bit is set
                     if (val >> bit) & 1:
                         flag_index = "b"+str(i)
-                        if flag_index in self.codes[entry.documented_name+'_codes']:
-                            flags.append(self.codes[entry.documented_name+'_codes'][flag_index])
-                        
+                        flag_indexes.append(flag_index)
+                        if flag_index in self.codes[code_key]:
+                            flags.append(self.codes[code_key][flag_index])
+
+                #check multibit flags
+                multibit_flags = [key for key in self.codes if '&' in key]
+
+                if multibit_flags: #if multibit flags are found
+                    flag_indexes_set : set[str] = set(flag_indexes)
+                    for multibit_flag in multibit_flags:
+                        bits = multibit_flag.split('&')  # Split key into 'bits'
+                        if all(bit in flag_indexes_set for bit in bits): # Check if all bits are present in the flag_indexes_set
+                            flags.append(self.codes[code_key][multibit_flag])
+                    
                 value = ",".join(flags)
             else:
                 flags : list[str] = []
