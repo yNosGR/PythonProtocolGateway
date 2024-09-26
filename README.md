@@ -6,7 +6,8 @@
 
 [![CodeQL](https://github.com/HotNoob/PythonProtocolGateway/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/HotNoob/PythonProtocolGateway/actions/workflows/github-code-scanning/codeql)
 
-For advanced configuration help, please checkout the wiki :)
+For advanced configuration help, please checkout the documentation :)
+https://github.com/HotNoob/PythonProtocolGateway/tree/main/documentation
 
 # Python Protocol Gateway
 
@@ -14,9 +15,9 @@ Python Protocol Gateway is a python-based service that reads data via Modbus RTU
 Configuration is handled via a small config files. 
 In the long run, Python Protocol Gateway will become a general purpose protocol gateway to translate between more than just modbus and mqtt. 
 
-For specific device installation instructions please checkout the wiki:
+For specific device installation instructions please checkout the documentation:
 Growatt, EG4, Sigineer, SOK, PACE-BMS
-https://github.com/HotNoob/PythonProtocolGateway/wiki
+https://github.com/HotNoob/PythonProtocolGateway/tree/main/documentation
 
 # General Installation
 Connect the USB port on the inverter into your computer / device. This port is essentially modbus usb adapter.
@@ -56,7 +57,8 @@ eg4_v58 = eg4 inverters ( EG4-6000XP ) - confirmed working
 eg4_3000ehv_v1 = eg4 inverters ( EG4_3000EHV )
 ```
 
-more details on these protocols can be found in the wiki
+more details on these protocols can be found in the documentation:
+https://github.com/HotNoob/PythonProtocolGateway/tree/main/documentation
 
 ### run as script
 ```

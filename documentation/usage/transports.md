@@ -67,7 +67,6 @@ serial_number =
 bridge = 
 write_enabled = False
 Interval = 10
-Error_Interval = 60
 ```
 ### transport
 Transport is the type or method of reading and writing data
@@ -217,3 +216,43 @@ analyze_protocol_save_load = true
 ```
 When enabled, the analyzer will save dump files containing the raw data found while scanning
 
+# CanBus
+
+```
+transport = canbus
+protocol_version =
+
+port = 
+bustype = socketcan
+buadrate = 
+
+```
+
+## Linux / Windows
+usb can adapters are a pain with windows, so primary focus is linux. 
+
+## CanBus USB Adapters
+
+there is a bit of a learning curve with canbus usb adapters. 
+
+the main adapter being used to test python protocol gateway: https://github.com/FYSETC/UCAN
+these are dime a dozen on aliexpress / ebay / wherever. most of them will be based on the CANable adapters. 
+
+fysetc sells them directly here: https://www.fysetc.com/products/fysetc-ucan-board
+this adapter comes with the candlelight ( socketcan ) by default. the board is CANable v1.0 compatible. slcan firmware can be flashed here: https://canable.io/updater/canable1.html
+
+candlelight utilizes socketcan, slcan is can over serial. 
+
+here is some extra reading material to help on using a usb canbus adapter: https://canable.io/getting-started.html
+
+### candlelight / socketcan
+This adapter will appear as a gs_usb device, and the can inteface will appear as an ip interface
+
+``` ip link show ```
+
+### slcan
+This adapter will appear as a serial device. 
+
+```
+bustype = slcan
+```

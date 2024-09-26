@@ -98,7 +98,7 @@ class mqtt(transport_base):
         
 
     def connect(self):
-        print("mqtt connect")
+        self._log.info("mqtt connect")
         if self.__first_connection:
             self.__first_connection = False
             self.client.connect(str(self.host), int(self.port), 60)
@@ -109,7 +109,7 @@ class mqtt(transport_base):
 
     def exit_handler(self):
         '''on exit handler'''
-        print("MQTT Exiting...")
+        self._log.warning("MQTT Exiting...")
         self.client.publish( self.base_topic + "/availability","offline")
         return
     
@@ -204,7 +204,7 @@ class mqtt(transport_base):
             self.mqtt_discovery(from_transport)
 
     def mqtt_discovery(self, from_transport : transport_base):
-        print("Publishing HA Discovery Topics...")
+        self._log.info("Publishing HA Discovery Topics...")
 
         disc_payload = {}
         disc_payload['availability_topic'] = self.base_topic + "/availability"
@@ -240,7 +240,7 @@ class mqtt(transport_base):
                     clean_name = self.__holding_register_prefix + clean_name
 
 
-            print('Publishing Topic '+str(count)+' of ' + str(length) + ' "'+str(clean_name)+'"', end='\r', flush=True)
+            print(('#Publishing Topic '+str(count)+' of ' + str(length) + ' "'+str(clean_name)+'"').ljust(100)+"#", end='\r', flush=True)
 
             #device['sw_version'] = bms_version
             disc_payload = {}

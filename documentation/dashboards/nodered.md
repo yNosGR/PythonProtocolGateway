@@ -52,6 +52,8 @@ If you want to do some historical logging, InfluxDB is a better solution than th
 ### Import example
 Go to the hamburger, down to `Import`, click `select a file to import`, find `nodered-example-flow.json` in the repo. You should be left with something like this.
 ![example flow](https://github.com/user-attachments/assets/c2c284f8-e40f-4e05-bcb7-e054e32dad4c)
+![example dashboard](https://github.com/user-attachments/assets/d5d283f2-694d-4fd7-ab6a-773d701a5226)
+
 
 ### Create your own flow
 1. Drag a `debug` node out - we will be using this throughout to see how the data flows. You can see the debug output by dragging a wire from an output to the debug's input and turning it on.

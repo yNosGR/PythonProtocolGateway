@@ -69,6 +69,32 @@ R = Read Only
 RD = Read Disabled
 W = Write
 ```
+#### values / codes
+there are two main purposes for this column. 
+1. defines possible values / ranges of values for protocol validation / safety
+for example:
+```0~100```
+
+2. defines the values for flag data types, such as 16BIT_FLAGS; any data type can be used. 
+the format for these flags is json. these flags / codes can also be defined via the .json file by naming them as such:
+"{{document_name}}_codes"
+
+##### Bit Flag Example
+```
+{"b0" : "StandBy", "b1" : "On"}
+```
+
+##### MultiBit Flag Example
+Some protocols utilize combinations of bits as flags.
+```
+{"b0" : "StandBy", "b0&b1" : "Operational", "b1" : "Error" }
+```
+
+
+##### uint / bits / other
+``` 
+{"75" : "Error", "50": "Warning"}
+````
 
 
 

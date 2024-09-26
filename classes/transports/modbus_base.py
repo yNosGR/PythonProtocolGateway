@@ -14,6 +14,13 @@ if TYPE_CHECKING:
     from configparser import SectionProxy
 
 class modbus_base(transport_base):
+
+    modbus_delay_increament : float = 0.05 
+    ''' delay adjustment every error. todo: add a setting for this '''
+
+    modbus_delay_setting : float = 0.85
+    '''time inbetween requests, unmodified'''
+
     modbus_delay : float = 0.85
     '''time inbetween requests'''
 
@@ -38,9 +45,14 @@ class modbus_base(transport_base):
         if 'send_holding_register' in self.protocolSettings.settings:
             self.send_holding_register = strtobool(self.protocolSettings.settings['send_holding_register'])
 
+        if 'batch_delay' in self.protocolSettings.settings:
+            self.modbus_delay = float(self.protocolSettings.settings['batch_delay'])
+
         #allow enable/disable of which registers to send
         self.send_holding_register = settings.getboolean('send_holding_register', fallback=self.send_holding_register)
         self.send_input_register = settings.getboolean('send_input_register', fallback=self.send_input_register)
+        self.modbus_delay = settings.getfloat(['batch_delay', 'modbus_delay'], fallback=self.modbus_delay)
+        self.modbus_delay_setting = self.modbus_delay
 
 
         if self.analyze_protocol_enabled:
@@ -64,7 +76,7 @@ class modbus_base(transport_base):
             
     def read_serial_number(self) -> str:
         serial_number = str(self.read_variable("Serial Number", Registry_Type.HOLDING))
-        print("read SN: " +serial_number)
+        self._log.info("read SN: " +serial_number)
         if serial_number:
             return serial_number
         
@@ -98,12 +110,12 @@ class modbus_base(transport_base):
         return serial_number
 
     def enable_write(self):
-        print("Validating Protocol for Writing")
+        self._log.info("Validating Protocol for Writing")
         self.write_enabled = False
         score_percent = self.validate_protocol(Registry_Type.HOLDING)
         if(score_percent > 90):
             self.write_enabled = True
-            print("enable write - validation passed")
+            self._log.warning("enable write - validation passed")
 
     def write_data(self, data : dict[str, str]) -> None:
         if not self.write_enabled:
@@ -167,7 +179,7 @@ class modbus_base(transport_base):
 
         maxScore = len(registry_map)
         percent = score*100/maxScore
-        print("validation score: " + str(score) + " of " + str(maxScore) + " : " + str(round(percent)) + "%")
+        self._log.info("validation score: " + str(score) + " of " + str(maxScore) + " : " + str(round(percent)) + "%")
         return percent
     
     def analyze_protocol(self, settings_dir : str = 'protocols'):
@@ -434,7 +446,7 @@ class modbus_base(transport_base):
         while (index := index + 1) < len(ranges) :
             range = ranges[index]
 
-            print("get registers("+str(index)+"): " + str(range[0]) + " to " + str(range[0]+range[1]-1) + " ("+str(range[1])+")")
+            self._log.info("get registers ("+str(index)+"): " +str(registry_type)+ " - " + str(range[0]) + " to " + str(range[0]+range[1]-1) + " ("+str(range[1])+")")
             time.sleep(self.modbus_delay) #sleep for 1ms to give bus a rest #manual recommends 1s between commands
 
             isError = False
@@ -442,7 +454,7 @@ class modbus_base(transport_base):
                 register = self.read_registers(range[0], range[1], registry_type=registry_type)
 
             except ModbusIOException as e: 
-                print("ModbusIOException : ", e.error_code)
+                self._log.error("ModbusIOException : ", e.error_code)
                 if e.error_code == 4: #if no response; probably time out. retry with increased delay
                     isError = True
                 else:
@@ -450,7 +462,7 @@ class modbus_base(transport_base):
 
             if register.isError() or isError:
                 self._log.error(register.__str__)
-                self.modbus_delay = self.modbus_delay + 0.050 #increase delay, error is likely due to modbus being busy
+                self.modbus_delay += self.modbus_delay_increament #increase delay, error is likely due to modbus being busy
 
                 if self.modbus_delay > 60: #max delay. 60 seconds between requests should be way over kill if it happens
                     self.modbus_delay = 60
@@ -461,9 +473,14 @@ class modbus_base(transport_base):
                     #undo step in loop and retry read
                     retry = retry + 1
                     total_retries = total_retries + 1
-                    print("Retry("+str(retry)+" - ("+str(total_retries)+")) range("+str(index)+")")
+                    self._log.warning("Retry("+str(retry)+" - ("+str(total_retries)+")) range("+str(index)+")")
                     index = index - 1
                     continue
+            elif self.modbus_delay > self.modbus_delay_setting: #no error, decrease delay 
+                self.modbus_delay -= self.modbus_delay_increament
+                if self.modbus_delay < self.modbus_delay_setting:
+                    self.modbus_delay = self.modbus_delay_setting
+                
             
 
             retry -= 1
