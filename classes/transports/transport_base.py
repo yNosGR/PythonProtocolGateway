@@ -68,7 +68,7 @@ class transport_base:
             else:
                 self.write_enabled = settings.getboolean("write", self.write_enabled)
             
-        self.device_identifier = self.device_model + "_" + self.device_serial_number
+        self.device_identifier = (self.device_model + "_" + self.device_serial_number).lower()
 
 
     def init_bridge(self, from_transport : 'transport_base'):
