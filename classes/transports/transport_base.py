@@ -81,7 +81,7 @@ class transport_base:
     def connect(self):
         pass
 
-    def write_data(self, data : dict[str, registry_map_entry], from_transport : transport_base):
+    def write_data(self, data : dict[str, registry_map_entry], from_transport : 'transport_base'):
         ''' general purpose write function for between transports'''
         pass
 
