@@ -170,13 +170,13 @@ class mqtt(transport_base):
         if(self.json):
             # Serializing json
             json_object = json.dumps(data, indent=4)
-            self.client.publish(self.base_topic+from_transport.device_identifier, json_object, 0, properties=self.mqtt_properties)
+            self.client.publish(self.base_topic+'/'+from_transport.device_identifier, json_object, 0, properties=self.mqtt_properties)
         else:
             for entry, val in data.items():
                 if isinstance(val, float) and self.max_precision >= 0: #apply max_precision on mqtt transport 
                     val = round(val, self.max_precision)
 
-                self.client.publish(str(self.base_topic+from_transport.device_identifier+'/'+entry).lower(), str(val))
+                self.client.publish(str(self.base_topic+'/'+from_transport.device_identifier+'/'+entry).lower(), str(val))
 
     def client_on_message(self, client, userdata, msg):
         """ The callback for when a PUBLISH message is received from the server. """
@@ -253,7 +253,7 @@ class mqtt(transport_base):
             if from_transport.write_enabled and item.write_mode == WriteMode.WRITE:
                 writePrefix = "" #home assistant doesnt like write prefix
 
-            disc_payload['state_topic'] = self.base_topic + from_transport.device_identifier + writePrefix+ "/"+clean_name
+            disc_payload['state_topic'] = self.base_topic + '/' +from_transport.device_identifier + writePrefix+ "/"+clean_name
             
             if item.unit:
                 disc_payload['unit_of_measurement'] = item.unit
