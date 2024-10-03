@@ -37,7 +37,8 @@ class transport_base:
 
         #apply log level to logger
         self._log_level = getattr(logging, settings.get('log_level', fallback='INFO'), logging.INFO)
-        self._log : logging.Logger = logging.getLogger(__name__ + f"[{self.transport_name}]")
+        short_name : str = __name__[__name__.rfind('.'): ] if '.' in __name__ else None
+        self._log : logging.Logger = logging.getLogger(short_name + f"[{self.transport_name}]")
 
         self._log.setLevel(self._log_level)
         
