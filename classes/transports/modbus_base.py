@@ -458,7 +458,8 @@ class modbus_base(transport_base):
                 if e.error_code == 4: #if no response; probably time out. retry with increased delay
                     isError = True
                 else:
-                    raise
+                    isError = True #other erorrs. ie Failed to connect[ModbusSerialClient(rtu baud[9600])]
+
 
             if register.isError() or isError:
                 self._log.error(register.__str__)
@@ -482,7 +483,6 @@ class modbus_base(transport_base):
                     self.modbus_delay = self.modbus_delay_setting
                 
             
-
             retry -= 1
             if retry < 0:
                 retry = 0
