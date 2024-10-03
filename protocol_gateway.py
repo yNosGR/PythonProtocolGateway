@@ -171,7 +171,7 @@ class Protocol_Gateway:
         for to_transport in self.__transports:
             if to_transport.transport_name != transport.transport_name:
                 if to_transport.transport_name == transport.bridge or transport.transport_name == to_transport.bridge:
-                    to_transport.write_data({entry.variable_name : data})
+                    to_transport.write_data({entry.variable_name : data}, transport)
                     break
 
     def run(self):
@@ -204,7 +204,7 @@ class Protocol_Gateway:
                             if transport.bridge:
                                 for to_transport in self.__transports:
                                     if to_transport.transport_name == transport.bridge:
-                                        to_transport.write_data(info)
+                                        to_transport.write_data(info, transport)
                                         break
               
             except Exception as err:

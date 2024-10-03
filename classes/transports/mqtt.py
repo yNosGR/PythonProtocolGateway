@@ -153,7 +153,7 @@ class mqtt(transport_base):
 
     __write_topics : dict[str, registry_map_entry] = {}
 
-    def write_data(self, data : dict[str, str]):
+    def write_data(self, data : dict[str, str], from_transport : transport_base):
         if not self.write_enabled:
             return 
         
@@ -167,16 +167,19 @@ class mqtt(transport_base):
         if info.rc == MQTT_ERR_NO_CONN:
             self.connected = False
 
+
+        identifier = from_transport.device_model + "_" + from_transport.device_serial_number
+
         if(self.json):
             # Serializing json
             json_object = json.dumps(data, indent=4)
-            self.client.publish(self.base_topic, json_object, 0, properties=self.mqtt_properties)
+            self.client.publish(self.base_topic+identifier, json_object, 0, properties=self.mqtt_properties)
         else:
             for entry, val in data.items():
                 if isinstance(val, float) and self.max_precision >= 0: #apply max_precision on mqtt transport 
                     val = round(val, self.max_precision)
 
-                self.client.publish(str(self.base_topic+'/'+entry).lower(), str(val))
+                self.client.publish(str(self.base_topic+identifier+'/'+entry).lower(), str(val))
 
     def client_on_message(self, client, userdata, msg):
         """ The callback for when a PUBLISH message is received from the server. """
@@ -249,11 +252,13 @@ class mqtt(transport_base):
             disc_payload['name'] = clean_name
             disc_payload['unique_id'] = "hotnoob_" + from_transport.device_serial_number + "_"+clean_name
 
+            identifier = from_transport.device_model + "_" + from_transport.device_serial_number
+
             writePrefix = ""
             if from_transport.write_enabled and item.write_mode == WriteMode.WRITE:
                 writePrefix = "" #home assistant doesnt like write prefix
 
-            disc_payload['state_topic'] = self.base_topic +writePrefix+ "/"+clean_name
+            disc_payload['state_topic'] = self.base_topic + identifier + writePrefix+ "/"+clean_name
             
             if item.unit:
                 disc_payload['unit_of_measurement'] = item.unit
