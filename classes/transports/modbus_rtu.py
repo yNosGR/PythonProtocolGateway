@@ -42,7 +42,7 @@ class modbus_rtu(modbus_base):
 
         address : int = settings.getint("address", 0)
         self.addresses = [address]
-
+        
         # pymodbus compatability; unit was renamed to address
         if 'slave' in inspect.signature(ModbusSerialClient.read_holding_registers).parameters:
             self.pymodbus_slave_arg = 'slave'

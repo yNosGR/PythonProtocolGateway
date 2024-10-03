@@ -17,6 +17,7 @@ class transport_base:
     device_serial_number : str = ''
     device_manufacturer : str = 'hotnoob'
     device_model : str = 'hotnoob'
+    device_identifier : str = 'hotnoob'
     bridge : str = ''
     write_enabled : bool = False
     max_precision : int = 2
@@ -67,6 +68,7 @@ class transport_base:
             else:
                 self.write_enabled = settings.getboolean("write", self.write_enabled)
             
+        self.device_identifier = self.device_model + "_" + self.device_serial_number
 
 
     def init_bridge(self, from_transport : 'transport_base'):
