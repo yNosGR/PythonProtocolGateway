@@ -33,15 +33,15 @@ class transport_base:
 
     def __init__(self, settings : 'SectionProxy', protocolSettings : 'protocol_settings' = None) -> None:
         
+        self.transport_name = settings.name #section name
+
         #apply log level to logger
         self._log_level = getattr(logging, settings.get('log_level', fallback='INFO'), logging.INFO)
         self._log : logging.Logger = logging.getLogger(__name__)
 
         self._log.setLevel(self._log_level)
-
-        self.transport_name = settings.name #section name
         
-        self.type = self.__class__.__name__        
+        self.type = self.__class__.__name__ +"["+self.transport_name+"]"
 
         self.protocolSettings = protocolSettings
         if not self.protocolSettings: #if not, attempt to load. lazy i know
