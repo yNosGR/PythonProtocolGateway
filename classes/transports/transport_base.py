@@ -67,9 +67,12 @@ class transport_base:
                 self.write_enabled = settings.getboolean(["write_enabled", "enable_write"], self.write_enabled)
             else:
                 self.write_enabled = settings.getboolean("write", self.write_enabled)
-            
-        self.device_identifier = (self.device_model + "_" + self.device_serial_number).lower()
+                
+        self.update_identifier()
 
+
+    def update_identifier(self):
+        self.device_identifier = (self.device_serial_number).trim().lower()
 
     def init_bridge(self, from_transport : 'transport_base'):
         pass

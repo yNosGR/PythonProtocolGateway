@@ -68,6 +68,7 @@ class modbus_base(transport_base):
         #if sn is empty, attempt to autoread it
         if not self.device_serial_number: 
             self.device_serial_number = self.read_serial_number()
+            self.update_identifier()
 
     def connect(self):
         if self.connected and self.first_connect:
