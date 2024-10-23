@@ -462,7 +462,7 @@ class modbus_base(transport_base):
                     isError = True #other erorrs. ie Failed to connect[ModbusSerialClient(rtu baud[9600])]
 
 
-            if register.isError() or isError:
+            if isError: #register.isError() or
                 self._log.error(register.__str__)
                 self.modbus_delay += self.modbus_delay_increament #increase delay, error is likely due to modbus being busy
 
