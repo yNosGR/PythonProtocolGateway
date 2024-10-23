@@ -72,7 +72,7 @@ class transport_base:
 
 
     def update_identifier(self):
-        self.device_identifier = (self.device_serial_number).trim().lower()
+        self.device_identifier = self.device_serial_number.strip().lower()
 
     def init_bridge(self, from_transport : 'transport_base'):
         pass
