@@ -462,8 +462,11 @@ class modbus_base(transport_base):
                     isError = True #other erorrs. ie Failed to connect[ModbusSerialClient(rtu baud[9600])]
 
 
-            if isError: #register.isError() or
-                self._log.error(register.__str__)
+            if isinstance(register, bytes) or register.isError() or isError: #sometimes weird errors are handled incorrectly and response is a ascii error string
+                if isinstance(register, bytes):
+                    self._log.error(register.decode('utf-8'))
+                else: 
+                    self._log.error(register.__str__)
                 self.modbus_delay += self.modbus_delay_increament #increase delay, error is likely due to modbus being busy
 
                 if self.modbus_delay > 60: #max delay. 60 seconds between requests should be way over kill if it happens
