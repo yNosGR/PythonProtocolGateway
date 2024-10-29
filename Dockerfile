@@ -11,5 +11,7 @@ COPY protocol_settings.py /app/
 COPY protocol_gateway.py /app/
 COPY inverter.py /app/
 COPY config.cfg /app/
+COPY defs/ /app/defs/
+COPY classes /app/classes/
 WORKDIR /app
 CMD ["python3", "protocol_gateway.py"] 
