@@ -25,6 +25,10 @@ When connected, the device will show up as a serial port.
  
 Alternatively, connect a usb adapter to your rs485 / can port with appropriate wiring. 
 
+### install as homeassistant add-on
+checkout:
+https://github.com/felipecrs/python-protocol-gateway-hass-addon/tree/master
+
 ### install requirements
 ```
 apt install pip python3 -y
