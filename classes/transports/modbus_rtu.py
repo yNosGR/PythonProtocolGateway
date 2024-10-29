@@ -33,7 +33,14 @@ class modbus_rtu(modbus_base):
             raise ValueError("Port is not set")
         
         self.port = find_usb_serial_port(self.port) 
-        print("Serial Port : " + self.port + " = ", get_usb_serial_port_info(self.port)) #print for config convience
+        
+        serial_info = get_usb_serial_port_info(self.port)
+        if serial_info is None:
+            serial_info_str = "No serial info available"
+        else:
+            serial_info_str = str(serial_info)
+
+        print("Serial Port : " + self.port + " = ", serial_info_str) #print for config convience
 
         if "baud" in self.protocolSettings.settings:
             self.baudrate = strtoint(self.protocolSettings.settings["baud"])
