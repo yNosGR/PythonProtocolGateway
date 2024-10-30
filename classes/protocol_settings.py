@@ -337,6 +337,19 @@ class protocol_settings:
             if not key.endswith("_codes"):
                 self.settings[key] = value
 
+    def load_registry_overrides(self, override_path, keys : list[str]):
+        """Load overrides into a multidimensional dictionary keyed by each specified key."""
+        overrides = {key: {} for key in keys}
+        
+        with open(override_path, newline='', encoding='latin-1') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                for key in keys:
+                    key_value = row[key]
+                    if key_value:
+                        overrides[key][key_value] = row
+        return overrides
+
 
     def load__registry(self, path, registry_type : Registry_Type = Registry_Type.INPUT) -> list[registry_map_entry]: 
         registry_map : list[registry_map_entry] = []
@@ -352,11 +365,230 @@ class protocol_settings:
         if not os.path.exists(path): #return empty is file doesnt exist.
             return registry_map
         
+
+        overrides : dict[str, dict]  = None
+        override_keys = ['documented name', 'registry']
+        overrided_keys = set()
+        ''' list / set of keys that were used for overriding. to track unique entries'''
+
+        #assuming path ends with .csv
+        overrides_path = path[:-4] + '.overrides.csv'
+
+        if os.path.exists(overrides_path):
+            self._log.info("loading override file: " + overrides_path)
+
+            overrides = self.load_registry_overrides(override_keys)
+        
         def determine_delimiter(first_row) -> str:
             if first_row.count(';') > first_row.count(','):
                 return ';'
             else:
-                return ','
+                return ','  
+            
+        def process_row():
+            # Initialize variables to hold numeric and character parts
+            numeric_part = 1
+            character_part = ''
+
+            #if or is in the unit; ignore unit
+            if "or" in row['unit'].lower() or ":" in row['unit'].lower():
+                numeric_part = 1
+                character_part = row['unit']
+            else:
+                # Use regular expressions to extract numeric and character parts
+                matches = re.findall(r'(\-?[0-9.]+)|(.*?)$', row['unit'])
+
+                # Iterate over the matches and assign them to appropriate variables
+                for match in matches:
+                    if match[0]:  # If it matches a numeric part
+                        numeric_part = float(match[0])
+                    elif match[1]:  # If it matches a character part
+                        character_part = match[1].strip()
+                        #print(str(row['documented name']) + " Unit: " + str(character_part) )
+
+            #clean up doc name, for extra parsing
+            row['documented name'] = row['documented name'].strip().lower().replace(' ', '_')
+
+            #apply overrides using documented name or register
+            override_row = None
+            # Check each key in order until a match is found
+            for key in override_keys:
+                key_value = row.get(key)
+                if key_value and key_value in overrides[key]:
+                    override_row = overrides[key][key_value]
+                    overrided_keys.add(key_value)
+                    break
+            
+            # Apply non-empty override values if an override row is found
+            if override_row:
+                for field, override_value in override_row.items():
+                    if override_value:  # Only replace if override value is non-empty
+                        row[field] = override_value
+
+            variable_name = row['variable name'] if row['variable name'] else row['documented name']
+            variable_name = variable_name = variable_name.strip().lower().replace(' ', '_').replace('__', '_') #clean name
+            
+            if re.search(r"[^a-zA-Z0-9\_]", variable_name) :
+                self._log.warning("Invalid Name : " + str(variable_name) + " reg: " + str(row['register']) + " doc name: " + str(row['documented name']) + " path: " + str(path))
+
+            #convert to float
+            try:
+                numeric_part = float(numeric_part)
+            except:
+                numeric_part = float(1)
+
+            if numeric_part == 0:
+                numeric_part = float(1)
+
+            data_type = Data_Type.USHORT
+
+            
+            if 'values' not in row:
+                row['values'] = ""
+                self._log.warning("No Value Column : path: " + str(path)) 
+
+            data_type_len : int = -1
+            #optional row, only needed for non-default data types
+            if 'data type' in row and row['data type']:
+                matches = data_type_regex.search(row['data type'])
+                if matches:
+                    data_type_len = int(matches.group('length'))
+                    data_type = Data_Type.fromString(matches.group('datatype'))
+                else:
+                    data_type = Data_Type.fromString(row['data type'])
+
+
+            #get value range for protocol analyzer
+            values : list = []
+            value_min : int = 0
+            value_max : int = 65535 #default - max value for ushort
+            value_regex : str = ""
+            value_is_json : bool = False
+
+            #test if value is json.
+            if "{" in row['values']: #to try and stop non-json values from parsing. the json parser is buggy for validation
+                try:
+                    codes_json = json.loads(row['values'])
+                    value_is_json = True
+
+                    name = row['documented name']+'_codes'
+                    if name not in self.codes:
+                        self.codes[name] = codes_json
+
+                except ValueError:
+                    value_is_json = False
+
+            if not value_is_json:
+                if ',' in row['values']:
+                    matches = list_regex.finditer(row['values'])
+
+                    for match in matches:
+                        groups = match.groupdict()
+                        if groups['range_start'] and groups['range_end']:
+                            start = strtoint(groups['range_start'])
+                            end = strtoint(groups['range_end'])
+                            values.extend(range(start, end + 1))
+                        else:
+                            values.append(groups['element'])
+                else:
+                    matched : bool = False
+                    val_match = range_regex.search(row['values'])
+                    if val_match:
+                        value_min = strtoint(val_match.group('start'))
+                        value_max = strtoint(val_match.group('end'))
+                        matched = True
+
+                    if data_type == Data_Type.ASCII:
+                        #value_regex
+                        val_match = ascii_value_regex.search(row['values'])
+                        if val_match:
+                            value_regex = val_match.group('regex') 
+                            matched = True
+
+                    if not matched: #single value
+                        values.append(row['values'])
+
+            concatenate : bool = False
+            concatenate_registers : list[int] = []
+
+            register : int = -1
+            register_bit : int = 0
+            register_byte : int = -1
+            row['register'] = row['register'].lower() #ensure is all lower case
+            match = register_regex.search(row['register'])
+            if match:
+                register = strtoint(match.group('register'))
+
+                register_bit = match.group('bit')
+                if register_bit:
+                    register_bit = strtoint(register_bit)
+                else:
+                    register_bit = 0
+
+                register_byte = match.group('byte')
+                if register_byte:
+                    register_byte = strtoint(register_byte)
+                else:
+                    register_byte = 0
+
+                #print("register: " + str(register) + " bit : " + str(register_bit))
+            else:
+                range_match = range_regex.search(row['register'])
+                if not range_match:
+                    register = strtoint(row['register'])
+                else:
+                    reverse = range_match.group('reverse')
+                    start = strtoint(range_match.group('start'))
+                    end = strtoint(range_match.group('end'))
+                    register = start
+                    if end > start:
+                        concatenate = True
+                        if reverse:
+                            for i in range(end, start-1, -1):
+                                concatenate_registers.append(i)
+                        else:
+                            for i in range(start, end+1):
+                                concatenate_registers.append(i)
+                    
+            if concatenate_registers:
+                r = range(len(concatenate_registers))
+            else:
+                r = range(1)
+
+            read_command = None
+            if "read command" in row and row['read command']:
+                if row['read command'][0] == 'x':
+                    read_command = bytes.fromhex(row['read command'][1:])
+                else:
+                    read_command = row['read command'].encode('utf-8')
+
+            writeMode : WriteMode = WriteMode.READ
+            if "writable" in row:
+                writeMode = WriteMode.fromString(row['writable'])
+            
+            for i in r:
+                item = registry_map_entry(
+                                            registry_type = registry_type,
+                                            register= register,
+                                            register_bit=register_bit,
+                                            register_byte= register_byte,
+                                            variable_name= variable_name,
+                                            documented_name = row['documented name'],
+                                            unit= str(character_part),
+                                            unit_mod= numeric_part,
+                                            data_type= data_type,
+                                            data_type_size = data_type_len,
+                                            concatenate = concatenate,
+                                            concatenate_registers = concatenate_registers,
+                                            values=values,
+                                            value_min=value_min,
+                                            value_max=value_max,
+                                            value_regex=value_regex,
+                                            read_command = read_command,
+                                            write_mode=writeMode
+                                        )
+                registry_map.append(item)
+                register = register + 1
 
                 
         with open(path, newline='', encoding='latin-1') as csvfile:
@@ -377,194 +609,20 @@ class protocol_settings:
 
             # Iterate over each row in the CSV file
             for row in reader:
+                process_row(row)
 
-                # Initialize variables to hold numeric and character parts
-                numeric_part = 1
-                character_part = ''
+            # Add any unmatched overrides as new entries... probably need to add some better error handling to ensure entry isnt empty ect...
+            for key in override_keys:
+                applied = False
+                for key_value, override_row in overrides[key].items():
+                    if key_value not in overrided_keys:
+                        self._log.info("Loading unique entry from overrides")
+                        process_row(override_row)
+                        applied = True
+                        break
 
-                #if or is in the unit; ignore unit
-                if "or" in row['unit'].lower() or ":" in row['unit'].lower():
-                    numeric_part = 1
-                    character_part = row['unit']
-                else:
-                    # Use regular expressions to extract numeric and character parts
-                    matches = re.findall(r'(\-?[0-9.]+)|(.*?)$', row['unit'])
-
-                    # Iterate over the matches and assign them to appropriate variables
-                    for match in matches:
-                        if match[0]:  # If it matches a numeric part
-                            numeric_part = float(match[0])
-                        elif match[1]:  # If it matches a character part
-                            character_part = match[1].strip()
-                            #print(str(row['documented name']) + " Unit: " + str(character_part) )
-
-                #clean up doc name, for extra parsing
-                row['documented name'] = row['documented name'].strip().lower().replace(' ', '_')
-
-                variable_name = row['variable name'] if row['variable name'] else row['documented name']
-                variable_name = variable_name = variable_name.strip().lower().replace(' ', '_').replace('__', '_') #clean name
-                
-                if re.search(r"[^a-zA-Z0-9\_]", variable_name) :
-                    self._log.warning("Invalid Name : " + str(variable_name) + " reg: " + str(row['register']) + " doc name: " + str(row['documented name']) + " path: " + str(path))
-
-                #convert to float
-                try:
-                    numeric_part = float(numeric_part)
-                except:
-                    numeric_part = float(1)
-
-                if numeric_part == 0:
-                    numeric_part = float(1)
-
-                data_type = Data_Type.USHORT
-
-               
-                if 'values' not in row:
-                    row['values'] = ""
-                    self._log.warning("No Value Column : path: " + str(path)) 
-
-                data_type_len : int = -1
-                #optional row, only needed for non-default data types
-                if 'data type' in row and row['data type']:
-                    matches = data_type_regex.search(row['data type'])
-                    if matches:
-                        data_type_len = int(matches.group('length'))
-                        data_type = Data_Type.fromString(matches.group('datatype'))
-                    else:
-                        data_type = Data_Type.fromString(row['data type'])
-
-
-                #get value range for protocol analyzer
-                values : list = []
-                value_min : int = 0
-                value_max : int = 65535 #default - max value for ushort
-                value_regex : str = ""
-                value_is_json : bool = False
-
-                #test if value is json.
-                if "{" in row['values']: #to try and stop non-json values from parsing. the json parser is buggy for validation
-                    try:
-                        codes_json = json.loads(row['values'])
-                        value_is_json = True
-
-                        name = row['documented name']+'_codes'
-                        if name not in self.codes:
-                            self.codes[name] = codes_json
-
-                    except ValueError:
-                        value_is_json = False
-
-                if not value_is_json:
-                    if ',' in row['values']:
-                        matches = list_regex.finditer(row['values'])
-
-                        for match in matches:
-                            groups = match.groupdict()
-                            if groups['range_start'] and groups['range_end']:
-                                start = strtoint(groups['range_start'])
-                                end = strtoint(groups['range_end'])
-                                values.extend(range(start, end + 1))
-                            else:
-                                values.append(groups['element'])
-                    else:
-                        matched : bool = False
-                        val_match = range_regex.search(row['values'])
-                        if val_match:
-                            value_min = strtoint(val_match.group('start'))
-                            value_max = strtoint(val_match.group('end'))
-                            matched = True
-
-                        if data_type == Data_Type.ASCII:
-                            #value_regex
-                            val_match = ascii_value_regex.search(row['values'])
-                            if val_match:
-                                value_regex = val_match.group('regex') 
-                                matched = True
-
-                        if not matched: #single value
-                            values.append(row['values'])
-
-                concatenate : bool = False
-                concatenate_registers : list[int] = []
-
-                register : int = -1
-                register_bit : int = 0
-                register_byte : int = -1
-                row['register'] = row['register'].lower() #ensure is all lower case
-                match = register_regex.search(row['register'])
-                if match:
-                    register = strtoint(match.group('register'))
-
-                    register_bit = match.group('bit')
-                    if register_bit:
-                        register_bit = strtoint(register_bit)
-                    else:
-                        register_bit = 0
-
-                    register_byte = match.group('byte')
-                    if register_byte:
-                        register_byte = strtoint(register_byte)
-                    else:
-                        register_byte = 0
-
-                    #print("register: " + str(register) + " bit : " + str(register_bit))
-                else:
-                    range_match = range_regex.search(row['register'])
-                    if not range_match:
-                        register = strtoint(row['register'])
-                    else:
-                        reverse = range_match.group('reverse')
-                        start = strtoint(range_match.group('start'))
-                        end = strtoint(range_match.group('end'))
-                        register = start
-                        if end > start:
-                            concatenate = True
-                            if reverse:
-                                for i in range(end, start-1, -1):
-                                    concatenate_registers.append(i)
-                            else:
-                                for i in range(start, end+1):
-                                    concatenate_registers.append(i)
-                       
-                if concatenate_registers:
-                    r = range(len(concatenate_registers))
-                else:
-                    r = range(1)
-
-                read_command = None
-                if "read command" in row and row['read command']:
-                    if row['read command'][0] == 'x':
-                        read_command = bytes.fromhex(row['read command'][1:])
-                    else:
-                        read_command = row['read command'].encode('utf-8')
-
-                writeMode : WriteMode = WriteMode.READ
-                if "writable" in row:
-                    writeMode = WriteMode.fromString(row['writable'])
-                
-                for i in r:
-                    item = registry_map_entry(
-                                                registry_type = registry_type,
-                                                register= register,
-                                                register_bit=register_bit,
-                                                register_byte= register_byte,
-                                                variable_name= variable_name,
-                                                documented_name = row['documented name'],
-                                                unit= str(character_part),
-                                                unit_mod= numeric_part,
-                                                data_type= data_type,
-                                                data_type_size = data_type_len,
-                                                concatenate = concatenate,
-                                                concatenate_registers = concatenate_registers,
-                                                values=values,
-                                                value_min=value_min,
-                                                value_max=value_max,
-                                                value_regex=value_regex,
-                                                read_command = read_command,
-                                                write_mode=writeMode
-                                            )
-                    registry_map.append(item)
-                    register = register + 1
+                if applied: 
+                    continue
             
             for index in reversed(range(len(registry_map))):
                 item = registry_map[index]

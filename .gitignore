@@ -21,6 +21,7 @@ variable_mask.txt
 variable_screen.txt
 .~lock.*
 protocols/*custom*
+protocols/*override*
 classes/transports/*custom*
 
 input_registry.json
