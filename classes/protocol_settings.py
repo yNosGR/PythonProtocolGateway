@@ -136,6 +136,8 @@ class WriteMode(Enum):
     WRITE = 0x02
     ''' READ AND WRITE '''
 
+    #todo, write only
+
     @classmethod
     def fromString(cls, name : str):
         name = name.strip().upper()
