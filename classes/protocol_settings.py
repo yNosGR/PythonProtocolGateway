@@ -137,6 +137,8 @@ class WriteMode(Enum):
     ''' READ AND WRITE '''
 
     #todo, write only
+    WRITEONLY = 0x03
+    ''' WRITE ONLY'''
 
     @classmethod
     def fromString(cls, name : str):
@@ -155,7 +157,8 @@ class WriteMode(Enum):
             "R/W"    : "WRITE",
             "RW"    : "WRITE",
             "W"     : "WRITE",
-            "YES"   : "WRITE"
+            "YES"   : "WRITE",
+            "WO"    : "WRITEONLY"
         }
         
         if name in alias:
@@ -635,6 +638,9 @@ class protocol_settings:
                 if register.register >= start and register.register < end:
                     if register.write_mode == WriteMode.READDISABLED: ##register is disabled; skip
                         continue
+                    if register.write_mode == WriteMode.WRITEONLY: ##Write Only; skip
+                        continue
+                
                     registers.append(register.register)
 
             if registers: #not empty

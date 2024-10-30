@@ -194,7 +194,7 @@ class mqtt(transport_base):
             self.__write_topics = {}
             #subscribe to write topics
             for entry in from_transport.protocolSettings.get_registry_map(Registry_Type.HOLDING):
-                if entry.write_mode == WriteMode.WRITE:
+                if entry.write_mode == WriteMode.WRITE or entry.write_mode == WriteMode.WRITEONLY:
                     #__write_topics
                     topic : str = self.base_topic + "/write/" + entry.variable_name.lower().replace(' ', '_')
                     self.__write_topics[topic] = entry
@@ -230,6 +230,7 @@ class mqtt(transport_base):
             if item.write_mode == WriteMode.READDISABLED: #disabled
                 continue
 
+
             clean_name = item.variable_name.lower().replace(' ', '_')
 
             if False:
@@ -250,8 +251,8 @@ class mqtt(transport_base):
             disc_payload['unique_id'] = "hotnoob_" + from_transport.device_serial_number + "_"+clean_name
 
             writePrefix = ""
-            if from_transport.write_enabled and item.write_mode == WriteMode.WRITE:
-                writePrefix = "" #home assistant doesnt like write prefix
+            if from_transport.write_enabled and ( item.write_mode == WriteMode.WRITE or item.write_mode == WriteMode.WRITEONLY ):
+                writePrefix = "" #home assistant doesnt like write prefix   
 
             disc_payload['state_topic'] = self.base_topic + '/' +from_transport.device_identifier + writePrefix+ "/"+clean_name
             
@@ -263,6 +264,10 @@ class mqtt(transport_base):
             
             self.client.publish(discovery_topic,
                                        json.dumps(disc_payload),qos=1, retain=True)
+            
+            #send WO message to indicate topic is write only
+            if item.write_mode == WriteMode.WRITEONLY:
+                self.client.publish(disc_payload['state_topic'], "WRITEONLY")
             
             time.sleep(0.07) #slow down for better reliability
         
