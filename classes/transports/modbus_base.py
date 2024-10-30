@@ -105,7 +105,7 @@ class modbus_base(transport_base):
         print(sn2)
         print(sn3)
         
-        if not re.search("[^a-zA-Z0-9\_]", sn2) :
+        if not re.search("[^a-zA-Z0-9_]", sn2) :
             serial_number = sn2
 
         return serial_number
@@ -262,7 +262,7 @@ class modbus_base(transport_base):
         def evaluate_score(entry : registry_map_entry, val):
             score = 0
             if entry.data_type == Data_Type.ASCII:
-                if val and not re.match('[^a-zA-Z0-9\_\-]', val): #validate ascii
+                if val and not re.match('[^a-zA-Z0-9_-]', val): #validate ascii
                     mod = 1
                     if entry.concatenate:
                         mod = len(entry.concatenate_registers)
