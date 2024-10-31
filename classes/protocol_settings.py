@@ -389,12 +389,14 @@ class protocol_settings:
             
         def process_row(row):
             # Initialize variables to hold numeric and character parts
-            numeric_part = 1
-            character_part = ''
+            unit_multiplier : float = 1
+            unit_symbol : str = ''
 
              #clean up doc name, for extra parsing
             row['documented name'] = row['documented name'].strip().lower().replace(' ', '_')
 
+
+            #region overrides
             if overrides != None:
                 #apply overrides using documented name or register
                 override_row = None
@@ -412,10 +414,14 @@ class protocol_settings:
                         if override_value:  # Only replace if override value is non-empty
                             row[field] = override_value
 
+            #endregion overrides
+
+            #region unit    
+
             #if or is in the unit; ignore unit
             if "or" in row['unit'].lower() or ":" in row['unit'].lower():
-                numeric_part = 1
-                character_part = row['unit']
+                unit_multiplier = 1
+                unit_symbol = row['unit']
             else:
                 # Use regular expressions to extract numeric and character parts
                 matches = re.findall(r'(\-?[0-9.]+)|(.*?)$', row['unit'])
@@ -423,10 +429,20 @@ class protocol_settings:
                 # Iterate over the matches and assign them to appropriate variables
                 for match in matches:
                     if match[0]:  # If it matches a numeric part
-                        numeric_part = float(match[0])
+                        unit_multiplier = float(match[0])
                     elif match[1]:  # If it matches a character part
-                        character_part = match[1].strip()
-                        #print(str(row['documented name']) + " Unit: " + str(character_part) )
+                        unit_symbol = match[1].strip()
+
+            #convert to float
+            try:
+                unit_multiplier = float(unit_multiplier)
+            except:
+                unit_multiplier = float(1)
+
+            if unit_multiplier == 0:
+                unit_multiplier = float(1)
+
+            #endregion unit
 
 
             variable_name = row['variable name'] if row['variable name'] else row['documented name']
@@ -435,21 +451,11 @@ class protocol_settings:
             if re.search(r"[^a-zA-Z0-9\_]", variable_name) :
                 self._log.warning("Invalid Name : " + str(variable_name) + " reg: " + str(row['register']) + " doc name: " + str(row['documented name']) + " path: " + str(path))
 
-            #convert to float
-            try:
-                numeric_part = float(numeric_part)
-            except:
-                numeric_part = float(1)
 
-            if numeric_part == 0:
-                numeric_part = float(1)
 
+
+            #region data type
             data_type = Data_Type.USHORT
-
-            
-            if 'values' not in row:
-                row['values'] = ""
-                self._log.warning("No Value Column : path: " + str(path)) 
 
             data_type_len : int = -1
             #optional row, only needed for non-default data types
@@ -461,7 +467,14 @@ class protocol_settings:
                 else:
                     data_type = Data_Type.fromString(row['data type'])
 
+            
+            if 'values' not in row:
+                row['values'] = ""
+                self._log.warning("No Value Column : path: " + str(path))
 
+            #endregion data type
+
+            #region values
             #get value range for protocol analyzer
             values : list = []
             value_min : int = 0
@@ -511,7 +524,9 @@ class protocol_settings:
 
                     if not matched: #single value
                         values.append(row['values'])
+            #endregion values
 
+            #region register
             concatenate : bool = False
             concatenate_registers : list[int] = []
 
@@ -559,6 +574,8 @@ class protocol_settings:
             else:
                 r = range(1)
 
+            #endregion register
+
             read_command = None
             if "read command" in row and row['read command']:
                 if row['read command'][0] == 'x':
@@ -578,8 +595,8 @@ class protocol_settings:
                                             register_byte= register_byte,
                                             variable_name= variable_name,
                                             documented_name = row['documented name'],
-                                            unit= str(character_part),
-                                            unit_mod= numeric_part,
+                                            unit= str(unit_symbol),
+                                            unit_mod= unit_multiplier,
                                             data_type= data_type,
                                             data_type_size = data_type_len,
                                             concatenate = concatenate,
