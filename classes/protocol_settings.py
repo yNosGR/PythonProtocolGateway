@@ -345,9 +345,10 @@ class protocol_settings:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 for key in keys:
-                    key_value = row[key].strip().lower().replace(' ', '_')
-                    if key_value:
-                        overrides[key][key_value] = row
+                    if key in row:
+                        key_value = row[key].strip().lower().replace(' ', '_')
+                        if key_value:
+                            overrides[key][key_value] = row
         return overrides
 
 
@@ -618,16 +619,17 @@ class protocol_settings:
                     applied = False
                     for key_value, override_row in overrides[key].items():
                         # Check if both keys are unique before applying
-                        if all(override_row.get(k) not in overrided_keys for k in override_keys):
-                            self._log.info("Loading unique entry from overrides for both unique keys")
-                            process_row(override_row)
-                            
-                            # Mark both keys as applied
-                            for k in override_keys:
-                                overrided_keys.add(override_row.get(k))
+                        if all(override_row.get(k) for k in override_keys): 
+                            if all(override_row.get(k) not in overrided_keys for k in override_keys):
+                                self._log.info("Loading unique entry from overrides for both unique keys")
+                                process_row(override_row)
                                 
-                            applied = True
-                            break  # Exit inner loop after applying unique entry
+                                # Mark both keys as applied
+                                for k in override_keys:
+                                    overrided_keys.add(override_row.get(k))
+                                    
+                                applied = True
+                                break  # Exit inner loop after applying unique entry
 
                     if applied: 
                         continue
