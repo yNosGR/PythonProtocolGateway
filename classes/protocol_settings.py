@@ -345,7 +345,7 @@ class protocol_settings:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 for key in keys:
-                    key_value = row[key]
+                    key_value = row[key].strip().lower().replace(' ', '_')
                     if key_value:
                         overrides[key][key_value] = row
         return overrides
@@ -367,17 +367,17 @@ class protocol_settings:
         
 
         overrides : dict[str, dict]  = None
-        override_keys = ['documented name', 'registry']
+        override_keys = ['documented name', 'register']
         overrided_keys = set()
         ''' list / set of keys that were used for overriding. to track unique entries'''
 
         #assuming path ends with .csv
-        overrides_path = path[:-4] + '.overrides.csv'
+        override_path = path[:-4] + '.override.csv'
 
-        if os.path.exists(overrides_path):
-            self._log.info("loading override file: " + overrides_path)
+        if os.path.exists(override_path):
+            self._log.info("loading override file: " + override_path)
 
-            overrides = self.load_registry_overrides(override_keys)
+            overrides = self.load_registry_overrides(override_path, override_keys)
         
         def determine_delimiter(first_row) -> str:
             if first_row.count(';') > first_row.count(','):
@@ -385,7 +385,7 @@ class protocol_settings:
             else:
                 return ','  
             
-        def process_row():
+        def process_row(row):
             # Initialize variables to hold numeric and character parts
             numeric_part = 1
             character_part = ''
@@ -409,24 +409,25 @@ class protocol_settings:
             #clean up doc name, for extra parsing
             row['documented name'] = row['documented name'].strip().lower().replace(' ', '_')
 
-            #apply overrides using documented name or register
-            override_row = None
-            # Check each key in order until a match is found
-            for key in override_keys:
-                key_value = row.get(key)
-                if key_value and key_value in overrides[key]:
-                    override_row = overrides[key][key_value]
-                    overrided_keys.add(key_value)
-                    break
-            
-            # Apply non-empty override values if an override row is found
-            if override_row:
-                for field, override_value in override_row.items():
-                    if override_value:  # Only replace if override value is non-empty
-                        row[field] = override_value
+            if overrides != None:
+                #apply overrides using documented name or register
+                override_row = None
+                # Check each key in order until a match is found
+                for key in override_keys:
+                    key_value = row.get(key)
+                    if key_value and key_value in overrides[key]:
+                        override_row = overrides[key][key_value]
+                        overrided_keys.add(key_value)
+                        break
+                
+                # Apply non-empty override values if an override row is found
+                if override_row:
+                    for field, override_value in override_row.items():
+                        if override_value:  # Only replace if override value is non-empty
+                            row[field] = override_value
 
             variable_name = row['variable name'] if row['variable name'] else row['documented name']
-            variable_name = variable_name = variable_name.strip().lower().replace(' ', '_').replace('__', '_') #clean name
+            variable_name = variable_name.strip().lower().replace(' ', '_').replace('__', '_') #clean name
             
             if re.search(r"[^a-zA-Z0-9\_]", variable_name) :
                 self._log.warning("Invalid Name : " + str(variable_name) + " reg: " + str(row['register']) + " doc name: " + str(row['documented name']) + " path: " + str(path))
@@ -611,18 +612,25 @@ class protocol_settings:
             for row in reader:
                 process_row(row)
 
-            # Add any unmatched overrides as new entries... probably need to add some better error handling to ensure entry isnt empty ect...
-            for key in override_keys:
-                applied = False
-                for key_value, override_row in overrides[key].items():
-                    if key_value not in overrided_keys:
-                        self._log.info("Loading unique entry from overrides")
-                        process_row(override_row)
-                        applied = True
-                        break
+            if overrides != None:
+                # Add any unmatched overrides as new entries... probably need to add some better error handling to ensure entry isnt empty ect...
+                for key in override_keys:
+                    applied = False
+                    for key_value, override_row in overrides[key].items():
+                        # Check if both keys are unique before applying
+                        if all(override_row.get(k) not in overrided_keys for k in override_keys):
+                            self._log.info("Loading unique entry from overrides for both unique keys")
+                            process_row(override_row)
+                            
+                            # Mark both keys as applied
+                            for k in override_keys:
+                                overrided_keys.add(override_row.get(k))
+                                
+                            applied = True
+                            break  # Exit inner loop after applying unique entry
 
-                if applied: 
-                    continue
+                    if applied: 
+                        continue
             
             for index in reversed(range(len(registry_map))):
                 item = registry_map[index]
