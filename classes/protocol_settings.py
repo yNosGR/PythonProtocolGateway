@@ -346,7 +346,8 @@ class protocol_settings:
             for row in reader:
                 for key in keys:
                     if key in row:
-                        key_value = row[key].strip().lower().replace(' ', '_')
+                        row[key] = row[key].strip().lower().replace(' ', '_')
+                        key_value = row[key]
                         if key_value:
                             overrides[key][key_value] = row
         return overrides
@@ -391,23 +392,7 @@ class protocol_settings:
             numeric_part = 1
             character_part = ''
 
-            #if or is in the unit; ignore unit
-            if "or" in row['unit'].lower() or ":" in row['unit'].lower():
-                numeric_part = 1
-                character_part = row['unit']
-            else:
-                # Use regular expressions to extract numeric and character parts
-                matches = re.findall(r'(\-?[0-9.]+)|(.*?)$', row['unit'])
-
-                # Iterate over the matches and assign them to appropriate variables
-                for match in matches:
-                    if match[0]:  # If it matches a numeric part
-                        numeric_part = float(match[0])
-                    elif match[1]:  # If it matches a character part
-                        character_part = match[1].strip()
-                        #print(str(row['documented name']) + " Unit: " + str(character_part) )
-
-            #clean up doc name, for extra parsing
+             #clean up doc name, for extra parsing
             row['documented name'] = row['documented name'].strip().lower().replace(' ', '_')
 
             if overrides != None:
@@ -426,6 +411,23 @@ class protocol_settings:
                     for field, override_value in override_row.items():
                         if override_value:  # Only replace if override value is non-empty
                             row[field] = override_value
+
+            #if or is in the unit; ignore unit
+            if "or" in row['unit'].lower() or ":" in row['unit'].lower():
+                numeric_part = 1
+                character_part = row['unit']
+            else:
+                # Use regular expressions to extract numeric and character parts
+                matches = re.findall(r'(\-?[0-9.]+)|(.*?)$', row['unit'])
+
+                # Iterate over the matches and assign them to appropriate variables
+                for match in matches:
+                    if match[0]:  # If it matches a numeric part
+                        numeric_part = float(match[0])
+                    elif match[1]:  # If it matches a character part
+                        character_part = match[1].strip()
+                        #print(str(row['documented name']) + " Unit: " + str(character_part) )
+
 
             variable_name = row['variable name'] if row['variable name'] else row['documented name']
             variable_name = variable_name.strip().lower().replace(' ', '_').replace('__', '_') #clean name
@@ -590,6 +592,7 @@ class protocol_settings:
                                             write_mode=writeMode
                                         )
                 registry_map.append(item)
+
                 register = register + 1
 
                 
