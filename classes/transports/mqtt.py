@@ -231,7 +231,9 @@ class mqtt(transport_base):
                 continue
 
 
-            clean_name = item.variable_name.lower().replace(' ', '_')
+            clean_name = item.variable_name.lower().replace(' ', '_').strip()
+            if not clean_name: #if name is empty, skip
+                continue
 
             if False:
                 if self.__input_register_prefix and item.registry_type == Registry_Type.INPUT:
