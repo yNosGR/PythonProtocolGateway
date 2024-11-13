@@ -452,7 +452,8 @@ class protocol_settings:
                 self._log.warning("Invalid Name : " + str(variable_name) + " reg: " + str(row['register']) + " doc name: " + str(row['documented name']) + " path: " + str(path))
 
 
-
+            if not variable_name and not row['documented name']: #skip empty entry / no name. todo add more invalidator checks. 
+                return
 
             #region data type
             data_type = Data_Type.USHORT
