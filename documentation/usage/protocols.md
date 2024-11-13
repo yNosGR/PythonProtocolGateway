@@ -1,3 +1,20 @@
+## Overriding protocols
+Protocols CSVs can be overriden, so that specific entries can be modified. 
+Protocols CSV overrides can be created naming them with name.override.csv
+
+For example, creating a file called: v0.14.input_registry_map.override.csv
+will allow the v0.14 protocol to be modified while preseving the main csv. 
+
+"documented name" is used as the primary key. the "register" is a secondary key. 
+
+only non-empty values will overwrite; not all columns need to be specified. 
+
+| documented name  | data type |
+| ------------- | ------------- |
+| product id  | ASCII  |
+
+if both the "documented name" and "register" are unqiue, the row will be treated as a new entry. 
+
 ## Custom / Editing Protocols
 Custom protocols can be created by naming them with name.custom. this will ensure that they do not get overwritten when updating. 
 

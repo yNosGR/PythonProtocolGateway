@@ -17,6 +17,7 @@ class transport_base:
     device_serial_number : str = ''
     device_manufacturer : str = 'hotnoob'
     device_model : str = 'hotnoob'
+    device_identifier : str = 'hotnoob'
     bridge : str = ''
     write_enabled : bool = False
     max_precision : int = 2
@@ -33,15 +34,16 @@ class transport_base:
 
     def __init__(self, settings : 'SectionProxy', protocolSettings : 'protocol_settings' = None) -> None:
         
+        self.transport_name = settings.name #section name
+
         #apply log level to logger
         self._log_level = getattr(logging, settings.get('log_level', fallback='INFO'), logging.INFO)
-        self._log : logging.Logger = logging.getLogger(__name__)
+        short_name : str = __name__[__name__.rfind('.'): ] if '.' in __name__ else None
+        self._log : logging.Logger = logging.getLogger(short_name + f"[{self.transport_name}]")
 
         self._log.setLevel(self._log_level)
-
-        self.transport_name = settings.name #section name
         
-        self.type = self.__class__.__name__        
+        self.type = self.__class__.__name__ 
 
         self.protocolSettings = protocolSettings
         if not self.protocolSettings: #if not, attempt to load. lazy i know
@@ -65,8 +67,12 @@ class transport_base:
                 self.write_enabled = settings.getboolean(["write_enabled", "enable_write"], self.write_enabled)
             else:
                 self.write_enabled = settings.getboolean("write", self.write_enabled)
-            
+                
+        self.update_identifier()
 
+
+    def update_identifier(self):
+        self.device_identifier = self.device_serial_number.strip().lower()
 
     def init_bridge(self, from_transport : 'transport_base'):
         pass
@@ -81,7 +87,7 @@ class transport_base:
     def connect(self):
         pass
 
-    def write_data(self, data : dict[str, registry_map_entry]):
+    def write_data(self, data : dict[str, registry_map_entry], from_transport : 'transport_base'):
         ''' general purpose write function for between transports'''
         pass
 

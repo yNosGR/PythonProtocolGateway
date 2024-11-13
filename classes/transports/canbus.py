@@ -220,7 +220,7 @@ class canbus(transport_base):
         self.write_enabled = True
         self._log.warning("enable write - validation on the todo")
 
-    def write_data(self, data : dict[str, str]) -> None:
+    def write_data(self, data : dict[str, str], from_transport : transport_base) -> None:
         if not self.write_enabled:
             return
 

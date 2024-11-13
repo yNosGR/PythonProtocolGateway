@@ -153,14 +153,14 @@ class mqtt(transport_base):
 
     __write_topics : dict[str, registry_map_entry] = {}
 
-    def write_data(self, data : dict[str, str]):
+    def write_data(self, data : dict[str, str], from_transport : transport_base):
         if not self.write_enabled:
             return 
         
         if self.connected:
             self.connected = self.client.is_connected()
         
-        self._log.info("write data to mqtt transport")   
+        self._log.info(f"write data from [{from_transport.transport_name}] to mqtt transport")   
         self._log.info(data)   
         #have to send this every loop, because mqtt doesnt disconnect when HA restarts. HA bug. 
         info = self.client.publish(self.base_topic + "/availability","online", qos=0,retain=True)
@@ -170,13 +170,13 @@ class mqtt(transport_base):
         if(self.json):
             # Serializing json
             json_object = json.dumps(data, indent=4)
-            self.client.publish(self.base_topic, json_object, 0, properties=self.mqtt_properties)
+            self.client.publish(self.base_topic+'/'+from_transport.device_identifier, json_object, 0, properties=self.mqtt_properties)
         else:
             for entry, val in data.items():
                 if isinstance(val, float) and self.max_precision >= 0: #apply max_precision on mqtt transport 
                     val = round(val, self.max_precision)
 
-                self.client.publish(str(self.base_topic+'/'+entry).lower(), str(val))
+                self.client.publish(str(self.base_topic+'/'+from_transport.device_identifier+'/'+entry).lower(), str(val))
 
     def client_on_message(self, client, userdata, msg):
         """ The callback for when a PUBLISH message is received from the server. """
@@ -194,7 +194,7 @@ class mqtt(transport_base):
             self.__write_topics = {}
             #subscribe to write topics
             for entry in from_transport.protocolSettings.get_registry_map(Registry_Type.HOLDING):
-                if entry.write_mode == WriteMode.WRITE:
+                if entry.write_mode == WriteMode.WRITE or entry.write_mode == WriteMode.WRITEONLY:
                     #__write_topics
                     topic : str = self.base_topic + "/write/" + entry.variable_name.lower().replace(' ', '_')
                     self.__write_topics[topic] = entry
@@ -230,7 +230,10 @@ class mqtt(transport_base):
             if item.write_mode == WriteMode.READDISABLED: #disabled
                 continue
 
-            clean_name = item.variable_name.lower().replace(' ', '_')
+
+            clean_name = item.variable_name.lower().replace(' ', '_').strip()
+            if not clean_name: #if name is empty, skip
+                continue
 
             if False:
                 if self.__input_register_prefix and item.registry_type == Registry_Type.INPUT:
@@ -250,10 +253,10 @@ class mqtt(transport_base):
             disc_payload['unique_id'] = "hotnoob_" + from_transport.device_serial_number + "_"+clean_name
 
             writePrefix = ""
-            if from_transport.write_enabled and item.write_mode == WriteMode.WRITE:
-                writePrefix = "" #home assistant doesnt like write prefix
+            if from_transport.write_enabled and ( item.write_mode == WriteMode.WRITE or item.write_mode == WriteMode.WRITEONLY ):
+                writePrefix = "" #home assistant doesnt like write prefix   
 
-            disc_payload['state_topic'] = self.base_topic +writePrefix+ "/"+clean_name
+            disc_payload['state_topic'] = self.base_topic + '/' +from_transport.device_identifier + writePrefix+ "/"+clean_name
             
             if item.unit:
                 disc_payload['unit_of_measurement'] = item.unit
@@ -263,6 +266,10 @@ class mqtt(transport_base):
             
             self.client.publish(discovery_topic,
                                        json.dumps(disc_payload),qos=1, retain=True)
+            
+            #send WO message to indicate topic is write only
+            if item.write_mode == WriteMode.WRITEONLY:
+                self.client.publish(disc_payload['state_topic'], "WRITEONLY")
             
             time.sleep(0.07) #slow down for better reliability
         

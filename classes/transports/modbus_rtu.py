@@ -33,6 +33,9 @@ class modbus_rtu(modbus_base):
             raise ValueError("Port is not set")
         
         self.port = find_usb_serial_port(self.port) 
+        if not self.port:
+            raise ValueError("Port is not valid / not found")
+        
         print("Serial Port : " + self.port + " = ", get_usb_serial_port_info(self.port)) #print for config convience
 
         if "baud" in self.protocolSettings.settings:
@@ -42,7 +45,7 @@ class modbus_rtu(modbus_base):
 
         address : int = settings.getint("address", 0)
         self.addresses = [address]
-
+        
         # pymodbus compatability; unit was renamed to address
         if 'slave' in inspect.signature(ModbusSerialClient.read_holding_registers).parameters:
             self.pymodbus_slave_arg = 'slave'

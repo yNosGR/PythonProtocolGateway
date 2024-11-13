@@ -68,6 +68,7 @@ class modbus_base(transport_base):
         #if sn is empty, attempt to autoread it
         if not self.device_serial_number: 
             self.device_serial_number = self.read_serial_number()
+            self.update_identifier()
 
     def connect(self):
         if self.connected and self.first_connect:
@@ -104,7 +105,7 @@ class modbus_base(transport_base):
         print(sn2)
         print(sn3)
         
-        if not re.search("[^a-zA-Z0-9\_]", sn2) :
+        if not re.search("[^a-zA-Z0-9_]", sn2) :
             serial_number = sn2
 
         return serial_number
@@ -117,7 +118,7 @@ class modbus_base(transport_base):
             self.write_enabled = True
             self._log.warning("enable write - validation passed")
 
-    def write_data(self, data : dict[str, str]) -> None:
+    def write_data(self, data : dict[str, str], from_transport : transport_base) -> None:
         if not self.write_enabled:
             return
 
@@ -261,7 +262,7 @@ class modbus_base(transport_base):
         def evaluate_score(entry : registry_map_entry, val):
             score = 0
             if entry.data_type == Data_Type.ASCII:
-                if val and not re.match('[^a-zA-Z0-9\_\-]', val): #validate ascii
+                if val and not re.match('[^a-zA-Z0-9_-]', val): #validate ascii
                     mod = 1
                     if entry.concatenate:
                         mod = len(entry.concatenate_registers)
@@ -458,10 +459,14 @@ class modbus_base(transport_base):
                 if e.error_code == 4: #if no response; probably time out. retry with increased delay
                     isError = True
                 else:
-                    raise
+                    isError = True #other erorrs. ie Failed to connect[ModbusSerialClient(rtu baud[9600])]
 
-            if register.isError() or isError:
-                self._log.error(register.__str__)
+
+            if isinstance(register, bytes) or register.isError() or isError: #sometimes weird errors are handled incorrectly and response is a ascii error string
+                if isinstance(register, bytes):
+                    self._log.error(register.decode('utf-8'))
+                else: 
+                    self._log.error(register.__str__)
                 self.modbus_delay += self.modbus_delay_increament #increase delay, error is likely due to modbus being busy
 
                 if self.modbus_delay > 60: #max delay. 60 seconds between requests should be way over kill if it happens
@@ -482,7 +487,6 @@ class modbus_base(transport_base):
                     self.modbus_delay = self.modbus_delay_setting
                 
             
-
             retry -= 1
             if retry < 0:
                 retry = 0
