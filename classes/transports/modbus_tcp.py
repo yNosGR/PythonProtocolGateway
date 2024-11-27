@@ -10,6 +10,7 @@ class modbus_tcp(modbus_base):
     port : str = 502
     host : str = ""
     client : ModbusTcpClient 
+    pymodbus_slave_arg = 'unit'
 
     def __init__(self, settings : SectionProxy, protocolSettings : protocol_settings = None):
         #logger = logging.getLogger(__name__)
@@ -25,8 +26,16 @@ class modbus_tcp(modbus_base):
         super().__init__(settings, protocolSettings=protocolSettings)
         
     def read_registers(self, start, count=1, registry_type : Registry_Type = Registry_Type.INPUT, **kwargs):
+
+        if 'unit' not in kwargs:
+            kwargs = {'unit': 1, **kwargs}
+
+        #compatability
+        if self.pymodbus_slave_arg != 'unit':
+            kwargs['slave'] = kwargs.pop('unit')
+
         if registry_type == Registry_Type.INPUT:
-            return self.client.read_input_registers(start, count, **kwargs)
+            return self.client.read_input_registers(start, count, **kwargs  )
         elif registry_type == Registry_Type.HOLDING:
             return self.client.read_holding_registers(start, count, **kwargs)
     
