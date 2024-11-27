@@ -1,4 +1,6 @@
 import logging
+import inspect
+
 from classes.protocol_settings import Registry_Type, protocol_settings
 
 #compatability
@@ -26,6 +28,10 @@ class modbus_tcp(modbus_base):
             raise ValueError("Host is not set")
         
         self.port = settings.getint("port", self.port)
+
+        # pymodbus compatability; unit was renamed to address
+        if 'slave' in inspect.signature(ModbusTcpClient.read_holding_registers).parameters:
+            self.pymodbus_slave_arg = 'slave'
 
         self.client = ModbusTcpClient(host=self.host, port=self.port, timeout=7, retries=3)
         super().__init__(settings, protocolSettings=protocolSettings)
