@@ -13,6 +13,12 @@ https://github.com/HotNoob/PythonProtocolGateway/wiki/Configuration-Examples#mod
 protocol_version = v0.14
 ```
 
+## Inverter Protocol Select
+```
+spf 5000              = v0.14
+spf 12000t dvm-us mpv = v0.14
+```
+
 ## HomeAssistant Cards
 Here are some example cards. If you want to use them, you will have to change the variable names and others to reflect your configs. 
 
