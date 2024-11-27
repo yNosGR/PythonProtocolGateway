@@ -9,6 +9,8 @@ Optional hardware:
 ADUM3160 chipset / USB isolator. The growatt inverter's usb port has a power issue that can effect reliablilty; using an isolator will help mitigate this problem.
 https://www.aliexpress.com/item/1005002959825296.html?spm=a2g0o.order_list.order_list_main.5.51c618021n8SGf
 
+For best long term reliability, use a rs485 adapter \w rj45 ethernet cable.
+
 ## Configuration
 Follow configuration example for ModBus RTU to MQTT
 https://github.com/HotNoob/PythonProtocolGateway/wiki/Configuration-Examples#modbus-rtu-to-mqtt
