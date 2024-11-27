@@ -1,7 +1,12 @@
 import logging
 from classes.protocol_settings import Registry_Type, protocol_settings
-from pymodbus.client.sync import ModbusTcpClient
-from .transport_base import transport_base
+
+#compatability
+try:
+    from pymodbus.client.sync import ModbusTcpClient
+except ImportError:
+    from pymodbus.client import ModbusTcpClient
+
 from .modbus_base import modbus_base
 from configparser import SectionProxy
 
