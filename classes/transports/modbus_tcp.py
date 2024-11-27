@@ -2,10 +2,11 @@ import logging
 from classes.protocol_settings import Registry_Type, protocol_settings
 from pymodbus.client.sync import ModbusTcpClient
 from .transport_base import transport_base
+from .modbus_base import modbus_base
 from configparser import SectionProxy
 
 
-class modbus_tcp(transport_base):
+class modbus_tcp(modbus_base):
     port : str = 502
     host : str = ""
     client : ModbusTcpClient 
