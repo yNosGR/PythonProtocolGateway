@@ -15,6 +15,16 @@
 
 3. Connect appropriate wires to USB RS485 Adapter
 
+## Raspberry Pi Can Hat
+If using a Raspberry Pi Can Hat, ensure your RS485 pins are not A-A, B-B. The expected pinout configuration should be A-B, B-A. 
+
+If you get the following error while using a Raspberry Pi Can Hat swap your A/B wires:
+
+```
+ERROR:.transport_base[transport.0]:<bound method ModbusException.__str__ of ModbusIOException()>
+```
+
+
 ## Configuration
 Follow configuration example for ModBus RTU to MQTT
 https://github.com/HotNoob/PythonProtocolGateway/wiki/Configuration-Examples#modbus-rtu-to-mqtt
