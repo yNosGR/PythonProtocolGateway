@@ -16,7 +16,7 @@
 3. Connect appropriate wires to USB RS485 Adapter
 
 ## Raspberry Pi Can Hat
-If using a Raspberry Pi Can Hat, ensure your RS485 pins are not A-A, B-B. The expected pinout configuration should be A-B, B-A. 
+If using a Raspberry Pi Can Hat, The expected pinout RS485 A/B configuration maybe be reversed.
 
 If you get the following error while using a Raspberry Pi Can Hat swap your A/B wires:
 
