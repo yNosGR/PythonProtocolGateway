@@ -22,7 +22,7 @@ class modbus_base(transport_base):
 
 
     #this is specifically static
-    clients : dict[str, 'BaseModbusClient'] = []
+    clients : dict[str, 'BaseModbusClient'] = {}
     ''' str is identifier, dict of clients when multiple transports use the same ports '''
 
     #non-static here for reference, type hinting, python bs ect... 
