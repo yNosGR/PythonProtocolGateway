@@ -12,9 +12,20 @@ from defs.common import strtobool
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from configparser import SectionProxy
+    try:
+        from pymodbus.client.sync import BaseModbusClient
+    except ImportError:
+        from pymodbus.client import BaseModbusClient
+
 
 class modbus_base(transport_base):
 
+
+    #this is specifically static
+    clients : dict[str, BaseModbusClient] = []
+    ''' str is identifier, dict of clients when multiple transports use the same ports '''
+
+    #non-static here for reference, type hinting, python bs ect... 
     modbus_delay_increament : float = 0.05 
     ''' delay adjustment every error. todo: add a setting for this '''
 

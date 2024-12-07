@@ -54,6 +54,12 @@ class modbus_rtu(modbus_base):
         # Get the signature of the __init__ method
         init_signature = inspect.signature(ModbusSerialClient.__init__)
 
+        client_str = self.port+"("+self.baudrate+")"
+
+        if client_str in modbus_base.clients:
+            self.client = modbus_base.clients[client_str]
+            return
+        
         if 'method' in init_signature.parameters:
             self.client = ModbusSerialClient(method='rtu', port=self.port, 
                                         baudrate=int(self.baudrate), 
@@ -64,6 +70,9 @@ class modbus_rtu(modbus_base):
                             baudrate=int(self.baudrate), 
                             stopbits=1, parity='N', bytesize=8, timeout=2
                             )
+            
+        #add to clients
+        self.clients[client_str] = self.client
         
     def read_registers(self, start, count=1, registry_type : Registry_Type = Registry_Type.INPUT, **kwargs):
 
