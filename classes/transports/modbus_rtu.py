@@ -9,6 +9,7 @@ try:
 except ImportError:
     from pymodbus.client import ModbusSerialClient
 
+
 from .modbus_base import modbus_base
 from configparser import SectionProxy
 from defs.common import find_usb_serial_port, get_usb_serial_port_info, strtoint
@@ -66,13 +67,14 @@ class modbus_rtu(modbus_base):
                                         stopbits=1, parity='N', bytesize=8, timeout=2
                                         )
         else:
-            self.client = ModbusSerialClient(port=self.port, 
+            self.client = ModbusSerialClient(
+                            port=self.port, 
                             baudrate=int(self.baudrate), 
                             stopbits=1, parity='N', bytesize=8, timeout=2
                             )
             
         #add to clients
-        self.clients[client_str] = self.client
+        modbus_base.clients[client_str] = self.client
         
     def read_registers(self, start, count=1, registry_type : Registry_Type = Registry_Type.INPUT, **kwargs):
 
@@ -84,9 +86,9 @@ class modbus_rtu(modbus_base):
             kwargs['slave'] = kwargs.pop('unit')
 
         if registry_type == Registry_Type.INPUT:
-            return self.client.read_input_registers(start, count, **kwargs)
+            return self.client.read_input_registers(address=start, count=count, **kwargs)
         elif registry_type == Registry_Type.HOLDING:
-            return self.client.read_holding_registers(start, count, **kwargs)
+            return self.client.read_holding_registers(address=start, count=count, **kwargs)
         
     def write_register(self, register : int, value : int, **kwargs):
         if not self.write_enabled:

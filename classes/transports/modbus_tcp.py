@@ -42,7 +42,7 @@ class modbus_tcp(modbus_base):
         self.client = ModbusTcpClient(host=self.host, port=self.port, timeout=7, retries=3)
 
         #add to clients
-        self.clients[client_str] = self.client
+        modbus_base.clients[client_str] = self.client
 
         super().__init__(settings, protocolSettings=protocolSettings)
         
