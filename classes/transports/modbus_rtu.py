@@ -54,7 +54,7 @@ class modbus_rtu(modbus_base):
         # Get the signature of the __init__ method
         init_signature = inspect.signature(ModbusSerialClient.__init__)
 
-        client_str = self.port+"("+self.baudrate+")"
+        client_str = self.port+"("+str(self.baudrate)+")"
 
         if client_str in modbus_base.clients:
             self.client = modbus_base.clients[client_str]

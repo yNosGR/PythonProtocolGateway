@@ -33,7 +33,7 @@ class modbus_tcp(modbus_base):
         if 'slave' in inspect.signature(ModbusTcpClient.read_holding_registers).parameters:
             self.pymodbus_slave_arg = 'slave'
 
-        client_str = self.host+"("+self.port+")"
+        client_str = self.host+"("+str(self.port)+")"
         #check if client is already initialied
         if client_str in modbus_base.clients:
             self.client = modbus_base.clients[client_str]
@@ -43,7 +43,7 @@ class modbus_tcp(modbus_base):
 
         #add to clients
         self.clients[client_str] = self.client
-        
+
         super().__init__(settings, protocolSettings=protocolSettings)
         
     def read_registers(self, start, count=1, registry_type : Registry_Type = Registry_Type.INPUT, **kwargs):
