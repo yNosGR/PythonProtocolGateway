@@ -502,12 +502,12 @@ class modbus_base(transport_base):
             if retry < 0:
                 retry = 0
 
-            if(register.count > 0):
-                #combine registers into "registry"
-                i = -1
-                while(i := i + 1 ) < range[1]:
-                    #print(str(i) + " => " + str(i+range[0]))
-                    registry[i+range[0]] = register.registers[i]
+ 
+            #combine registers into "registry"
+            i = -1
+            while(i := i + 1 ) < range[1]:
+                #print(str(i) + " => " + str(i+range[0]))
+                registry[i+range[0]] = register.registers[i]
 
         return registry
     
