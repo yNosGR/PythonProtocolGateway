@@ -3,7 +3,7 @@
     "baud"  : "9600",
     "send_holding_register" : "true",
     "send_input_register" : "false",
-    "batch_size" : 7,
+    "batch_size" : 21,
     "batch_delay" : 1.4,
     "cell_voltage_state_codes" : 
     {
