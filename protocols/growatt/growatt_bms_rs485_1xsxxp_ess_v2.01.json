@@ -1,4 +1,5 @@
 {
+    "NOTE" : "INCOMPLETE - WORK IN PROGRESS",
     "transport" : "modbus_rtu",
     "baud" : 9600
 }
