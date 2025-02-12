@@ -30,6 +30,8 @@ class Data_Type(Enum):
 
     ASCII = 84
     ''' 2 characters '''
+    HEX = 85
+    ''' HEXADECIMAL STRING '''
 
     _1BIT = 201
     _2BIT = 202
@@ -516,7 +518,7 @@ class protocol_settings:
                         value_max = strtoint(val_match.group('end'))
                         matched = True
 
-                    if data_type == Data_Type.ASCII:
+                    if data_type == Data_Type.ASCII: #might need to apply too hex values as well? or min-max works for hex?
                         #value_regex
                         val_match = ascii_value_regex.search(row['values'])
                         if val_match:
@@ -885,6 +887,8 @@ class protocol_settings:
             bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
             bit_index = entry.register_bit
             value = (register >> bit_index) & bit_mask
+        elif entry.data_type == Data_Type.HEX:
+            value = register.hex() #convert bytes to hex
         elif entry.data_type == Data_Type.ASCII:
             try:
                 value = register.decode("utf-8") #convert bytes to ascii
@@ -999,6 +1003,9 @@ class protocol_settings:
                 bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
                 bit_index = entry.register_bit
                 value = (registry[entry.register] >> bit_index) & bit_mask
+        elif entry.data_type == Data_Type.HEX:
+                value = registry[entry.register].to_bytes((16 + 7) // 8, byteorder=self.byteorder) #convert to ushort to bytes
+                value = value.hex() #convert bytes to hex
         elif entry.data_type == Data_Type.ASCII:
             value = registry[entry.register].to_bytes((16 + 7) // 8, byteorder=self.byteorder) #convert to ushort to bytes
             try:
