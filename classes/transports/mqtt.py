@@ -110,7 +110,7 @@ class mqtt(transport_base):
     def exit_handler(self):
         '''on exit handler'''
         self._log.warning("MQTT Exiting...")
-        self.client.publish( self.base_topic + "/availability","offline")
+        self.client.publish( self.base_topic + '/' + self.device_identifier + "/availability","offline")
         return
     
     def mqtt_reconnect(self):
@@ -163,7 +163,7 @@ class mqtt(transport_base):
         self._log.info(f"write data from [{from_transport.transport_name}] to mqtt transport")   
         self._log.info(data)   
         #have to send this every loop, because mqtt doesnt disconnect when HA restarts. HA bug. 
-        info = self.client.publish(self.base_topic + "/availability","online", qos=0,retain=True)
+        info = self.client.publish(self.base_topic + '/' + from_transport.device_identifier + "/availability","online", qos=0,retain=True)
         if info.rc == MQTT_ERR_NO_CONN:
             self.connected = False
 
@@ -196,7 +196,7 @@ class mqtt(transport_base):
             for entry in from_transport.protocolSettings.get_registry_map(Registry_Type.HOLDING):
                 if entry.write_mode == WriteMode.WRITE or entry.write_mode == WriteMode.WRITEONLY:
                     #__write_topics
-                    topic : str = self.base_topic + "/write/" + entry.variable_name.lower().replace(' ', '_')
+                    topic : str = self.base_topic + '/'+ from_transport.device_identifier + "/write/" + entry.variable_name.lower().replace(' ', '_')
                     self.__write_topics[topic] = entry
                     self.client.subscribe(topic)
 
@@ -207,7 +207,7 @@ class mqtt(transport_base):
         self._log.info("Publishing HA Discovery Topics...")
 
         disc_payload = {}
-        disc_payload['availability_topic'] = self.base_topic + "/availability"
+        disc_payload['availability_topic'] = self.base_topic + '/' + from_transport.device_identifier + "/availability"
 
         device = {}
         device['manufacturer'] = from_transport.device_manufacturer
@@ -247,7 +247,7 @@ class mqtt(transport_base):
 
             #device['sw_version'] = bms_version
             disc_payload = {}
-            disc_payload['availability_topic'] = self.base_topic + "/availability"
+            disc_payload['availability_topic'] = self.base_topic + '/' + from_transport.device_identifier + "/availability"
             disc_payload['device'] = device
             disc_payload['name'] = clean_name
             disc_payload['unique_id'] = "hotnoob_" + from_transport.device_serial_number + "_"+clean_name

@@ -1,8 +1,8 @@
 variable name,data type,register,documented_name,description,writable,values,unit,note
 ,,1,Protocol_Type,,R,,,Positive: charging Negative: discharging
 ,,2,Protocol_Version,,R,,,
-,ASCII,3~4,BMS_Firmware_Version,,,,,
-,ASCII,4~5,BMS_Hardware_Version,,,,,
+,HEX,3~4,BMS_Firmware_Version,,,,,
+,HEX,4~5,BMS_Hardware_Version,,,,,
 ,,,,,,,,
 ,,x10,Number_of_Cells,,,,,
 ,,x11,Cell_Voltage_1,,,,0.1V,

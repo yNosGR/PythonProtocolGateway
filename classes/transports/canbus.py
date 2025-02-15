@@ -62,7 +62,7 @@ class canbus(transport_base):
         self.linux = platform.system() != 'Windows'
 
 
-        self.port = settings.get(["port", "channel"], "").lower()
+        self.port = settings.get(["port", "channel"], "")
         if not self.port:
             raise ValueError("Port/Channel is not set")
 
@@ -77,6 +77,7 @@ class canbus(transport_base):
         #setup / configure socketcan
         if self.interface == "socketcan":
             self.setup_socketcan()
+            self.port = self.port.lower()
 
         self.bus = can.interface.Bus(interface=self.interface, channel=self.port, bitrate=self.baudrate)
         self.reader = can.AsyncBufferedReader()

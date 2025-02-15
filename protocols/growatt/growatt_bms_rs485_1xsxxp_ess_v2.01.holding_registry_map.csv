@@ -1,0 +1,10 @@
+variable name,data type,register,documented name,description,write,values,unit
+,,x0001 ,MCU Software version ,,R,,
+,,x0002,Gauge Version ,,,,
+,ASCII,x0003-x0004,Gauge FR Version ,,,,
+,6bit,x0005,Date Second,,,,
+,6bit,x0005.b6,Date Minute,,,,
+,6bit,x0005.b12,Date Hour,,,,
+,6bit,x0006,Date Day,,,,
+,6bit,x0006.b6,Date Month,,,,
+,6bit,x0006.b12,Date Year,,,,
