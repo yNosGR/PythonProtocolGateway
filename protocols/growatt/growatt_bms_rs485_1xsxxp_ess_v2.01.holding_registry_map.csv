@@ -1,5 +1,5 @@
 variable name,data type,register,documented name,description,write,values,unit
-,,0x0001 ,MCU Software version ,,R,,
+,,x0001 ,MCU Software version ,,R,,
 ,,x0002,Gauge Version ,,,,
 ,ASCII,x0003-x0004,Gauge FR Version ,,,,
 ,6bit,x0005,Date Second,,,,
