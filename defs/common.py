@@ -20,7 +20,7 @@ def strtoint(val : str) -> int:
     if isinstance(val, int): #is already int. 
         return val
     
-    val = val.lower()
+    val = val.lower().strip()
 
     if val and val[0] == 'x':
         val = val[1:]
