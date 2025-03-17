@@ -133,7 +133,7 @@ class Protocol_Gateway:
                     raise ValueError('Missing Transport / Protocol Version')
                 
             
-                if not transport_type and protocol_version: #get transport from protocol settings... 
+                if not transport_type and protocol_version: #get transport from protocol settings...  todo need to make a quick function instead of this
                     protocolSettings : protocol_settings = protocol_settings(protocol_version)
 
                     if not transport_type and not protocolSettings.transport:
@@ -211,7 +211,7 @@ class Protocol_Gateway:
                 traceback.print_exc()
                 self.__log.error(err)
 
-            time.sleep(7)
+            time.sleep(0.7) #change this in future. probably reduce to allow faster reads. 
 
    
 

@@ -32,7 +32,7 @@ class transport_base:
 
     _log : logging.Logger = None
 
-    def __init__(self, settings : 'SectionProxy', protocolSettings : 'protocol_settings' = None) -> None:
+    def __init__(self, settings : 'SectionProxy') -> None:
         
         self.transport_name = settings.name #section name
 
@@ -45,17 +45,6 @@ class transport_base:
         
         self.type = self.__class__.__name__ 
 
-        self.protocolSettings = protocolSettings
-        if not self.protocolSettings: #if not, attempt to load. lazy i know
-            self.protocol_version = settings.get('protocol_version')
-            if self.protocol_version:
-                self.protocolSettings = protocol_settings(self.protocol_version)
-
-        if self.protocolSettings:
-            self.protocol_version = self.protocolSettings.protocol
-
-            #todo, reimplement default settings from protocolsettings
-
         if settings:
             self.device_serial_number = settings.get(["device_serial_number", "serial_number"], self.device_serial_number)
             self.device_manufacturer = settings.get(["device_manufacturer", "manufacturer"], self.device_manufacturer)
@@ -67,6 +56,18 @@ class transport_base:
                 self.write_enabled = settings.getboolean(["write_enabled", "enable_write"], self.write_enabled)
             else:
                 self.write_enabled = settings.getboolean("write", self.write_enabled)
+
+
+        #load a protocol_settings class for every transport; required for adv features. ie, variable timing.
+        #must load after settings  
+        self.protocol_version = settings.get('protocol_version')
+        if self.protocol_version:
+            self.protocolSettings = protocol_settings(self.protocol_version, transport_settings=settings)
+
+        if self.protocolSettings:
+            self.protocol_version = self.protocolSettings.protocol
+
+            #todo, reimplement default settings from protocolsettings
                 
         self.update_identifier()
 

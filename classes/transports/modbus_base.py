@@ -155,7 +155,10 @@ class modbus_base(transport_base):
             if registry_type == Registry_Type.HOLDING and not self.send_holding_register:
                 continue
 
-            registry = self.read_modbus_registers(ranges=self.protocolSettings.get_registry_ranges(registry_type=registry_type), registry_type=registry_type)
+            #calculate ranges dynamically -- for variable read timing
+            ranges = self.protocolSettings.calculate_registry_ranges(self.protocolSettings.registry_map[registry_type], self.protocolSettings.registry_map_size[registry_type])
+
+            registry = self.read_modbus_registers(ranges=ranges, registry_type=registry_type)
             new_info = self.protocolSettings.process_registery(registry, self.protocolSettings.get_registry_map(registry_type))
 
             if False:
