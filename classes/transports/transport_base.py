@@ -58,14 +58,14 @@ class transport_base:
                 self.write_enabled = settings.getboolean("write", self.write_enabled)
 
 
-        #load a protocol_settings class for every transport; required for adv features. ie, variable timing.
-        #must load after settings  
-        self.protocol_version = settings.get('protocol_version')
-        if self.protocol_version:
-            self.protocolSettings = protocol_settings(self.protocol_version, transport_settings=settings)
+            #load a protocol_settings class for every transport; required for adv features. ie, variable timing.
+            #must load after settings  
+            self.protocol_version = settings.get('protocol_version')
+            if self.protocol_version:
+                self.protocolSettings = protocol_settings(self.protocol_version, transport_settings=settings)
 
-        if self.protocolSettings:
-            self.protocol_version = self.protocolSettings.protocol
+                if self.protocolSettings:
+                    self.protocol_version = self.protocolSettings.protocol
 
             #todo, reimplement default settings from protocolsettings
                 

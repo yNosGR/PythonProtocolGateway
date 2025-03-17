@@ -374,7 +374,7 @@ class protocol_settings:
         registry_map : list[registry_map_entry] = []
         register_regex = re.compile(r'(?P<register>(?:0?x[\da-z]+|[\d]+))\.(b(?P<bit>x?\d{1,2})|(?P<byte>x?\d{1,2}))')
 
-        read_interval_regex = re.compile(r'(?P<value>[\.\d]+)(?P<unit>[xs]|ms')
+        read_interval_regex = re.compile(r'(?P<value>[\.\d]+)(?P<unit>[xs]|ms)')
 
 
         data_type_regex = re.compile(r'(?P<datatype>\w+)\.(?P<length>\d+)')
