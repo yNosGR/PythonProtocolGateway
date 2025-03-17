@@ -403,7 +403,7 @@ class modbus_base(transport_base):
         if ushortValue == None:
             raise ValueError("Invalid value - None")
 
-        self.write_register(entry.register, ushortValue, registry_type=registry_type)
+        self.write_register(entry.register, ushortValue)
 
 
     def read_variable(self, variable_name : str, registry_type : Registry_Type, entry : registry_map_entry = None):
