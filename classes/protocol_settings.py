@@ -270,6 +270,7 @@ class protocol_settings:
 
         self.protocol = protocol
         self.settings_dir = settings_dir
+        self.transport_settings = transport_settings
 
         #load variable mask
         self.variable_mask = []
@@ -426,12 +427,10 @@ class protocol_settings:
             #region read_interval
             
             
-            if 'read_interval' in row:
-                row['read_interval'] = row['read_interval'].lower() #ensure is all lower case
-                match = read_interval_regex.search(row['read_interval'])
+            if 'read interval' in row:
+                row['read interval'] = row['read interval'].lower() #ensure is all lower case
+                match = read_interval_regex.search(row['read interval'])
                 if match:
-                    register = strtoint(match.group('register'))
-
                     unit = match.group('unit')
                     value = match.group('value')
                     if value:
@@ -444,12 +443,12 @@ class protocol_settings:
                                 read_interval *= 1000
 
             if read_interval == 0:
-                read_interval = transport_read_interval
+                read_interval = transport_read_interval * 1000
                 if "read_interval" in self.settings:
                     try:
                         read_interval = int(self.settings['read_interval'])
                     except ValueError:
-                        read_interval = transport_read_interval
+                        read_interval = transport_read_interval * 1000
 
 
             #region overrides
@@ -762,7 +761,7 @@ class protocol_settings:
 
             return registry_map
         
-    def calculate_registry_ranges(self, map : list[registry_map_entry], max_register : int) -> list[tuple]:
+    def calculate_registry_ranges(self, map : list[registry_map_entry], max_register : int, init : bool = False) -> list[tuple]:
         ''' read optimization; calculate which ranges to read'''
         max_batch_size = 45 #see manual; says max batch is 45
 
@@ -776,7 +775,8 @@ class protocol_settings:
         ranges : list[tuple] = []
 
         timestamp_ms = int(time.time() * 1000)
-
+        if init : #hack so that all registers are read initially without adding extra if in loop
+            timestamp_ms = 0
 
         while (start := start+max_batch_size) <= max_register:
             
@@ -843,7 +843,7 @@ class protocol_settings:
                 size = item.register
 
         self.registry_map_size[registry_type] = size
-        self.registry_map_ranges[registry_type] = self.calculate_registry_ranges(self.registry_map[registry_type], self.registry_map_size[registry_type])
+        self.registry_map_ranges[registry_type] = self.calculate_registry_ranges(self.registry_map[registry_type], self.registry_map_size[registry_type], init=True)
 
     def process_register_bytes(self, registry : dict[int,bytes], entry : registry_map_entry):
         ''' process bytes into data'''
