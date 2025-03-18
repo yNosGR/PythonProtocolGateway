@@ -1,4 +1,4 @@
-variable name,data type,register,documented name,read interval,description,customer write,values,unit,Initial value,note,,,,,,,,,,,,
+variable name,data type,register,documented name,read_interval,description,customer write,values,unit,Initial value,note,,,,,,,,,,,,
 ,,0,On_Off,,"The Standby On/Off state and the AC output DisEN/EN state; The low byte is the Standby on/off(1/0), the high byte is the AC output disable/enable (1/0).",,"0x0000:??? Standby??? off, Output enable; 0x0001:??? Standby??? on, Output enable; 0x0100:??? Standby??? off, Output disable; 0x0101:??? Standby??? on, Output disable;",,0,,,,,,,,,,,,,
 ,,1,OutputConfig,10x,AC output set,W,"{""0"": ""BAT First"", ""1"": ""PV First"",""2"": ""UTI First""}",,,,,0,,,,,,,,,,
 ,,2,ChargeConfig,10x,Charge source set,W,"{""0"": ""PV first"",""1"": ""PV&UTI"",""2"": ""PV Only""}",,,,,0,,,,,,,,,,
