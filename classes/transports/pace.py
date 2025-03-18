@@ -186,8 +186,10 @@ class CustomFramer(ModbusRtuFramer):
         packet = struct.pack(RTU_FRAME_HEADER,
                              message.unit_id,
                              0x03) + data
+
         crc = computeCRC(packet)
-        crc2 = calculate_crc(packet,size)
+#       size = len(packet)
+#       crc2 = calculate_crc(packet, size)
 
         #packet struct:
         #slave address - 0x01 - 0x10
