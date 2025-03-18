@@ -25,7 +25,9 @@ class mqtt(transport_base):
     discovery_topic : str = "homeassistant"
     discovery_enabled : bool = False
     json : bool = False
-    reconnect_delay : int = 7  # seconds
+    reconnect_delay : int = 7
+    """ seconds """
+
     reconnect_attempts : int = 21
     #max_precision : int = - 1
 
