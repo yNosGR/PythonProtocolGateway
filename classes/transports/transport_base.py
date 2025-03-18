@@ -33,7 +33,7 @@ class transport_base:
     _log : logging.Logger = None
 
     def __init__(self, settings : 'SectionProxy') -> None:
-        
+
         self.transport_name = settings.name #section name
 
         #apply log level to logger
@@ -42,8 +42,8 @@ class transport_base:
         self._log : logging.Logger = logging.getLogger(short_name + f"[{self.transport_name}]")
 
         self._log.setLevel(self._log_level)
-        
-        self.type = self.__class__.__name__ 
+
+        self.type = self.__class__.__name__
 
         if settings:
             self.device_serial_number = settings.get(["device_serial_number", "serial_number"], self.device_serial_number)
@@ -57,9 +57,8 @@ class transport_base:
             else:
                 self.write_enabled = settings.getboolean("write", self.write_enabled)
 
-
             #load a protocol_settings class for every transport; required for adv features. ie, variable timing.
-            #must load after settings  
+            #must load after settings
             self.protocol_version = settings.get('protocol_version')
             if self.protocol_version:
                 self.protocolSettings = protocol_settings(self.protocol_version, transport_settings=settings)
@@ -68,7 +67,7 @@ class transport_base:
                     self.protocol_version = self.protocolSettings.protocol
 
             #todo, reimplement default settings from protocolsettings
-                
+
         self.update_identifier()
 
 
@@ -94,8 +93,10 @@ class transport_base:
 
     #lets convert this to dict[str, registry_map_entry]
     def read_data(self) -> dict[str,str]:
-        ''' general purpose read function for between transports; 
-        return type may be changed to dict[str, registrsy_map_entry]. still thinking about this'''
+        '''
+        general purpose read function for between transports;
+        return type may be changed to dict[str, registrsy_map_entry]. still thinking about this
+        '''
         pass
 
 

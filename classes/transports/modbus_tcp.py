@@ -1,4 +1,3 @@
-import logging
 import inspect
 
 from classes.protocol_settings import Registry_Type, protocol_settings
@@ -16,17 +15,14 @@ from configparser import SectionProxy
 class modbus_tcp(modbus_base):
     port : str = 502
     host : str = ""
-    client : ModbusTcpClient 
+    client : ModbusTcpClient
     pymodbus_slave_arg = 'unit'
 
     def __init__(self, settings : SectionProxy, protocolSettings : protocol_settings = None):
-        #logger = logging.getLogger(__name__)
-        #logging.basicConfig(level=logging.DEBUG)
-        
         self.host = settings.get("host", "")
         if not self.host:
             raise ValueError("Host is not set")
-        
+
         self.port = settings.getint("port", self.port)
 
         # pymodbus compatability; unit was renamed to address
@@ -45,7 +41,7 @@ class modbus_tcp(modbus_base):
         modbus_base.clients[client_str] = self.client
 
         super().__init__(settings, protocolSettings=protocolSettings)
-        
+
     def read_registers(self, start, count=1, registry_type : Registry_Type = Registry_Type.INPUT, **kwargs):
 
         if 'unit' not in kwargs:
@@ -59,7 +55,7 @@ class modbus_tcp(modbus_base):
             return self.client.read_input_registers(start, count, **kwargs  )
         elif registry_type == Registry_Type.HOLDING:
             return self.client.read_holding_registers(start, count, **kwargs)
-    
+
     def connect(self):
         self.connected = self.client.connect()
         super().connect()

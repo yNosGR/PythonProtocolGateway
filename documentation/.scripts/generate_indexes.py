@@ -24,7 +24,7 @@ def generate_readme(directory : str, folder_order : str = [], output_file : str 
             with open(note_file, "r", encoding="utf-8") as note:
                 readme.write(note.read())
 
-        
+
         previous_folder = ""
 
         folder_lines : dict[str, list[str]] = {}
@@ -40,7 +40,7 @@ def generate_readme(directory : str, folder_order : str = [], output_file : str 
                 # Create a bold header for each new folder
                 folder_lines[relative_folder] = []
                 folder_lines[relative_folder].append(f"**{relative_folder}**\n\n")
-                
+
                 previous_folder = relative_folder
 
                 #generate index in folder
@@ -49,7 +49,7 @@ def generate_readme(directory : str, folder_order : str = [], output_file : str 
             for file in files:
                 file_path = os.path.relpath(os.path.join(root, file), directory).replace("\\", "/") #use linux path structure
                 file_path = urllib.parse.quote(file_path)
-                
+
                 if file == "README.md": #skip
                     continue
 

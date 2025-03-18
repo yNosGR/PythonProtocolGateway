@@ -5,7 +5,7 @@ import glob
 
 
 #move up a folder for tests
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))) 
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from classes.protocol_settings import protocol_settings
 
@@ -22,5 +22,4 @@ protocols = [os.path.splitext(os.path.basename(f))[0] for f in files]
 @pytest.mark.parametrize("protocol", protocols)
 def test_protocol_setting(protocol : str):
     print(protocol)
-    protocolSettings : protocol_settings = protocol_settings(protocol)
-
+    protocolSettings : protocol_settings = protocol_settings(protocol)  # noqa: F841

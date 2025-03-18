@@ -10,7 +10,6 @@ import itertools
 import json
 import re
 import os
-import math
 import ast
 
 from typing import TYPE_CHECKING
@@ -103,12 +102,12 @@ class Data_Type(Enum):
             "UINT32" : "UINT",
             "INT32" : "INT"
         }
-        
+
         if name in alias:
             name = alias[name]
 
         return getattr(cls, name)
-    
+
     @classmethod
     def getSize(cls, data_type : 'Data_Type'):
         sizes = {
@@ -121,16 +120,16 @@ class Data_Type(Enum):
                     Data_Type._16BIT_FLAGS : 16,
                     Data_Type._32BIT_FLAGS : 32
                  }
-        
+
         if data_type in sizes:
             return sizes[data_type]
 
         if data_type.value > 400:  #signed magnitude bits
             return data_type.value-400
-        
+
         if data_type.value > 300:  #signed bits
             return data_type.value-300
-        
+
         if data_type.value > 200: #unsigned bits
             return data_type.value-200
 
@@ -168,7 +167,7 @@ class WriteMode(Enum):
             "YES"   : "WRITE",
             "WO"    : "WRITEONLY"
         }
-        
+
         if name in alias:
             name = alias[name]
         else:
@@ -182,20 +181,20 @@ class Registry_Type(Enum):
 
     HOLDING = 0x03
     INPUT = 0x04
-    
+
 @dataclass
 class registry_map_entry:
     registry_type : Registry_Type
     register : int
     register_bit : int
-    register_byte : int 
+    register_byte : int
     ''' byte offset for canbus ect... '''
     variable_name : str
     documented_name : str
     unit : str
     unit_mod : float
     concatenate : bool
-    concatenate_registers : list[int] 
+    concatenate_registers : list[int]
 
     values : list
     value_regex : str = ""
@@ -219,16 +218,15 @@ class registry_map_entry:
     next_read_timestamp : int = 0
     ''' unix timestamp in ms '''
 
- 
     write_mode : WriteMode = WriteMode.READ
     ''' enable disable reading/writing '''
-    
+
     def __str__(self):
         return self.variable_name
 
     def __eq__(self, other):
-        return (    isinstance(other, registry_map_entry) 
-                    and self.register == other.register 
+        return (    isinstance(other, registry_map_entry)
+                    and self.register == other.register
                     and self.register_bit == other.register_bit
                     and self.registry_type == other.registry_type
                     and self.register_byte == other.register_byte)
@@ -309,7 +307,7 @@ class protocol_settings:
 
     def get_registry_map(self, registry_type : Registry_Type = Registry_Type.ZERO) -> list[registry_map_entry]:
         return self.registry_map[registry_type]
-    
+
     def get_registry_ranges(self, registry_type : Registry_Type) -> list[registry_map_entry]:
         return self.registry_map_ranges[registry_type]
 
@@ -317,18 +315,18 @@ class protocol_settings:
     def get_holding_registry_entry(self, name : str):
         ''' deprecated '''
         return self.get_registry_entry(name, registry_type=Registry_Type.HOLDING)
-    
+
     def get_input_registry_entry(self, name : str):
         ''' deprecated '''
         return self.get_registry_entry(name, registry_type=Registry_Type.INPUT)
 
     def get_registry_entry(self, name : str, registry_type : Registry_Type) -> registry_map_entry:
-        
+
         name = name.strip().lower().replace(' ', '_') #clean name
         for item in self.registry_map[registry_type]:
             if item.documented_name == name:
                 return item
-        
+
         return None
 
     def load__json(self, file : str = '', settings_dir : str = ''):
@@ -358,7 +356,7 @@ class protocol_settings:
     def load_registry_overrides(self, override_path, keys : list[str]):
         """Load overrides into a multidimensional dictionary keyed by each specified key."""
         overrides = {key: {} for key in keys}
-        
+
         with open(override_path, newline='', encoding='latin-1') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
@@ -371,7 +369,7 @@ class protocol_settings:
         return overrides
 
 
-    def load__registry(self, path, registry_type : Registry_Type = Registry_Type.INPUT) -> list[registry_map_entry]: 
+    def load__registry(self, path, registry_type : Registry_Type = Registry_Type.INPUT) -> list[registry_map_entry]:
         registry_map : list[registry_map_entry] = []
         register_regex = re.compile(r'(?P<register>(?:0?x[\da-z]+|[\d]+))\.(b(?P<bit>x?\d{1,2})|(?P<byte>x?\d{1,2}))')
 
@@ -393,7 +391,7 @@ class protocol_settings:
 
         if not os.path.exists(path): #return empty is file doesnt exist.
             return registry_map
-        
+
 
         overrides : dict[str, dict]  = None
         override_keys = ['documented name', 'register']
@@ -407,13 +405,13 @@ class protocol_settings:
             self._log.info("loading override file: " + override_path)
 
             overrides = self.load_registry_overrides(override_path, override_keys)
-        
+
         def determine_delimiter(first_row) -> str:
             if first_row.count(';') > first_row.count(','):
                 return ';'
             else:
-                return ','  
-            
+                return ','
+
         def process_row(row):
             # Initialize variables to hold numeric and character parts
             unit_multiplier : float = 1
@@ -425,8 +423,8 @@ class protocol_settings:
             row['documented name'] = row['documented name'].strip().lower().replace(' ', '_')
 
             #region read_interval
-            
-            
+
+
             if 'read interval' in row:
                 row['read interval'] = row['read interval'].lower() #ensure is all lower case
                 match = read_interval_regex.search(row['read interval'])
@@ -452,7 +450,7 @@ class protocol_settings:
 
 
             #region overrides
-            if overrides != None:
+            if overrides is not None:
                 #apply overrides using documented name or register
                 override_row = None
                 # Check each key in order until a match is found
@@ -462,7 +460,7 @@ class protocol_settings:
                         override_row = overrides[key][key_value]
                         overrided_keys.add(key_value)
                         break
-                
+
                 # Apply non-empty override values if an override row is found
                 if override_row:
                     for field, override_value in override_row.items():
@@ -471,7 +469,7 @@ class protocol_settings:
 
             #endregion overrides
 
-            #region unit    
+            #region unit
 
             #if or is in the unit; ignore unit
             if "or" in row['unit'].lower() or ":" in row['unit'].lower():
@@ -491,7 +489,7 @@ class protocol_settings:
             #convert to float
             try:
                 unit_multiplier = float(unit_multiplier)
-            except:
+            except Exception:
                 unit_multiplier = float(1)
 
             if unit_multiplier == 0:
@@ -502,12 +500,12 @@ class protocol_settings:
 
             variable_name = row['variable name'] if row['variable name'] else row['documented name']
             variable_name = variable_name.strip().lower().replace(' ', '_').replace('__', '_') #clean name
-            
+
             if re.search(r"[^a-zA-Z0-9\_]", variable_name) :
                 self._log.warning("Invalid Name : " + str(variable_name) + " reg: " + str(row['register']) + " doc name: " + str(row['documented name']) + " path: " + str(path))
 
 
-            if not variable_name and not row['documented name']: #skip empty entry / no name. todo add more invalidator checks. 
+            if not variable_name and not row['documented name']: #skip empty entry / no name. todo add more invalidator checks.
                 return
 
             #region data type
@@ -523,7 +521,7 @@ class protocol_settings:
                 else:
                     data_type = Data_Type.fromString(row['data type'])
 
-            
+
             if 'values' not in row:
                 row['values'] = ""
                 self._log.warning("No Value Column : path: " + str(path))
@@ -575,7 +573,7 @@ class protocol_settings:
                         #value_regex
                         val_match = ascii_value_regex.search(row['values'])
                         if val_match:
-                            value_regex = val_match.group('regex') 
+                            value_regex = val_match.group('regex')
                             matched = True
 
                     if not matched: #single value
@@ -624,7 +622,7 @@ class protocol_settings:
                         else:
                             for i in range(start, end+1):
                                 concatenate_registers.append(i)
-                    
+
             if concatenate_registers:
                 r = range(len(concatenate_registers))
             else:
@@ -645,7 +643,7 @@ class protocol_settings:
 
             if "write" in row:
                 writeMode = WriteMode.fromString(row['write'])
-            
+
             for i in r:
                 item = registry_map_entry(
                                             registry_type = registry_type,
@@ -672,19 +670,19 @@ class protocol_settings:
 
                 register = register + 1
 
-                
+
         with open(path, newline='', encoding='latin-1') as csvfile:
 
             #clean column names before passing to csv dict reader
 
-            delimeter = ';' 
+            delimeter = ';'
             first_row = next(csvfile).lower().replace('_', ' ')
             if first_row.count(';') < first_row.count(','):
                 delimeter = ','
 
             first_row = re.sub(r"\s+" + re.escape(delimeter) +"|" + re.escape(delimeter) +r"\s+", delimeter, first_row) #trim values
 
-            csvfile = itertools.chain([first_row], csvfile) #add clean header to begining of iterator 
+            csvfile = itertools.chain([first_row], csvfile) #add clean header to begining of iterator
 
             # Create a CSV reader object
             reader = csv.DictReader(csvfile, delimiter=delimeter)
@@ -693,33 +691,33 @@ class protocol_settings:
             for row in reader:
                 process_row(row)
 
-            if overrides != None:
+            if overrides is not None:
                 # Add any unmatched overrides as new entries... probably need to add some better error handling to ensure entry isnt empty ect...
                 for key in override_keys:
                     applied = False
                     for key_value, override_row in overrides[key].items():
                         # Check if both keys are unique before applying
-                        if all(override_row.get(k) for k in override_keys): 
+                        if all(override_row.get(k) for k in override_keys):
                             if all(override_row.get(k) not in overrided_keys for k in override_keys):
                                 self._log.info("Loading unique entry from overrides for both unique keys")
                                 process_row(override_row)
-                                
+
                                 # Mark both keys as applied
                                 for k in override_keys:
                                     overrided_keys.add(override_row.get(k))
-                                    
+
                                 applied = True
                                 break  # Exit inner loop after applying unique entry
 
-                    if applied: 
+                    if applied:
                         continue
-            
+
             for index in reversed(range(len(registry_map))):
                 item = registry_map[index]
                 if index > 0:
                     #if high/low, its a double
                     if (
-                        item.documented_name.endswith('_l') 
+                        item.documented_name.endswith('_l')
                         and registry_map[index-1].documented_name.replace('_h', '_l') == item.documented_name
                         ):
                         combined_item = registry_map[index-1]
@@ -733,7 +731,7 @@ class protocol_settings:
 
                         if combined_item.documented_name == combined_item.variable_name:
                             combined_item.variable_name = combined_item.variable_name[:-2].strip()
-                            
+
                         combined_item.documented_name = combined_item.documented_name[:-2].strip()
 
                         if not combined_item.unit: #fix inconsistsent documentation
@@ -747,24 +745,25 @@ class protocol_settings:
                 for index in reversed(range(len(registry_map))):
                     item = registry_map[index]
                     if (
-                        item.documented_name.strip().lower() not in self.variable_mask 
+                        item.documented_name.strip().lower() not in self.variable_mask
                         and item.variable_name.strip().lower() not in self.variable_mask
                         ):
                         del registry_map[index]
 
-            #apply variable screen     
+            #apply variable screen
             if self.variable_screen:
                 for index in reversed(range(len(registry_map))):
                     item = registry_map[index]
                     if (
-                        item.documented_name.strip().lower() in self.variable_mask 
+                        item.documented_name.strip().lower() in self.variable_mask
                         and item.variable_name.strip().lower() in self.variable_mask
                         ):
-                        del registry_map[index]      
+                        del registry_map[index]
 
             return registry_map
-        
+
     def calculate_registry_ranges(self, map : list[registry_map_entry], max_register : int, init : bool = False) -> list[tuple]:
+
         ''' read optimization; calculate which ranges to read'''
         max_batch_size = 45 #see manual; says max batch is 45
 
@@ -782,7 +781,7 @@ class protocol_settings:
             timestamp_ms = 0
 
         while (start := start+max_batch_size) <= max_register:
-            
+
             registers : list[int] = [] #use a list, im too lazy to write logic
 
             end = start+max_batch_size
@@ -793,7 +792,7 @@ class protocol_settings:
                     if register.write_mode == WriteMode.WRITEONLY: ##Write Only; skip
                         continue
 
-                        #we are assuming calc registry ranges is being called EVERY READ.
+                    #we are assuming calc registry ranges is being called EVERY READ.
                     if register.next_read_timestamp < timestamp_ms:
                         register.next_read_timestamp = timestamp_ms + register.read_interval
                         registers.append(register.register)
@@ -807,13 +806,13 @@ class protocol_settings:
         path = base_dir + '/' + file
         if os.path.exists(path):
             return path
-        
+
         suffix = file.split('_', 1)[0]
 
         path = base_dir + '/' + suffix +'/' + file
         if os.path.exists(path):
             return path
-        
+
         #find file by name, recurisvely. last resort
         search_pattern = os.path.join(base_dir, '**', file)
         matches = glob.glob(search_pattern, recursive=True)
@@ -839,7 +838,7 @@ class protocol_settings:
         self.registry_map[registry_type] = self.load__registry(path, registry_type)
 
         size : int = 0
-        
+
         #get max register size
         for item in self.registry_map[registry_type]:
             if item.register > size:
@@ -855,7 +854,7 @@ class protocol_settings:
             register = registry[entry.register][0] #can bus uses tuple for timestamp
         else:
             register = registry[entry.register]
-            
+
         if entry.register_byte > 0:
             register = register[entry.register_byte:]
 
@@ -881,13 +880,13 @@ class protocol_settings:
 
             #handle custom sizes, less than 1 register
             end_bit = flag_size + start_bit
-            
+
             if entry.documented_name+'_codes' in self.codes:
                 code_key : str = entry.documented_name+'_codes'
                 flags : list[str] = []
                 flag_indexes : list[str] = []
                 for i in range(start_bit, end_bit):  # Iterate over each bit position (0 to 15)
-                    byte = i // 8 
+                    byte = i // 8
                     bit = i % 8
                     val = register[byte]
                     # Check if the i-th bit is set
@@ -906,7 +905,7 @@ class protocol_settings:
                         bits = multibit_flag.split('&')  # Split key into 'bits'
                         if all(bit in flag_indexes_set for bit in bits): # Check if all bits are present in the flag_indexes_set
                             flags.append(self.codes[code_key][multibit_flag])
-                    
+
                 value = ",".join(flags)
             else:
                 flags : list[str] = []
@@ -968,10 +967,10 @@ class protocol_settings:
             entry.documented_name+'_codes' in self.codes):
             try:
                 cleanval = str(int(value))
-        
+
                 if cleanval in self.codes[entry.documented_name+'_codes']:
                     value = self.codes[entry.documented_name+'_codes'][cleanval]
-            except:
+            except Exception:
                 #do nothing; try is for intval
                 value = value
 
@@ -983,7 +982,7 @@ class protocol_settings:
         if entry.data_type == Data_Type.UINT: #read uint
             if entry.register + 1 not in registry:
                 return
-            
+
             value = float((registry[entry.register] << 16) + registry[entry.register + 1])
         elif entry.data_type == Data_Type.SHORT: #read signed short
             val = registry[entry.register]
@@ -998,7 +997,7 @@ class protocol_settings:
         elif entry.data_type == Data_Type.INT: #read int
             if entry.register + 1 not in registry:
                 return
-            
+
             combined_value_unsigned = (registry[entry.register] << 16) + registry[entry.register + 1]
 
             # Convert the combined unsigned value to a signed integer if necessary
@@ -1011,7 +1010,7 @@ class protocol_settings:
             #value = struct.unpack('<h', bytes([min(max(registry[item.register], 0), 255), min(max(registry[item.register+1], 0), 255)]))[0]
             #value = int.from_bytes(bytes([registry[item.register], registry[item.register + 1]]), byteorder='little', signed=True)
         elif entry.data_type == Data_Type._16BIT_FLAGS or entry.data_type == Data_Type._8BIT_FLAGS or entry.data_type == Data_Type._32BIT_FLAGS:
-            
+
             #16 bit flags
             start_bit : int = 0
             end_bit : int = 16 #default 16 bit
@@ -1033,7 +1032,7 @@ class protocol_settings:
             end_bit = end_bit - (offset * 16)
 
             val = registry[entry.register]
-            
+
             if entry.documented_name+'_codes' in self.codes:
                 flags : list[str] = []
                 offset : int = 0
@@ -1047,7 +1046,7 @@ class protocol_settings:
                             if flag_index in self.codes[entry.documented_name+'_codes']:
                                 flags.append(self.codes[entry.documented_name+'_codes'][flag_index])
 
-                        
+
                 value = ",".join(flags)
             else:
                 flags : list[str] = []
@@ -1091,31 +1090,31 @@ class protocol_settings:
             entry.documented_name+'_codes' in self.codes):
             try:
                 cleanval = str(int(value))
-        
+
                 if cleanval in self.codes[entry.documented_name+'_codes']:
                     value = self.codes[entry.documented_name+'_codes'][cleanval]
-            except:
+            except Exception:
                 #do nothing; try is for intval
                 value = value
-                
+
         return value
 
     def process_registery(self, registry : Union[dict[int, int], dict[int, bytes]] , map : list[registry_map_entry]) -> dict[str,str]:
         '''process registry into appropriate datatypes and names -- maybe add func for single entry later?'''
-        
+
         concatenate_registry : dict = {}
         info = {}
         for entry in map:
 
             if entry.register not in registry:
                 continue
-            value = ''    
+            value = ''
 
             if isinstance(registry[entry.register], bytes):
                 value = self.process_register_bytes(registry, entry)
             else:
                 value = self.process_register_ushort(registry, entry)
-            
+
             #if item.unit:
             #    value = str(value) + item.unit
             if entry.concatenate:
@@ -1144,7 +1143,7 @@ class protocol_settings:
         return info
 
     def validate_registry_entry(self, entry : registry_map_entry, val) -> int:
-            #if code, validate first. 
+            #if code, validate first.
             if entry.documented_name+'_codes' in self.codes:
                 if val in self.codes[entry.documented_name+'_codes']:
                     return 1
@@ -1162,7 +1161,9 @@ class protocol_settings:
                 if int(val) >= entry.value_min and int(val) <= entry.value_max:
                     return 1
 
-            return 0 
+            self._log.error(f"validate_registry_entry fail overall {entry.value_min} / {entry.value_max} / {int(val)}")
+
+            return 0
 
     def evaluate_expressions(self, expression, variables : dict[str,str]):
         # Define the register string
@@ -1215,7 +1216,7 @@ class protocol_settings:
 
             return results
 
-        def evaluate_expression(expression):   
+        def evaluate_expression(expression):
             # Define a regular expression pattern to match "maths"
             var_pattern = re.compile(r'\[(?P<maths>.*?)\]')
 
@@ -1224,15 +1225,15 @@ class protocol_settings:
                 try:
                     maths = match.group("maths")
                     maths = re.sub(r'\s', '', maths) #remove spaces, because ast.parse doesnt like them
-                    
+
                     # Parse the expression safely
                     tree = ast.parse(maths, mode='eval')
 
                     # Evaluate the expression
                     end_value = eval(compile(tree, filename='', mode='eval'))
-                        
+
                     return str(end_value)
-                except :
+                except Exception:
                     return match.group(0)
 
             # Replace variables with their values
@@ -1252,5 +1253,5 @@ class protocol_settings:
 
         for r in results:
             print(evaluate_expression(r))
-   
+
 #settings = protocol_settings('v0.14')
