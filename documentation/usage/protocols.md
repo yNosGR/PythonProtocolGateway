@@ -43,23 +43,23 @@ protocol_version = eg4_v58.custom
 ```
 protocol_version = eg4_v58
 ```
-[Devices\EG4 to MQTT](https://github.com/HotNoob/PythonProtocolGateway/wiki/Devices%5CEG4-to-MQTT)
+[Devices\EG4 to MQTT](/documentation/devices/EG4.md)
 
 ## v0.14
 ```
 protocol_version = v0.14
 ```
-[Devices\Growatt To MQTT](https://github.com/HotNoob/PythonProtocolGateway/wiki/Devices%5CGrowatt-To-MQTT)
+[Devices\Growatt To MQTT](/documentation/devices/Growatt.md)
 
 ## sigineer_v0.11
 
 ```
 protocol_version = sigineer_v0.11
 ```
-[Devices\Sigineer to MQTT](https://github.com/HotNoob/PythonProtocolGateway/wiki/Devices%5CSigineer-to-MQTT)
+[Devices\Sigineer to MQTT](/documentation/devices/Sigineer.md)
 
 ## pace_bms_v1.3
 ```
 protocol_version = pace_bms_v1.3
 ```
-[Devices\SOK to MQTT](https://github.com/HotNoob/PythonProtocolGateway/wiki/Devices%5CSOK-to-MQTT)
+[Devices\SOK to MQTT](/documentation/devices/SOK.md)
