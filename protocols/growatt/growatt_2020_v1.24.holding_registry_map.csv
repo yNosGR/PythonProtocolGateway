@@ -1,564 +1,564 @@
-variable name;data type;register;documented name;description;write;values;unit;Initial value;note;;;;;;;
-;;0;OnOff;"Remote On/Off . On(1);Of(f 0)Inverter On(3);Off(2)BDC";W;0;1;2;3;;1;The inverter can be switched on and off; and the BDC can be switched on and off for the batt ready function.;;;
-;;1;SaftyFuncEn;Bit0: SPI enable Bit1: AutoTestStart Bit2: LVFRT enable Bit3:FreqDerating Enable Bit4: Softstart enable Bit5: DRMS enable Bit6:PowerVoltFunc Enable Bit7: HVFRT enable Bit8:ROCOF enable Bit9: Recover FreqDeratingMode Enable Bit10:Split phase enable Bit10~15:??;W;0 :Disable1: enable;;;SPI: systemprotectioninterfaceBit0~3:for CEI0-21Bit4~6:for SAA;;;;;;;
-;;2;PF CMDmemoryState;Set Holding register3;4;5;99 CMD will be memory or not(1/0); if not; these settings are the initial value. ;W;0or1;;0;Means these settings will beacting or not whennextpower on ;;
-;;3;Active P Rate;Inverter Max output active power percent;W;0-100 or 255;%;255;255: power is not be limited;;;;;;;
-;;4;Reactive P Rate;Inverter max output reactive power percent;W;-100-100 or 255;%;255;255: power is not be limited;;;;;;;
-;;5;Power factor;Inverter output powerfactor's 10000 times;W;0-20000; 0-10000isunderexcited; otherisoverexcitEd;;;;0;;;;
-;;6;Pmax H;Normal power (high);;;0.1VA;;;;;;;;;
-;;7;Pmax L;Normal power (low);;;0.1VA;;;;;;;;;
-;;8;Vnormal;Normal work PV voltage;;;0.1V;;;;;;;;;
-;;9;Fw version H;Firmware version (high);;;ASCII;;;;;;;;;
-;;10;Fw version M;Firmware version (middle);;;;;;;;;;;;
-;;11;Fw version L;Firmware version (low);;;;;;;;;;;;
-;;12;Fw version2 H;Control Firmware version (high);;;ASCII;;;;;;;;;
-;;13;Fw version2 M;Control Firmware version (middle);;;;;;;;;;;;
-;;14;Fw version2 L;Control Firmware version (low);;;;;;;;;;;;
-;;15;LCD language;LCD language;W;0-5;;;"0: Italian; 1: English; 2: German; 3: Spanish; 4: French; 5: Chinese; 6:Polish 7:Portugues 8:Hungary";;;;;;;
-;;16;CountrySele cted;Country Selected or not;W;"0: need to select; 1: have selected";;;;;;;;;;
-;;17;Vpv start;Input start voltage;W;;0.1V;;;;;;;;;
-;;18;Time start;Start time;W;;1s;;;;;;;;;
-;;19;RestartDelay Time;"Restart Delay Time after fault back;";W;;1s;;;;;;;;;
-;;20;wPowerStart Slope;Power start slope;W;01/01/00;0.10%;;;;;;;;;
-;;21;wPowerRest artSlopeEE;Power restart slope;W;01/01/00;0.10%;;;;;;;;;
-;;22;wSelectBaud rate;Select communicationbaudrat e 0: 9600bps 1:38400bps;W;0-1;;0;;;;;;;;
-;;23;Serial NO 1;Serial number 1-2;;;ASCII;;;;;;;;;
-;;24;Serial NO 2;Serial number 3-4;;;;;;;;;;;;
-;;25;Serial NO 3;Serial number 5-6;;;;;;;;;;;;
-;;26;Serial NO 4;Serial number 7-8;;;;;;;;;;;;
-;;27;Serial NO 5;Serial number 9-10;;;;;;;;;;;;
-;;28;Module H;Inverter Module (high);;&*5;;;;;;;;;;
-;;29;Module L;Inverter Module (low);;&*5;;;;;;;;;;
-;;30;Com Address;Communicate address;W;01/01/54;;1;;;;;;;;
-;;31;FlashStart;Update firmware;W;1;;;;;;;;;;
-;;32;Reset User Info;Reset User Information;W;0x0001;;;;;;;;;;
-;;33;Reset to factory;Reset to factory;W;0x0001;;;;;;;;;;
-;;34;Manufacturer Info 8;Manufacturer information (high);;;ASCII;;;;;;;;;
-;;35;Manufacturer Info 7;Manufacturer information (middle);;;;;;;;;;;;
-;;36;Manufacturer Info 6;Manufacturer information (low);;;;;;;;;;;;
-;;37;Manufacturer Info 5;Manufacturer information (high);;;;;;;;;;;;
-;;38;Manufacturer Info 4;Manufacturer information (middle);;;;;;;;;;;;
-;;39;Manufacturer Info3;Manufacturer information (low);;;;;;;;;;;;
-;;40;Manufacturer Info 2;Manufacturer information (low);;;;;;;;;;;;
-;;41;Manufacturer Info 1;Manufacturer information (high);;;;;;;;;;;;
-;;42;bfailsafeEn;G100 fail safe;W;Enable:1 Disable:0;;;English G100 fail safe set;;;;;;;
-;;43;DTC;Device Type Code;;&*6;;;;;;;;;;
-;;44;TP;Input tracker num and output phase num;;Eg:0x020 3 is two MPPT and 3ph output;;;;;;;;;;
-;;45;Sys Year;System time-year;W;Year offset is 0;;;Local time;;;;;;;
-;;46;Sys Month;System time- Month;W;;;;;;;;;;;
-;;47;Sys Day;System time- Day;W;;;;;;;;;;;
-;;48;Sys Hour;System time- Hour;W;;;;;;;;;;;
-;;49;Sys Min;System time- Min;W;;;;;;;;;;;
-;;50;Sys Sec;System time- Second;W;;;;;;;;;;;
-;;51;Sys Weekly;System Weekly;W;0-6;;;;;;;;;;
-;;52;Vac low;Grid voltage low limit protect;W;;0.1V;;;;;;;;;
-;;53;Vac high;Grid voltage high limit protect;W;;0.1V;;;;;;;;;
-;;54;Fac low;Grid frequency low limit protect;W;;0.01 Hz;;;;;;;;;
-;;55;Fac high;Grid high frequencylimit protect;W;;0.01 Hz;;;;;;;;;
-;;56;Vac low 2;Grid voltage low limit protect 2;W;;0.1V;;;;;;;;;
-;;57;Vac high 2;Grid voltage high limit protect 2;W;;0.1V;;;;;;;;;
-;;58;Fac low 2;Grid frequency low limit protect 2;W;;0.01 Hz;;;;;;;;;
-;;59;Fac high 2;Grid high frequency limit protect 2;W;;0.01 Hz;;;;;;;;;
-;;60;Vac low 3;Grid voltage low limit protect 3;W;;0.1V;;;;;;;;;
-;;61;Vac high 3;Grid voltage high limit protect 3;W;;0.1V;;;;;;;;;
-;;62;Fac low 3;Grid frequency low limit protect 3;W;;0.01Hz;;;;;;;;;
-;;63;Fac high 3;Grid frequency high limit protect 3;W;;0.01Hz;;;;;;;;;
-;;64;Vac low C;Grid low voltage limit connect to Grid;W;;0.1V;;;;;;;;;
-;;65;Vac high C;Grid high voltage limit connect to Grid;W;;0.1V;;;;;;;;;
-;;66;Fac low C;Grid low frequency limit connect to Grid;W;;0.01 Hz;;;;;;;;;
-;;67;Fac high C;Grid high frequency limit connect to Grid;W;;0.01 Hz;;;;;;;;;
-;;68;Vac low1 time;Grid voltage low limit protect time 1;W;;Cycle;;;;;;;;;
-;;69;Vac high1 time;Grid voltage high limit protect time 1;W;;Cycle;;;;;;;;;
-;;70;Vac low2 time;Grid voltage low limit protect time 2;W;;Cycle;;;;;;;;;
-;;71;Vac high2 time;Grid voltage high limit protect time 2;W;;Cycle;;;;;;;;;
-;;72;Fac low1 time;Grid frequency low limit protect time 1;W;;Cycle;;;;;;;;;
-;;73;Fac high1 time;Grid frequency high limit protect time 1;W;;Cycle;;;;;;;;;
-;;74;Fac low2 time;Grid frequency low limit protect time 2;W;;Cycle;;;;;;;;;
-;;75;Fac high2 time;Grid frequency high limit protect time 2;W;;Cycle;;;;;;;;;
-;;76;Vac low3 time;Grid voltage low limit protect time 3;W;;Cycle;;;;;;;;;
-;;77;Vac high3 time;Grid voltage high limit protect time 3;W;;Cycle;;;;;;;;;
-;;78;Fac low3 time;Grid frequency low limit protect time 3;W;;Cycle;;;;;;;;;
-;;79;Fac high3 time;Grid frequency high limit protect time 3;W;;Cycle;;;;;;;;;
-;;80;U10min;Volt protection for 10 min;W;;0.1V;1.1Vn;;;;;;;;
-;;81;PV Voltage High Fault;PV Voltage High Fault;W;;0.1V;;;;;;;;;
-;;82;FW Build No_ 5;Model letter version number (TJ);;;ASCII;;;;;;;;;
-;;83;FW Build No_ 4;Model letter version number (AA);;;ASCII;;;;;;;;;
-;;84;FW Build No_ 3;DSP1 FW Build No.;;;ASCII;;;;;;;;;
-;;85;FW Build No_ 2;DSP2/M0 FW Build No.;;;ASCII;;;;;;;;;
-;;86;FW Build No_ 1;CPLD/AFCI FW Build No.;;;ASCII;;;;;;;;;
-;;87;FW Build No_ 0;M3 FW Build No.;;;ASCII;;;;;;;;;
-;;88;ModbusVers ion;Modbus Version;;Eg:207 is V2.07;Int(16 bits);;;;;;;;;
-;;89;PFModel;Set PF function Model 0: PF=1 1: PF by set 2: default PF line 3: User PF line 4: UnderExcited (Inda) Reactive Power 5: OverExcited(Capa) Reactive Power 6:Q(v)model 7:Direct Control mode;W;;;;;;;;;;;
-;;90;GPRS IP Flag;"Bit0-3:read:1;Set GPRS IP Successed Write:2;Read GPRS IP Successed Bit4-7:GPRS status";W;Bit0-3:ab out GPRS IP SET Bit4-7:ab out GRPRS Status;;;;;;;;;;
-;;91;FreqDerateS tart;Frequency derating start point;W;;0.01H Z;;;;;;;;;
-;;92;FLrate;Frequency - load limit rate;W;0-100;10tim es;;;;;;;;;
-;;93;V1S;CEI021 V1S Q(v);W;V1S<V2S;0.1V;;;;;;;;;
-;;94;V2S;CEI021 V2S Q(v);W;;0.1V;;;;;;;;;
-;;95;V1L;CEI021 V1L Q(v);W;V1L<V1S;0.1V;;;;;;;;;
-;;96;V2L;CEI021 V2L Q(v);W;V2L<V1L;0.1V;;;;;;;;;
-;;97;Qlockinpow er;Q(v) lock in active power of CEI021;W;0-100;Percen t;;;;;;;;;
-;;98;QlockOutpo wer;Q(v) lock Out active power of CEI021;W;0-100;Percen t;;;;;;;;;
-;;99;LIGridV;Lock in gird volt of CEI021 PF line;W;nVn;0.1V;;;;;;;;;
-;;100;LOGridV;Lock out gird volt of CEI021 PF line;W;nVn;0.1V;;;;;;;;;
-;;101;PFAdj1;PF adjust value 1;;4096 is 1;;;;;;;;;;
-;;102;PFAdj2;PF adjust value 2;;4096 is 1;;;;;;;;;;
-;;103;PFAdj3;PF adjust value 3;;4096 is 1;;;;;;;;;;
-;;104;PFAdj4;PF adjust value 4;;4096 is 1;;;;;;;;;;
-;;105;PFAdj5;PF adjust value 5;;4096 is 1;;;;;;;;;;
-;;106;PFAdj6;PF adjust value 6;;4096 is 1;;;;;;;;;;
-;;107;QVRPDelayTi meEE;QV Reactive Power delaytime;W;0-30;1S;3S;;;;;;;;
-;;108;OverFDeratD elayTimeEE;Overfrequency derati ngdelaytime;W;0-20;50ms;0;;;;;;;;
-;;109;QpercentMa x;Qmax for Q(V) curve;W;0-1000;0.10%;;;;;;;;;
-;;110;PFLineP1_LP;PF limit line point 1 load percent;W;0-255;percen t;;255 means no this point;;;;;;;
-;;111;PFLineP1_PF;PF limit line point 1 power factor;W;0-20000;;;;;;;;;;
-;;112;PFLineP2_LP;PF limit line point 2 load percent;W;0-255;percen t;;255 means no this point;;;;;;;
-;;113;PFLineP2_PF;PF limit line point 2power factor;W;0-20000;;;;;;;;;;
-;;114;PFLineP3_LP;PF limit line point 3 load percent;W;0-255;percen t;;255 means no this point;;;;;;;
-;;115;PFLineP3_PF;PF limit line point 3 power factor;W;0-20000;;;;;;;;;;
-;;116;PFLineP4_LP;PF limit line point 4 load percent;W;0-255;percen t;;255 means no this point;;;;;;;
-;;117;PFLineP4_PF;PF limit line point 4 power factor;W;0-20000;;;;;;;;;;
-;;118;Module 4;Inverter Module (4);;&*11;;;SxxBxx;;;;;;;
-;;119;Module 3;Inverter Module (3);;&*11;;;DxxTxx;;;;;;;
-;;120;Module 2;Inverter Module (2);;&*11;;;PxxUxx;;;;;;;
-;;121;Module 1;Inverter Module (1);;&*11;;;Mxxxx Power;;;;;;;
-;;122;ExportLimit_ En_dis;ExportLimit_En/dis;R/W;01/01/00;;;"ExportLimit enable, 0: Disable exportLimit; 1: Enable 485 exportLimit; 2: Enable 232 exportLimit; 3: Enable CT exportLimit;";;;;;;;
-;;123;ExportLimitP owerRate;ExportLimitPowerRate;R/W;-1000~+1 000;0.10%;;ExportLimit PowerRate;;;;;;;
-;;124;TrakerModel;Traker Model;W;0;1;2;;;;;0:Independent 1:DC Source 2:Parallel;;;
-;;125;INV Type_1;Inverter type-1;R;;ASCII;;Reserved;;;;;;;
-;;126;INV Type_2;Inverter type-2;R;;ASCII;;;;;;;;;
-;;127;INV Type_3;Inverter type-3;R;;ASCII;;;;;;;;;
-;;128;INV Type_4;Inverter type-4;R;;ASCII;;;;;;;;;
-;;129;INV Type_5;Inverter type-5;R;;ASCII;;;;;;;;;
-;;130;INV Type_6;Inverter type-6;R;;ASCII;;;;;;;;;
-;;131;INV Type_7;Inverter type-7;R;;ASCII;;;;;;;;;
-;;132;INV Type_8;Inverter type-8;R;;ASCII;;;;;;;;;
-;;133;BLVersion1;Boot loader version1;R;;;;Reserved;;;;;;;
-;;134;BLVersion2;Boot loader version2;R;;;;Reserved;;;;;;;
-;;135;BLVersion3;Boot loader version3;R;;;;Reserved;;;;;;;
-;;136;BLVersion4;Boot loader version4;R;;;;Reserved;;;;;;;
-;;137;Reactive P ValueH;Reactive PowerH;R/W;;0.1var;;;;;;;;;
-;;138;Reactive P ValueL;Reactive PowerL;R/W;;0.1var;;;;;;;;;
-;;139;ReactiveOut putPriorityE nable;ReactiveOutput Priority Enable;R/W;;0/1;;0:disable 1:enable;;;;;;;
-;;140;Reactive P Value_Ratio_;Reactive Power Ratio;R/W;;0.1;;;;;;;;;
-;;141;SvgFunction Enable;Svg enable on night;R/W;;0/1;;0:disable 1:enable;;;;;;;
-;;142;uwUnderFU ploadPoint;UnderF Upload Point;R/W;;0.01H Z;;;;;;;;;
-;;143;uwOFDerate RecoverPoin t;OFDerate RecoverPoint;R/W;;0.01H Z;;;;;;;;;
-;;144;uwOFDerate RecoverDela yTime;OFDerate RecoverDelayTime;R/W;0-30000;50ms;;;;;;;;;
-;;145;ZeroCurrent Enable;ZeroCurrent Enable;R/W;0-1;;;;;;;;;;
-;;146;uwZeroCurre ntStaticlowV olt;ZeroCurrent StaticlowVolt;R/W;46-230V;0.1V;115V;;;;;;;;
-;;147;uwZeroCurre ntStaticHigh Volt;ZeroCurrent StaticHighVolt;R/W;230-276V;0.1V;276V;;;;;;;;
-;;148;uwHVoltDerateHighPoint;HVoltDerate HighPoint;R/W;0-1000V;0.1V;;;;;;;;;
-;;149;uwHVoltDer ateLowPoint;HVoltDerate LowPoint;R/W;0-1000V;0.1V;;;;;;;;;
-;;150;uwQVPower StableTime;QVPower Stable Time;R/W;0-60S;0.1S;;;;;;;;;
-;;151;uwUnderFU ploadStopPo int;UnderF Upload StopPoint;R/W;;0.01H Z;;;;;;;;;
-;;152;fUnderFreqP oint;Underfrequency load start point;R/W;46.00-50. 00;0.01Hz;49.8;CEI;;;;;;;
-;;153;fUnderFreqE ndPoint;Underfrequency down load end point;R/W;46.00-50. 00;0.01Hz;49.1;CEI;;;;;;;
-;;154;fOverFreqPo int;Over frequency loading start point;R/W;50.00-52. 00;0.01Hz;50.2;CEI;;;;;;;
-;;155;fOverFreqEn dPoint;Over frequency loading end point;R/W;50.00-52. 00;0.01Hz;51.5;CEI;;;;;;;
-;;156;fUnderVoltP oint;Undervoltage load shedding start point;R/W;160-300;0.1V;220;CEI;;;;;;;
-;;157;fUnderVoltE ndPoint;Undervoltage derating end point;R/W;160-300;0.1V;207;CEI;;;;;;;
-;;158;fOverVoltPoi nt;Overvoltage loading start point;R/W;160-300;0.1V;230;CEI;;;;;;;
-;;159;fOverVoltEn dPoint;Overvoltage loading end point;R/W;160-300;0.1V;245;CEI;;;;;;;
-;;160;uwNominal GridVolt;NominalGridVolt Select;R/W;0~3;;;UL;;;;;;;
-;;161;uwGridWatt Delay;GridWatt DelayTime;R/W;0~3000;20ms;;UL;;;;;;;
-;;162;uwReconnec tStartSlope;Reconnect StartSlope;R/W;1~1000;0.1;;UL;;;;;;;
-;;163;uwLFRTEE;LFRT1 Freq;R/W;5500~650 0;0.01Hz;;UL;;;;;;;
-;;164;uwLFRTTime EE;LFRT1 Time;R/W;;20ms;;UL;;;;;;;
-;;165;uwLFRT2EE;LFRT2 Freq;R/W;5500~650 0;0.01Hz;;UL;;;;;;;
-;;166;uwLFRTTime 2EE;LFRT2 Time;R/W;;20ms;;UL;;;;;;;
-;;167;uwHFRTEE;HFRT1 Freq;R/W;5500~650 0;0.01Hz;;UL;;;;;;;
-;;168;uwHFRTTim eEE;HFRT1 Time;R/W;;20ms;;UL;;;;;;;
-;;169;uwHFRT2EE;HFRT2 Freq;R/W;5500~650 0;0.01Hz;;UL;;;;;;;
-;;170;uwHFRTTim e2EE;HFRT2 Time;R/W;;20ms;;UL;;;;;;;
-;;171;uwHVRTEE;HVRT1 Volt;R/W;;0.001 Un;;UL;;;;;;;
-;;172;uwHVRTTim eEE;HVRT1 Time;R/W;;20ms;;UL;;;;;;;
-;;173;uwHVRT2EE;HVRT2 Volt;R/W;;0.001 Un;;UL;;;;;;;
-;;174;uwHVRTTim e2EE;HVRT2 Time;R/W;;0.001 Un;;UL;;;;;;;
-;;175;uwUnderFU ploadDelayTi me;UnderF UploadDelayTime;R/W;0-2s;50ms;0s;50549;;;;;;;
-;;176;uwUnderFU ploadRateEE;UnderF UploadRate;R/W;;;;50549;;;;;;;
-;;177;uwGridResta rt_H_Freq;GridRestart HighFreq;R/W;;0.01Hz;;50549;;;;;;;
-;;178;OverFDeratR esponseTim e;OverFDerat ResponseTime;W/R;0-500;;;;;;;;;;
-;;179;UnderFUplo adResponse Time;UnderFUpload ResponseTime;W/R;0-500;;;;;;;;;;
-;;180;MeterLink;Whether to elect the meter;R/W;;;;0: Missed; 1: Received;;;;;;
-;;181;OPT Number;Number of connection optimizers;R/W;0-64;;;The total number of optimizers connected to the inverter;;;;;;;
-;;182;OPT ConfigOK Flag;Optimizer configuration completion flag;R/W;;;;0x00:Not configured success 0x01:Configuration is complete;;;;;;;
-;;183;PvStrScan;String Num;R/W;0?8?16? 32;;;0:Not support Other:PvString Num;;;;;;;
-;;184;BDCLinkNum;BDC parallel Num;R/W;;;;The number of BDCs connected to the current machine Default is 0;;;;;;;
-;;185;PackNum;Number of battery modules;R;;;;Total number of battery modules currently associated with all BDCs;;;;;;;
-;;186;Reserved;;;;;;;;;;;;;
-;;187;VPP function enable status;VPP function enable status;R;;;;0:Disable 1:Enable;;;;;;;
-;;188;dataLog Connect Server status;dataLog Connect Server status;;;;;0:connection succeeded 1:Connection failed;;;;;;;
-;;201;PID Working Model;PID Operating mode;W;0: automati c 1: continuo us 2: All night;;;;;;;;;;
-;;202;PID On_Off Ctrl;PID Break control;W;0:On 1:Off;;;;;;;;;;
-;;203;PID Volt Option;PID Output voltage option;W;300~1000;V;;;;;;;;;
-;;209;New Serial NO;Serial number 1-2;;;ASCII;;;;;;;;;
-;;210;New Serial NO;Serial number 3-4;;;ASCII;;;;;;;;;
-;;211;New Serial NO;Serial number 5-6;;;ASCII;;;;;;;;;
-;;212;New Serial NO;Serial number 7-8;;;ASCII;;;;;;;;;
-;;213;New Serial NO;Serial number 9-10;;;ASCII;;;;;;;;;
-;;214;New Serial NO;Serial number 11-12;;;ASCII;;;;;;;;;
-;;215;New Serial NO;Serial number 13-14;;;ASCII;;;;;;;;;
-;;216;New Serial;Serial number 15-16;;;ASCII;;;;;;;;;
-;;217;New Serial;Serial number 17-18;;;ASCII;;;;;;;;;
-;;218;New Serial;Serial number 19-20;;;ASCII;;;;;;;;;
-;;219;New Serial;Serial number 21-22;;;ASCII;;;;;;;;;
-;;220;New Serial;Serial number 23-24;;;ASCII;;;;;;;;;
-;;221;New Serial;Serial number 25-26;;;ASCII;;;;;;;;;
-;;222;New Serial;Serial number 27-28;;;ASCII;;;;;;;;;
-;;223;New Serial;Serial number 29-30;;;ASCII;;;;;;;;;
-;;229;EnergyAdjust;Power generation incremental calibration coefficient;W/R;;0.10%;;1-1000;(Percent ratio);;;;;;
-;;230;IslandDisable;Island Disable or not. 1:disable 0:Enable;W;0;1;;;0;;;;;;
-;;231;FanCheck;Start Fan Check;W;1;;;;;;;;;;
-;;232;EnableNLine;Enable N Line of grid;W;1;;0;;;;;;;;
-;;233;wCheckHard ware;"wCheckHardware Bit0: GFCIBreak; Bit1:SPSDamage Bit8:EepromReadWarni ng Bit9:EEWriteWarning ??";;;;;;;;;;;;
-;;234;wCheckHard ware2;;;;;;reserved;;;;;;;
-;;235;ubNToGNDD etect;Dis/enable N to GND detect function;W;1:enable 0:disable;;1;;;;;;;;
-;;236;NonStdVacE nable;Enable/Disable Nonstandard Grid voltage range;W;0-2;;0;"0:Disable; 1:Enable Voltgrade1 2:Enable Voltgrade2";;;;;;;
-;;237;uwEnableSp ecSet;Disablse/enable appointed spec setting;W;1:enable 0:disable;Binary;0x000 0;Bit 0: Hungary;;;;;;;
-;;238;Fast MPPT enable;About Fast mppt;;0;1;2;;;;0;Reserved;;;
-;;240;Check Step;;W;;;;;;;;;;;
-;;241;INV_Lng;Inverter Longitude;W;;;;Longitude;;;;;;;
-;;242;INV_Lat;Inverter Latitude;W;;;;Latitude;;;;;;;
-;;304;uwAntiBackf lowFailPowe rLimitEE;Anti-backflow failure power percentage;R/W;0-1000;0.10%;;Anti-backflow failure default setting power percentage;;;;;;;
-;;305;Qloadspeed;Reactive loading speed;R/W;0-100;1.00%;;Reactive power adjustment speed setting item; n%Pn/s; 0 means that the loading speed is not enabled; that is; it is directly loaded to the set value;;;
-;;306;bParallelAnti BackflowEna ble;ParallelAnti-Backflow Enable;R/W;0-1;;;Parallel anti-Backflow open enable bit 1: enable 0:disable;;;;;;;
-;;307;uwAntiBackf lowFailureRe sponseTime;AntiBackflowFailure ResponseTime;R/W;01/01/00;1s;;AntiBackflow Failure Response Time;;;;;;;
-;;308;uwParallelAn tiBackflowPo werLimitEE;ParallelAntiBackflowPo wer;R/W;0-1000;0.10%;;Parallel AntiBackflow Power limit value setting;;;;;;;
-;;309;bISOCheckC md;ISO detection command;R/W;0-1;1;;ISO detection command;;;;;;;
-;;310;bGPRSStatus;GPRS Status 1: module not working 2: no sim card 3: No internet 4. TCP not connecting to server 5. TCP connection succeeded;R/W;0-255;1;;;;;;;;;
-;;311;uwQmax_In ductive;The inductive Qmax of the Q(V) curve;R/W;0-1000;0.10%;;;;;;;;;
-;;312;uwQmax_Capactive;The Capactive Qmax of the Q(V) curve;R/W;0-1000;0.10%;;;;;;;;;
-;;313;uwReactiveP owerAdjustF ailureRespon seTime;ReactivePowerAdjust Failur ResponseTime;R/W;0-5000;S;;;;;;;;;
-;;314;bSuperAntiB ackflowEnab le;SuperAntiBackflow Enable;R/W;;;;0:disable;1:enable;;;;;;
-;;315;uwReactiveP owerStableT ime;ReactivePowerStableTi me;R/W;0-200;S;;;;;;;;;
-;;316;uwQpStable Time;QpStableTime;R/W;0-200;S;;;;;;;;;
-;;317;uwPuDerate Time;PuDerateTime;R/W;0-200;S;;;;;;;;;
-;;318;uwQVModel Q2Point;QV mode Q2 set point reactive power percentage;R/W;0-2000;0.10%;;"Capacitive 30% ( The corresponding setting is 700); Inductive 30% (The corresponding setting is 1300); used for IEE1547";;;;;;;
-;;319;uwQVModel Q3Point;QV mode Q3 set point reactive power percentage;R/W;0-2000;;;;;;0.10%;;;;
-;;320;bVrefModel Enable;VrefModelEnable;R/W;0 : Vref mode for QV curve is not active 1 : Vref mode for QV curve is active;;;"When the Vref mode is not activated, the V1~V4 and Q1~Q4 upper computer of the QV curve can be adjusted; When Vref mode is activated, V1~V4 of the QV curve are determined with Vref and cannot be changed, and Q1~Q4 can be modified by the host computer .used for IEE1547";;;;;;;
-;;321;uwVrefMod elFilterTime;VrefModelFilterTime;R/W;0-5000;S;;Activate Vref mode; the output filter value is equal to Vref with in the set time .used for IEE1547;;;;;;
-;;322;uwUserQPM odeP1Krate;Active power P1 set point percentage for QP mode;R/W;0-1000;0.10%;;used for IEE1547;;;;;;;
-;;323;uwUserQPM odeP2Krate;Active power P2 set point percentage for QP mode;R/W;0-1000;0.10%;;used for IEE1547;;;;;;;
-;;324;uwUserQPM odeP3Krate;Active power P3 set point percentage for QP mode;R/W;0-1000;0.10%;;used for IEE1547;;;;;;;
-;;325;uwUserQPM odeQ1Krate;Reactive power Q1 set point percentage for QP mode;R/W;-1000-10 00;0.10%;;-1000~1000:Inductive(100%) ~ Capacitive(100%);;;;;;;
-;;326;uwUserQPM odeQ2Krate;Reactive power Q2 set point percentage for QP mode;R/W;-1000-10 00;0.10%;;-1000~1000:Inductive(100%) ~ Capacitive(100%);;;;;;;
-;;327;uwUserQPM odeQ3Krate;Reactive power Q3 set point percentage for QP mode;R/W;-1000-10 00;0.10%;;-1000~1000:Inductive(100%) ~ Capacitive(100%);;;;;;;
-;;328;uwAcVoltHig hDeratPowe rLimit;AcVoltHighDeratPower Limit;R/W;0-1000;0.10%;;;;;;;;;
-;;329;BackflowSin gleCtrl;BackflowSingleCtrl;R/W;0: disable 1: enable;;;;;;;;;;
-;;330;bAntiBackflo wProtectMo de;AntiBackflowProtectM ode;R/W;0-3;;;Used for Australian;;;;;;;
-;;331;uwUnderFU ploadZeroPo werPoint;UnderfreqUploadZeroP owerPoint;W;;0.01H Z;;;;;;;;;
-;;332;FreqDerateZ eroPowerPoi nt;FreqDerateZeroPowerP oint;W;;0.01H Z;;;;;;;;;
-;;333;bFreqDerati ngStopMode Enable;FreqDeratingStopMode Enable;R/W;0-1;;;;;;;;;;
-;;334;bFreqIncreas ingEnable;FreqIncreasingEnable;R/W;0-1;;;;;;;;;;
-;;335;uwFreqIncre asingRecove rTime;FreqIncreasingRecover Time;R/W;;50ms;;;;;;;;;
-;;336;uwFreqIncre asingEndLow Point;FreqIncreasingEndLow Point;R/W;;0.01H Z;;;;;;;;;
-;;337;bFreqIncreas ingStopMod eEnable;FreqIncreasingStopMo deEnable;R/W;0-1;;;;;;;;;;
-;;338;uwUserQpC hrP1Krate;User QP function;R/W;0-1000;0.10%;;;;;;;;;
-;;339;uwUserQpC hrP2Krate;User QP function;R/W;0-1000;0.10%;;;;;;;;;
-;;340;uwUserQpC hrP3Krate;User QP function;R/W;0-1000;0.10%;;;;;;;;;
-;;341;wUserQpChr Q1Krate;User QP function;R/W;-1000-10 00;0.10%;;;-1000~1000:Inductive(100%) ~ Capacitive(100%);;;;;;
-;;342;wUserQpChr Q2Krate;User QP function;R/W;-1000-10 00;0.10%;;;-1000~1000:Inductive(100%) ~ Capacitive(100%);;;;;;
-;;343;wUserQpChr Q3Krate;User QP function;R/W;-1000-10 00;0.10%;;;-1000~1000:Inductive(100%) ~ Capacitive(100%);;;;;;
-;;344;uwFreqDerat ingRecoverL owPoint;FreqDeratingRecoverLo wPoint;R/W;;0.01H Z;;;;;;;;;
-;;345;uwFreqIncre asingRecove rHighPoint;FreqIncreasingRecover HighPoint;R/W;;0.01H Z;;;;;;;;;
-;;336;uwFreqIncre asingEndLow Point;FreqIncreasingEndLow Point ;R/W ;;0.01H Z;;;;;;;;;
-;;337;bFreqIncreas ingStopMod Eenable;FreqIncreasingStopMo deEnable ;R/W ;0-1 ;;;;;;;;;;
-;;338;uwUserQpC HrP1Krate;User QP function; charge P1 set point Percentage;R/W ;0-1000 ;0.10%;;;;;;;;
-;;339;uwUserQpC HrP2Krate;User QP function; charge P2 set point Percentage;R/W ;0-1000 ;0.10%;;;;;;;;
-;;340;uwUserQpC HrP3Krate;User QP function; charge P3 set point Percentage;R/W ;0-1000 ;0.10%;;;;;;;;
-;;341;wUserQpChr Q1Krate;User QP function; charge Q1 set point Percentage;R/W ;-1000-10 00;0.10%;-1000~1000:Inductive(100%)~ Capacitive(100%);;;;;;;
-;;342;wUserQpChr Q2Krate;User QP function; charge Q2 set point Percentage;R/W ;-1000-10 00;0.10%;;;;;;;;
-;;343;wUserQpChr Q3Krate;User QP function; charge Q3 set point percentage ;R/W ;-1000-10 00;0.10%;;;;;;;;
-;;344;uwFreqDerat ingRecoverL OwPoint;FreqDeratingRecoverLo Wpoint;R/W ;;0.01Hz;;;;;;;;;
-;;345;uwFreqIncre asingRecove rHighPoint ;FreqIncreasingRecover HighPoint;R/W ;;0.01Hz;;;;;;;;;
-;;532;TurnOffUnlo adSpeed;TurnOffUnloadSpeed;W/R;0-1000;0.10%;;"0 means not enabled, that is, the function is not enabled; 1-1000 means n%Pn/min";;;;;;;
-;;533;LimitDevice;Anti-backflow equipment selection;W/R;0-3;;;1:Meter 3:CT;;;;;;;
-;;534;PowerSetOn DCSourceMo de;Power settings in dc source mode;W/R;0-90000;;;The unit is W;;;;;;;
-;;535;OUFreqGrad e1En; Over-under-frequencyGrade1Enable; currently only used by CEI0-21;W/R;0-1;;;0:disable 1:enable;;;;;;
-;;536;Country Set;Country settings under the same safety regulations;W/R;0-200;;;For mobile APP use only;;;;;;;
-;;538;InterlockEna ble;Three-machine communication Interlock function mode;W/R;0-2;;;0:disable 1: Slave Enable 2. host enable;;;;;;;
-;;539;OvTemperDe ratePoint;Over temperature derate point;W/R;;;;;;;;;;;
-;;540;SafetySetPas sword;Switch between different safety regulations to set the password;W/R;;;;;;;;;;;
-;;541;AFCI Onoff;AFCI Onoff;W/R;0xA0/0xA 5;;;0xA0:AFCI off 0xA5:AFCI on;;;;;;;
-;;542;AfciSelfChec k;AfciSelfCheck;W/R;;;;0:No self check 1: self check;;;;;;;
-;;543;AfciReset;AfciReset;W/R;;;;0:Not Reset 1: Reset;;;;;;;
-;;544;AFCIValue1;AFCIThresholdValue (low);W/R;0-65000;;;;;;;;;;
-;;545;AFCIValue2;AFCIThresholdValue (middle);W/R;0-65000;;;;;;;;;;
-;;546;AFCIValue3;AFCIThresholdValue (High);W/R;0-65000;;;;;;;;;;
-;;547;OverThresho ldValueMaxC nt;OverThresholdValueMa xCnt;W/R;0-255;;;;;;;;;;
-;;548;AFCIScanTyp eEnable;AFCI curve scan type;W/R;1~4;;;1:A road strength;;;;;;;
-;;549;PowerVoltSt opModeEn;PowerVoltStopModeEn;W/R;0?1;;;0:disable 1:enable The power is restoredwhenthe voltage is less thantherecovery point;;;;;;;
-;;550;VoltWattRec overTime;Voltage active power recovery time;W/R;0-15000;20ms;;;;;;;;;
-;;551;HvoltDerateStopPower;Voltage active cut-off power;W/R;-16400;;;;;;;;;;
-;;552;QVTimeExpo nent;QVTimeExponent;WR;01/01/55;;;Q varies exponentially with time;;;;;;;
-;;553;Volt_Watt Watt1;Voltage active V1 point;WR;0-11400;;;;;;;;;;
-;;554;Volt_Watt Watt2;Voltage active V2 point;WR;0-11400;;;;;;;;;;
-;;600;Volt_Var Var1;Voltage reactive V1 point;WR;0-1000;;;;0%~100.0%;US latest safety regulations;;;;;
-;;601;Volt_Var Var2;Voltage reactive V2 point;WR;0-1000;;;;0%~100.0%;US latest safety regulations;;;;;
-;;602;Volt_Var Var3;Voltage reactive V3 point;WR;0-1000;;;;0%~100.0%;US latest safety regulations;;;;;
-;;603;Volt_Var Var4;Voltage reactive V4 point;WR;0-1000;;;;0%~100.0%;US latest safety regulations;;;;;
-;;605;OPModEner gize;Allowed inverter output power;R/W;0/1;;;0: output power not allowed 1: allowable output power For US models;;;;;;;
-;;608;OneKeySetB DCMode;One key to set battery mode function;R/W;;;;0: self-use 1: battery priority 2: Grid priority 255:Disable Currently used for US models;;;;;;;
-;;609;PowerOutpu tEnable;Zero Power Output Enable;;;;;0:Zero Power Output 1:Unlimited output power(default is 1);;;;;;;
-;;610;DealDebugP araFlag;Flag bit for clearing debug variables;;;;;Currently only bit0 and bit1 are used bit0 is used to manually clear the Debug data uploaded to the server bit1 is used to manually clear the fault codes that need to be powered off to clear;;;;;;;
-;;612;bAcCoupleE n;AcCoupleEn;R/W;0-1;;;0:disable 1:enable;;;;;;;
-;;660;ReloadCmd;M3 remote command;;;;;0xA0: Initialize safety defaults 0xAA: Reboot M3 remotely;;;;;;;
-;;1000;Float charge current limit;When charge current battery need is lower than this value;W;;0.1A;;600;CC current;;;;;;
-;;1001;PF CMD memory state;Set the following 19-22 CMD will be memory ornot(1/0) these settings are the initial value.;W;0or1;;;;;0;Means these settings will be acting or not when next power on(02 repeat);;;;
-;;1002;VbatStartF orDischarg e;LV Vbat;R/W;;0.1V;;Lead-acid battery LV voltage;;;;;;;
-;;1003;VbatlowWa rnClr;LoadPercent(only lead-Acid): 45.5V <20% 48.0V 20%~50% 49.0V >50;W;;0.1V;;Clear battery low voltage error voltage point;;;;;;;
-;;1004;Vbatstopfo rdischarge;Should stop discharge when lower than this voltage(only lead-Acid): 46.0V <20% 44.8V 20%~50% 44.2V >50%;W;;0.01V;;;;;;;;;
-;;1005;Vbat stop for charge;Should stop charge when higher than this voltage;W;;0.01V;5800;;;;;;;;
-;;1006;Vbat start for discharge;Should not discharge when lower than this voltage;W;;0.01V;4800;;;;;;;;
-;;1007;Vbat constant charge;can charge when lower than this voltage;W;;0.01V;5800;CV voltage(acid);;;;;;;
-;;1008;EESysInfo_S ysSetEn;"Bit0:Resved; Bit1:Resved; Bit2:Resved; Bit3:Resved; Bit4:Resved; Bit5:bDischargeEn; Bit6:ForceDischrEn; Bit7:ChargeEn; Bit8:bForceChrEn; Bit9:bBackUpEn; Bit10:bInvLimitLoadE; Bit11:bSpLimitLoadEn; Bit12:bACChargeEn; Bit13:bPVLoadLimitEn; Bit14,15:UnUsed;";W;;;;System Enable;;;;;;;
-;;1009;Battemp lower limit d;Battery temperature lower limit for discharge;W;0-200:0-2 0? 1000-140 0:-40-0?;0.1?;1170;;;;;;;;
-;;1010;Bat temp upper limit d;Battery temperature upper limit for discharge;W;200-1000;0.1?;420;;;;;;;;
-;;1011;Bat temp lower limit c;Battery temperature lower limit for charge;W;0-200:0-2 0? 1000-140 0:-40-0?;0.1?;30;Lower temperature limit;;;;;;;
-;;1012;Bat temp upper limit c;Battery temperature upper limit for charge;W;200-1000;0.1?;370;Upper temperature limit;;;;;;;
-;;1013;uwUnderFr eDischarge DelyTime;Under Fre Delay Time;s;0-20;50ms;;Under Fre Delay Time;;;;;;;
-;;1014;BatMdlSeri alNum;Battery serial number;W;12:00:00 AM;;;SPH4-11K used;;;;;;;
-;;1015;BatMdlPara llNum;Battery parallel section;W;12:00:00 AM;;;SPH4-11K used;;;;;;;
-;;1016;DRMS_EN;/;/;/;/;/;0:disable 1:enable;;;;;;;
-;;1017;Bat First Start Time 4;High eight:hours Low eight: minutes;;0-23 0-59;;;;;;;;;;
-;;1018;Bat First Stop Time 4;High eight:hours Low eight: minutes;;0-23 0-59;;;;;;;;;;
-;;1019;BatFirst on_off Switch 4;Enable:1 Disable:0;;0 or 1;;;Battery priority enable 1;;;;;;;
-;;1020;Bat First Start Time 5;High eight:hours Low eight: minutes;;0-23 0-59;;;;;;;;;;
-;;1021;Bat First Stop Time 5;High eight:hours Low eight: minutes;;0-23 0-59;;;;;;;;;;
-;;1022;BatFirst on_off Switch 5;Enable:1 Disable:0;;0 or 1;;;Battery priority enable 1;;;;;;;
-;;1023;Bat First Start Time 6;High eight:hours Low eight: minutes;;0-23 0-59;;;;;;;;;;
-;;1024;Bat First Stop Time 6;High eight:hours Low eight: minutes;;0-23 0-59;;;;;;;;;;
-;;1025;BatFirst on_off Switch 6;Enable:1 Disable:0;;0 or 1;;;Battery priority enable 1;;;;;;;
-;;1026;Grid First Start Time 4;High eight:hours Low eight: minutes;;0-23 0-59;;;;;;;;;;
-;;1027;Grid First Stop Time 4;High eight:hours Low eight: minutes;;0-23 0-59;;;;;;;;;;
-;;1028;Grid First Stop Switch 4;Enable:1 Disable:0;;0 or 1;;;Grid priority enable;;;;;;;
-;;1029;Grid First Start Time 5;High eight:hours Low eight: minutes;;0-23 0-59;;;;;;;;;;
-;;1030;Grid First Stop Time 5;High eight:hours Low eight: minutes;;0-23 0-59;;;;;;;;;;
-;;1031;Grid First Stop Switch 5;Enable:1 Disable:0;;0 or 1;;;Grid priority enable;;;;;;;
-;;1032;Grid First Start Time 6;High eight:hours Low eight: minutes;;0-23 0-59;;;;;;;;;;
-;;1033;Grid First Stop Time 6;High eight:hours Low eight: minutes;;0-23 0-59;;;;;;;;;;
-;;1034;Grid First Stop Switch 6;Enable:1 Disable:0;;0 or 1;;;Grid priority enable;;;;;;;
-;;1035;Bat First Start Time 4;High eight:hours Low eight: minutes;;0-23 0-59;;;;;;;;;;
-;;1037;bCTMode;Use the CTMode to Choose RFCT \ Cable CT\METER;W;2:METER 1:cWirele ssCT 0:cWiredC T;;0;;;;;;;;
-;;1038;CTAdjust;CTAdjust enable;W;0:disable 1:enable;;0;;;;;;;;
-;;1044;Priority;ForceChrEn/ForceDischr En Load first/bat first /grid first;R;0.Load(de fault)/1.B attery/2.G rid;;;bForceChrEn/disbForceDischrE n/dis;;;;;;;
-;;1047;AgingTestSt ep Cmd;Command for aging test;;0: default 1: charge 2: discharge;;;Cmd for aging test;;;;;;;
-;;1048;BatteryTyp e;Battery type choose of buck-boost input;;0:Lithium 1:Lead-aci d 2:other;;0;Battery type;;;;;;;
-;;1060;BuckUpsFunE n;Ups function enable or disable;;0:disable 1:enable;;;;;;;;;;
-;;1061;BuckUPSVoltSet;UPS output voltage;;0:230 1:208 2:240;;230V;;;;;;;;
-;;1062;UPSFreqSet;UPS output frequency;;0:50Hz 1:60Hz;;50Hz;;;;;;;;
-;;1070;GridFirstDisch argePowerRat e;Discharge Power Rate when Grid First;W;0-100;1.00%;;Discharge Power Rate when Grid First;;;;;;;
-;;1071;GridFirstStopS OC;Stop Discharge soc when Grid First;W;0-100;1.00%;;Stop Discharge soc when Grid First;;;;;;;
-;;1080;Grid First Start Time 1;High eight bit:hour Low eight bit:minute;;0-23 0-59;;;;;;;;;;
-;;1081;Grid First Stop Time 1;High eight bit:hour Low eight bit:minute;;0-23 0-59;;;;;;;;;;
-;;1082;Grid First Stop Switch 1;Enable :1 Disable:0;;0 or 1;;;Grid First enable;;;;;;;
-;;1083;Grid First Start Time 2;High eight bit:hour Low eight bit:minute;;0-23 0-59;;;;;;;;;;
-;;1084;Grid First Stop Time 2;High eight bit:hour Low eight bit:minute;;0-23 0-59;;;;;;;;;;
-;;1085;Grid First Stop Switch 2;ForceDischarge.bSwitch&L CD_SET_FORCE_TRUE_2)= =LCD_SET_FORCE_TRUE_2;;0 or 1;;;Grid First enable;;"ForceDischarge; LCD_SET_FORCE_T RUE_2";;;;;
-;;1086;Grid First Start Time 3;High eight bit:hour Low eight bit:minute;;0-23 0-59;;;;;;;;;;
-;;1087;Grid First Stop Time 3;High eight bit:hour Low eight bit:minute;;0-23 0-59;;;;;;;;;;
-;;1088;Grid First Stop Switch 3;Enable :1 Disable:0;;0 or 1;;;Grid First enable;;;;;;;
-;;1090;BatFirstPower Rate;Charge Power Rate when Bat First;W;0-100;1.00%;;Charge Power Rate when Bat First;;;;;;;
-;;1091;wBatFirst stop SOC;Stop Charge soc when Bat First;W;0-100;1.00%;;Stop Charge soc when Bat First;;;;;;;
-;;1092;AC charge Switch;When Bat First Enable:1 Disable:0;;Enable:1 Disable:0;;;AC Charge Enable;;;;;;;
-;;1100;Bat First Start Time 1;High eight bit:hour Low eight bit:minute;;0-23 0-59;;;;;;;;;;
-;;1101;Bat First Stop Time 1;High eight bit:hour Low eight bit:minute;;0-23 0-59;;;;;;;;;;
-;;1102;BatFirst on_off Switch 1;Enable :1 Disable:0;;0 or 1;;;Bat First Enable1;;;;;;;
-;;1103;Bat First Start Time 2;High eight bit:hour Low eight bit:minute;;0-23 0-59;;;;;;;;;;
-;;1104;Bat First Stop Time 2;High eight bit:hour Low eight bit:minute;;0-23 0-59;;;;;;;;;;
-;;1105;BatFirston_off Switch 2;Enable :1 Disable:0;;0 or 1;;;Bat First Enable2;;;;;;;
-;;1106;Bat First Start Time 3;High eight bit:hour Low eight bit:minute;;0-23 0-59;;;;;;;;;;
-;;1107;Bat First Stop Time 3;High eight bit:hour Low eight bit:minute;;0-23 0-59;;;;;;;;;;
-;;1108;BatFirston_off Switch 3;Enable :1 Disable:0;;0 or 1;;;Bat First Enable3;;;;;;;
-;;1110;Load First Start Time 1;High eight bit:hour Low eight bit:minute;;0-23 0-59;;;;;SPA/ reserve;;;;;
-;;1111;Load First Stop Time 1;High eight bit:hour Low eight bit:minute;;0-23 0-59;;;;;SPA/ reserve;;;;;
-;;1112;Load First Switch 1;Enable :1 Disable:0;;0 or 1;;;Load First Enable;;SPA/ reserve;;;;;
-;;1113;Load First Start Time2;High eight bit:hour Low eight bit:minute;;0-23 0-59;;;;;SPA/ reserve;;;;;
-;;1114;Load First Stop Time 2;High eight bit:hour Low eight bit:minute;;0-23 0-59;;;;;SPA/ reserve;;;;;
-;;1115;Load First Switch 2;Enable :1 Disable:0;;0 or 1;;;Load First Enable;;SPA/ reserve;;;;;
-;;1116;Load First Start Time 3;High eight bit:hour Low eight bit:minute;;0-23 0-59;;;;;SPA/ reserve;;;;;
-;;1117;Load First Stop Time 3;High eight bit:hour Low eight bit:minute;;0-23 0-59;;;;;SPA/ reserve;;;;;
-;;1118;Load First Switch 3;Enable :1 Disable:0;;0 or 1;;;Load First Enable;;SPA/ reserve;;;;;
-;;1119;NewEPowerC alcFlag;/;;/;;;/;;0:The old formula 1 : The new formula;;;;;
-;;1120;BackUpEn;BackUp Enable;;;;;;;MIX US;;;;;
-;;1121;SGIPEn;SGIP Enable;;;;;;;MIX US;;;;;
-;;1125;BatSerialNO_ 8_B1;Product serial number of the first PACK of energy storage batteries;;/;ASCII;;;;;;;;;
-;;1126;BatSerialNO_ 7_B1;;;/;ASCII;;;;;;;;;
-;;1127;BatSerialNO_ 6_B1;;;/;ASCII;;;;;;;;;
-;;1128;BatSerialNO_ 5_B1;;;/;ASCII;;;;;;;;;
-;;1129;BatSerialNO_ 4_B1;;;/;ASCII;;;;;;;;;
-;;1130;BatSerialNO_ 3_B1;;;/;ASCII;;;;;;;;;
-;;1131;BatSerialNO_ 2_B1;;;/;ASCII;;;;;;;;;
-;;1132;BatSerialNO_ 1_B1;;;;;;;;;;;;;
-;;1244;Com version NameH;Name of the battery main control firmware version;;;ASCII;;;;;;;;;
-;;1245;Com version NameL;Name of the battery main control firmware version;;;ASCII;;;;;;;;;
-;;1246;Com version No;Version of the battery main control firmware;;;digital;;;;;;;;;
-;;1247;Com version NameH;Name of battery monitoring firmware version;;;ASCII;;;;;;;;;
-;;1248;Com version NameL;Name of battery monitoring firmware version;;;ASCII;;;;;;;;;
-;;1249;Com version No;Battery monitoring firmware version;;;digital;;;;;;;;;
-;;3000;ExportLimitFa iledPowerRat e;The power rate when exportLimit failed;R/W;;0.10%;;;;The power rate when exportLimit failed;;;;;
-;;3001;New Serial NO;Serial number 1-2;R/W;;ASCII;;;;"The new model uses the following registers to record the serial number; The representation is the same as the original: one register holds two characters and the new serial number is 30 characters.";;;;;
-;;3002;New Serial NO;Serial number 3-4;R/W;;ASCII;;;;;;;;;
-;;3003;New Serial NO;Serial number 5-6;R/W;;ASCII;;;;;;;;;
-;;3004;New Serial NO;Serial number 7-8;R/W;;ASCII;;;;;;;;;
-;;3005;New Serial NO;Serial number 9-10;R/W;;ASCII;;;;;;;;;
-;;3006;New Serial NO;Serial number 11-12;R/W;;ASCII;;;;;;;;;
-;;3007;New Serial NO;Serial number 13-14;R/W;;ASCII;;;;;;;;;
-;;3008;New Serial NO;Serial number 15-16;R/W;;ASCII;;;;;;;;;
-;;3009;New Serial NO;Serial number 17-18;R/W;;ASCII;;;;;;;;;
-;;3010;New Serial NO;Serial number 19-20;R/W;;ASCII;;;;;;;;;
-;;3011;New Serial NO;Serial number 21-22;R/W;;ASCII;;;;;;;;;
-;;3012;New Serial NO;Serial number 23-24;R/W;;ASCII;;;;;;;;;
-;;3013;New Serial NO;Serial number 25-26;R/W;;ASCII;;;;;;;;;
-;;3014;New Serial NO;Serial number 27-28;R/W;;ASCII;;;;;;;;;
-;;3015;New Serial NO;Serial number 29-30;R/W;;ASCII;;;;;;;;;
-;;3016;DryContactFu ncEn;DryContact function enable;R/W;0:Disable 1: Enable;;;;;DryContact function enable;;;;;
-;;3017;DryContactOn Rate;The power rate of drycontact turn on;R/W;0~1000;0.10%;;;;The power rate of drycontact turn on;;;;;
-;;3018;bWorkMode;WorkMode 0:default 1: System Retrofit 2: Multi-Parallel;R/W;1;2;3;;;;;;MIN2.5~6KTL-XH/ XA Double CT special;;
-;;3019;DryContactOffRate;Dry contact closure power;R/W ;0~100 0;0.10%;;;;Dry contact closure power pe rcentage;;;;;
-;;3020;BoxCtrlInvOrder;Off-net box control instruct ion;R/W ;;;;;;;;;;;
-;;3021;ExterCommOf fGridEn;External communication setting manual off-network enable;R/W;;;;;;"0x00: Disable; (default) 0x01: Enable;";;;;;
-;;3022;uwBdcStopW orkOfBusVolt;BdcStopWorkOfBusVolt;R;;;;;;;;;;;
-;;3023;bGridType;GridType---0:SinglePhase 1:ThreePhase 2:SplitPhase;R/W;1;2;3;;;;;MIN2.5~6KTL-XH/ XA Double CT special;;;
-;;3024;Float charge current limit;When charge current battery need is lower than this value enter into float charge;R/W;;0.1A;;600;;CC current;;;;;
-;;3025;VbatWarning;"""Battery-low"" warning setup voltage";R/W;;0.1V;;4800;;Lead acid battery LV voltage;;;;;
-;;3026;VbatlowWarn Clr;"""Battery-low"" warning clear voltage";R/W;;0.1V;;;;"Clear battery low voltage error voltage point LoadPercent(only lead-Acid): 45.5V(Load < 20%); 48.0V(20%<=Load <=50%); 49.0V(Load > 50%);";;;;;
-;;3027;Vbatstopfordi scharge;Battery cut off voltage;R/W;;0.1V;;;;"Should stop discharge when lower than this voltage(only lead-Acid): 46.0V(Load < 20%); 44.8V(20%<=Load <=50%); 44.2V(Load > 50%);";;;;;
-;;3028;Vbat stop for charge;Battery over charge voltage;R/W;;0.01V;;5800;;Should stop charge when higher than this voltage;;;;;
-;;3029;Vbat start for discharge;Battery start discharge voltage;R/W;;0.01V;;4800;;Should not discharge when lower than this voltage;;;;;
-;;3030;Vbat constant charge;Battery constant charge voltage;R/W;;0.01V;;5800;;CV voltage(acid) can charge when lower than this voltage;;;;;
-;;3031;Battemp lower limit d;Battery temperature lower limit for discharge;R/W;;0.1?;;1170;;0-200:0-20? 1000-1400: -40-0?;;;;;
-;;3032;Bat temp upper limit d;Battery temperature upper limit for discharge;R/W;;0.1?;;420;;;;;;;
-;;3033;Bat temp lower limit c;Battery temperature lower limit for charge;R/W;;0.1?;;30;;Battery temperature lower limit 0-200:0-20? 1000-1400: -40-0?;;;;;
-;;3034;Bat temp upper limit c;Battery temperature upper limit for charge;R/W;;0.1?;;370;;Battery temperature upper limit;;;;;
-;;3035;uwUnderFreD ischargeDelyT ime;Under Fre Delay Time;R/W;;50ms;;;;Under Fre Delay Time;;;;;
-;;3036;GridFirstDisch argePowerRat e;Discharge Power Rate when Grid First;W;0-100 ;1.00%;;;;;;;;;
-;;3037;GridFirstStopS OC;Stop Discharge soc when Grid First;W;0-100 ;1.00%;;;;;;;;;
-;;3038;Time 1_xh_ Start;Period 1: [Start Time ~ End Time] [Charge/Discharge] [Disable/Enable] 3038 enable charge and discharge;R/W;;;;;;;;;;;"Bit0~7: minutes; Bit8~12: hour; Bit13~14, 0: load priority; 1: battery priority; 2: Grid priority; Bit15, 0: prohibited; 1: enabled;"
-;;3039;Time 1_xh_ End;;R/W;;;;;;"Bit0~7: minutes; Bit8~12: hour; Bit13~15: reserved";;;;;
-;;3040;Time 2_xh_ Start;Time period 2: [start time ~ end time] [charge / discharge] [disable / enable] 3040 enable charge and discharge;R/W;;;;;;;;;;;"Bit0~7: minutes; Bit8~12: hour; Bit13~14, 0: load priority; 1: battery priority; 2: Grid priority; Bit15, 0: prohibited; 1:"
-;;3041;Time 2_xh_ End;;R/W;;;;;;"enabled;";;;;;
-;;3042;Time 3_xh_ Start;With Time1;R/W;;;;;;With Time1;;;;;
-;;3043;Time 3_xh_ End;;R/W;;;;;;With Time1;;;;;
-;;3044;Time 4_xh_ Start;With Time1;R/W;;;;;;With Time1;;;;;
-;;3045;Time 4_xh_ End;;R/W;;;;;;With Time1;;;;;
-;;3047;BatFirstPower Rate;Charge Power Rate when Bat First;;;;;;;;;;;;
-;;3048;wBatFirst stop SOC;Stop Charge soc when Bat First;;;;;;;;;;;;
-;;3049;AcChargeEna ble;AcChargeEnable;;;;;;;Enable :1 Disable:0;;;;;
-;;3050;Time 5_xh_ Start;With Time1;R/W;;;;;;With Time1;;;;;
-;;3051;Time 5_xh_ End;;R/W;;;;;;With Time1;;;;;
-;;3052;Time 6_xh_ Start;With Time1;R/W;;;;;;With Time1;;;;;
-;;3053;Time 6_xh_ End;;R/W;;;;;;With Time1;;;;;
-;;3054;Time 7_xh_ Start;With Time1;R/W;;;;;;With Time1;;;;;
-;;3055;Time 7_xh_ End;;R/W;;;;;;With Time1;;;;;
-;;3056;Time 8_xh_ Start;With Time1;R/W;;;;;;With Time1;;;;;
-;;3057;Time 8_xh_ End;;R/W;;;;;;With Time1;;;;;
-;;3058;Time 9_xh_ Start;With Time1;R/W;;;;;;With Time1;;;;;
-;;3059;Time 9_xh_ End;;R/W;;;;;;With Time1;;;;;
-;;3070;BatteryType;Battery type choose of buck-boost input;R/W;;;;;;Battery type 0:Lithium 1:Lead-acid 2:other;;;;;
-;;3071;BatMdlSeria_ ParalNum;BatMdlSeria/ParalNum;R/W;;;;;;"BatMdlSeria/Paral Num; SPH4-11K used The upper 8 bits indicate the number of series segments; The lower 8 bits indicate the number of parallel sections;";;;;;
-;;3079;UpsFunEn;Ups function enable or disable;R/W;;;;0;;0:disable 1:enable;;;;;
-;;3080;UPSVoltSet;UPS output voltage;R/W;;;;0;;0:230V 1:208V 2:240V;;;;;
-;;3081;UPSFreqSet;UPS output frequency;R/W;;;;0;;0:50Hz 1:60Hz;;;;;
-;;3082;bLoadFirstSto pSocSet;StopSoc When LoadFirst;R/W;13-100;;;;;ratio;;;;;
-;;3085;Com Address;Communication addr;R/W;;;;1;;1 : Communication addr=1 1 ~ 254 : Communication addr=1~254;;;;;
-;;3086;BaudRate;Communication BaudRate;R/W;;;;0;;0: 9600 bps 1: 38400 bps;;;;;
-;;3087;Serial NO_ 1;Serial Number 1-2;R/W;;ASCII;;;;For battery;;;;;
-;;3088;Serial NO_ 2;Serial Number 3-4;R/W;;ASCII;;;;;;;;;
-;;3089;Serial NO_ 3;Serial Number 5-6;R/W;;ASCII;;;;;;;;;
-;;3090;Serial NO_ 4;Serial Number 7-8;R/W;;ASCII;;;;;;;;;
-;;3091;Serial No_ 5;Serial Number 9-10;R/W;;ASCII;;;;;;;;;
-;;3092;Serial No_6;Serial Number 11-12;R/W;;ASCII;;;;;;;;;
-;;3093;Serial No_ 7;Serial Number 13-14;R/W;;ASCII;;;;;;;;;
-;;3094;Serial No_ 8;Serial Number 15-16;R/W;;ASCII;;;;;;;;;
-;;3095;BdcResetCmd;BDC Reset command;R/W;;;;;;0:Invalid data 1:Reset setting parameters 2:Reset correction parameter 3:Clear historical power;;;;;
-;;3096;ARKM3 Code;BDCMonitoring software code;R;;ASCII;;;;ZEBA;;;;;
-;;3098;DTC;DTC;R;;;;;;;;;;;
-;;3099;FW Code;DSP software code;R;;ASCII;;;;;;;;;
-;;3101;Processor1 FW Vision;DSP Software Version;R;;ASCII;;;;;;;;;
-;;3102;BusVoltRef;Minimum BUS voltage for charging and discharging batteries;R;;;;;;;;;;;
-;;3103;ARKM3Ver;BDC monitoring software version;R;;;;;;;;;;;
-;;3104;BMS_MCUVer sion;BMS hardware version information;R;1;;;;;;;;;;
-;;3105;BMS_FW;BMS software version information;R;1;;;;;;;;;;
-;;3106;BMS_Info;BMS ManufacturerName;R;1;;;;;;;;;;
-;;3107;BMSCommTy pe;BMSCommType;R;1;;;;;"BMSCommunicati on interface type: 0: RS485; 1: CAN;";;;;;
-;;3108;Module 4;BDCmodel (4);R/W;&*11;;;;;SxxBxx;;;;;
-;;3109;Module 3;BDCmodel (3);R/W;&*11;;;;;DxxTxx;;;;;
-;;3110;Module 2;BDCmodel (2);R/W;&*11;;;;;PxxUxx;;;;;
-;;3111;Module 1;BDCmodel (1);R/W;&*11;;;;;Mxxxx;;;;;
-;;3113;unProtocolVe r;BDCProtocolVer;R;1;;;;;Bit8-bit15 The major version number ranges from 0-256. In principle; it cannot be changed Bit0-bit7 Minor version number [0-256]. If the protocol is changed; you need to update this version No.;;;
-;;3114;uwCertificatio nVer;BDC CertificationVer;R;1;;;;;;;;;;
-;;3125;Time Month1;Use with Time1-9(us) Add month time;R/W;;;;;;;"bit0~3:month_L; bit4~7: month_H bit8, 0:disable 1:enable Bit9~15:reserve";;;;
-;;3126;Time Month2;Use with Time10-18(us) Add month time;R/W;;;;;;;With Time Month1;;;;
-;;3127;Time Month3;Use with Time19-27(us) Add month time;R/W;;;;;;;With Time Month1;;;;
-;;3128;Time Month4;Use with Time28-36(us) Add month time;R/W;;;;;;;With Time Month1;;;;
-;;3129;Time 1_us_ start;time1:[starttime~endtime];R/W;;;;;;"bit0~6:min; bit7~11:hour; bit12~14, 0:loadfirst;";;;;;
-;;3130;Time 1_us_ end;;R/W;;;;;;;"1:batfirst; 2:gridfirst; 3: anti-reflux bit15, 0:disable; 1:enable;";;;;
-;;3131;Time 2_us_ start;Same as above;R/W;;;;;;Same as Time 1 (us);;;;;
-;;3132;Time 2_us_ end;Same as above;R/W;;;;;;Same as Time 1 (us);;;;;
-;;3133;Time 3_us_ start;Same as above;R/W;;;;;;Same as Time 1 (us);;;;;
-;;3134;Time 3_us_ end;Same as above;R/W;;;;;;Same as Time 1 (us);;;;;
-;;3135;Time 4_us_ start;Same as above;R/W;;;;;;Same as Time 1 (us);;;;;
-;;3135;Time 4_us_ end;Same as above;R/W;;;;;;Same as Time 1 (us);;;;;
-;;3137;Time 5_us_ start;Same as above;R/W;;;;;;Same as Time 1 (us);;;;;
-;;3138;Time 5_us_ end;Same as above;R/W;;;;;;Same as Time 1 (us);;;;;
-;;3139;Time 6_us_ start;Same as above;R/W;;;;;;Same as Time 1 (us);;;;;
-;;3140;Time 6_us_ end;Same as above;R/W;;;;;;Same as Time 1 (us);;;;;
-;;3141;Time 7_us_ start;Same as above;R/W;;;;;;Same as Time 1 (us);;;;;
-;;3142;Time 7_us_ end;Same as above;R/W;;;;;;;;;;;
-;;3143;Time 8_us_ start;Same as above;R/W;;;;;;Same as Time 1 (us);;;;;
-;;3144;Time 8_us_ end;Same as above;R/W;;;;;;;;;;;
-;;3145;Time 9_us_ start;Same as above;R/W;;;;;;Same as Time 1 (us);;;;;
-;;3146;Time 9_us_ end;Same as above;R/W;;;;;;;;;;;
-;;3147;Time 10_us_ start;Same as above;R/W;;;;;;Same as Time 1 (us);;;;;
-;;3148;Time 10_us_ end;Same as above;R/W;;;;;;;;;;;
-;;3149;Time 11_us_ start;Same as above;R/W;;;;;;Same as Time 1 (us);;;;;
-;;3150;Time 11_us_ end;Same as above;R/W;;;;;;;;;;;
-;;3151;Time 12_us_ start;Same as above;R/W;;;;;;Same as Time 1 (us);;;;;
-;;3152;Time 12_us_ end;Same as above;R/W;;;;;;;;;;;
-;;3153;Time 13_us_ start;Same as above;R/W;;;;;;Same as Time 1 (us);;;;;
-;;3154;Time 13_us_ end;Same as above;R/W;;;;;;;;;;;
-;;3155;Time 14_us_ start;Same as above;R/W;;;;;;Same as Time 1 (us);;;;;
-;;3156;Time 14_us_ end;Same as above;R/W;;;;;;;;;;;
-;;3157;Time 15_us_ start;Same as above;R/W;;;;;;Same as Time 1 (us);;;;;
-;;3158;Time 15_us_ end;Same as above;R/W;;;;;;;;;;;
-;;3159;Time 16_us_ start;Same as above;R/W;;;;;;;;;;;
-;;3160;Time 16_us_ end;Same as above;R/W;;;;;;;;;;;
-;;3201;SpecialDay1;SpecialDay1(month; Day);R/W;;;;;;;"bit0~7:day; bit8~14:month bit15, 0:disable 1: enable";;;
-;;3202;SpecialDay1_Time1_Start;Start time;R/W;;;;;;"bit0~6:min; bit7~11:hour; bit12~14, 0:loadfirst; 1:batfirst; 2:gridfirst; 3: anti-reflux bit15, 0: disable; 1: enable;";;;;;
-;;3203;SpecialDay1_Time1_End;endtime;R/W;;;;;;"bit0~6:min; bit7~11:hour; bit12~15:reserve";;;;;
-;;3204;SpecialDay1_ Time2_Start;Same as above;R/W;;;;;;Same as SpecialDay1_Time 1;;;;;
-;;3205;SpecialDay1_ Time2_End;;R/W;;;;;;;;;;;
-;;3206;SpecialDay1_ Time3_Start;Same as above;R/W;;;;;;Same as SpecialDay1_Time 1;;;;;
-;;3207;SpecialDay1_ Time3_End;;R/W;;;;;;;;;;;
-;;3208;SpecialDay1_ Time4_Start;Same as above;R/W;;;;;;Same as SpecialDay1_Time 1;;;;;
-;;3209;SpecialDay1_ Time4_End;;R/W;;;;;;;;;;;
-;;3210;SpecialDay1_ Time5_Start;Same as above;R/W;;;;;;Same as SpecialDay1_Time 1;;;;;
-;;3211;SpecialDay1_ Time5_End;;R/W;;;;;;;;;;;
-;;3212;SpecialDay1_ Time6_Start;Same as above;R/W;;;;;;Same as SpecialDay1_Time 1;;;;;
-;;3213;SpecialDay1_ Time6_End;;R/W;;;;;;;;;;;
-;;3214;SpecialDay1_ Time7_Start;Same as above;R/W;;;;;;Same as SpecialDay1_Time 1;;;;;
-;;3215;SpecialDay1_ Time7_End;;R/W;;;;;;;;;;;
-;;3216;SpecialDay1_ Time8_Start;Same as above;R/W;;;;;;Same as SpecialDay1_Time 1;;;;;
-;;3217;SpecialDay1_ Time8_End;;R/W;;;;;;;;;;;
-;;3218;SpecialDay1_ Time9_Start;Same as above;R/W;;;;;;Same as SpecialDay1_Time 1;;;;;
-;;3219;SpecialDay1_ Time9_End;;R/W;;;;;;;;;;;
-;;3220;SpecialDay2;SpecialDay2(month; Day);R/W;;;;;;;"bit0~7:day; bit8~14:month bit15, 0:disable 1:enable";;;
-;;3221;SpecialDay2_ Time1_Start;Start time;R/W;;;;;;"bit0~6: min; bit7~11: hour; bit12~14, 0: loadfirst; 1: batfirst; 2: gridfirst; 3: anti-reflux bit15, 0: disable; 1: enable;";;;;;
-;;3222;SpecialDay2_ Time1_End;endtime;R/W;;;;;;"bit0~6: min; bit7~11: hour; bit12~15:reserve";;;;;
-;;3223;SpecialDay2_ Time2_Start;Same as above;R/W;;;;;;Same as SpecialDay2_Time 1;;;;;
-;;3224;SpecialDay2_ Time2_End;;R/W;;;;;;;;;;;
-;;3225;SpecialDay2_ Time3_Start;Same as above;R/W;;;;;;Same as SpecialDay2_Time 1;;;;;
-;;3226;SpecialDay2_ Time3_End;;R/W;;;;;;;;;;;
-;;3227;SpecialDay2_ Time4_Start;Same as above;R/W;;;;;;Same as SpecialDay2_Time 1;;;;;
-;;3228;SpecialDay2_ Time4_End;;R/W;;;;;;;;;;;
-;;3229;SpecialDay2_ Time5_Start;Same as above;R/W;;;;;;Same as SpecialDay2_Time 1;;;;;
-;;3230;SpecialDay2_ Time5_End;;R/W;;;;;;;;;;;
-;;3231;SpecialDay2_ Time6_Start;Same as above;R/W;;;;;;Same as SpecialDay2_Time 1;;;;;
-;;3232;SpecialDay2_ Time6_End;;R/W;;;;;;;;;;;
-;;3233;SpecialDay2_ Time7_Start;Same as above;R/W;;;;;;Same as SpecialDay2_Time 1;;;;;
-;;3234;SpecialDay2_ Time7_End;;R/W;;;;;;;;;;;
-;;3235;SpecialDay2_ Time8_Start;Same as above;R/W;;;;;;Same as SpecialDay2_Time 1;;;;;
-;;3236;SpecialDay2_ Time8_End;;R/W;;;;;;;;;;;
-;;3237;SpecialDay2_ Time9_Start;Same as above;R/W;;;;;;Same as SpecialDay2_Time 1;;;;;
-;;3238;SpecialDay2_ Time9_End;;R/W;;;;;;;;;;;
+variable name,data type,register,documented name,description,write,values,unit,Initial value,note,,,,,,,
+,,0,OnOff,Remote On/Off . On(1);Of(f 0)Inverter On(3);Off(2)BDC,W,0,1,2,3,,1,The inverter can be switched on and off, and the BDC can be switched on and off for the batt ready function.,,,
+,,1,SaftyFuncEn,Bit0: SPI enable Bit1: AutoTestStart Bit2: LVFRT enable Bit3:FreqDerating Enable Bit4: Softstart enable Bit5: DRMS enable Bit6:PowerVoltFunc Enable Bit7: HVFRT enable Bit8:ROCOF enable Bit9: Recover FreqDeratingMode Enable Bit10:Split phase enable Bit10~15:??,W,0 :Disable1: enable,,,SPI: systemprotectioninterfaceBit0~3:for CEI0-21Bit4~6:for SAA,,,,,,,
+,,2,PF CMDmemoryState,Set Holding register3,4,5,99 CMD will be memory or not(1/0), if not, these settings are the initial value. ,W,0or1,,0,Means these settings will beacting or not whennextpower on ,,
+,,3,Active P Rate,Inverter Max output active power percent,W,0-100 or 255,%,255,255: power is not be limited,,,,,,,
+,,4,Reactive P Rate,Inverter max output reactive power percent,W,-100-100 or 255,%,255,255: power is not be limited,,,,,,,
+,,5,Power factor,Inverter output powerfactor's 10000 times,W,0-20000, 0-10000isunderexcited, otherisoverexcitEd,,,,0,,,,
+,,6,Pmax H,Normal power (high),,,0.1VA,,,,,,,,,
+,,7,Pmax L,Normal power (low),,,0.1VA,,,,,,,,,
+,,8,Vnormal,Normal work PV voltage,,,0.1V,,,,,,,,,
+,,9,Fw version H,Firmware version (high),,,ASCII,,,,,,,,,
+,,10,Fw version M,Firmware version (middle),,,,,,,,,,,,
+,,11,Fw version L,Firmware version (low),,,,,,,,,,,,
+,,12,Fw version2 H,Control Firmware version (high),,,ASCII,,,,,,,,,
+,,13,Fw version2 M,Control Firmware version (middle),,,,,,,,,,,,
+,,14,Fw version2 L,Control Firmware version (low),,,,,,,,,,,,
+,,15,LCD language,LCD language,W,0-5,,,0: Italian; 1: English; 2: German; 3: Spanish; 4: French; 5: Chinese; 6:Polish 7:Portugues 8:Hungary,,,,,,,
+,,16,CountrySele cted,Country Selected or not,W,0: need to select; 1: have selected,,,,,,,,,,
+,,17,Vpv start,Input start voltage,W,,0.1V,,,,,,,,,
+,,18,Time start,Start time,W,,1s,,,,,,,,,
+,,19,RestartDelay Time,Restart Delay Time after fault back;,W,,1s,,,,,,,,,
+,,20,wPowerStart Slope,Power start slope,W,01/01/00,0.10%,,,,,,,,,
+,,21,wPowerRest artSlopeEE,Power restart slope,W,01/01/00,0.10%,,,,,,,,,
+,,22,wSelectBaud rate,Select communicationbaudrat e 0: 9600bps 1:38400bps,W,0-1,,0,,,,,,,,
+,,23,Serial NO 1,Serial number 1-2,,,ASCII,,,,,,,,,
+,,24,Serial NO 2,Serial number 3-4,,,,,,,,,,,,
+,,25,Serial NO 3,Serial number 5-6,,,,,,,,,,,,
+,,26,Serial NO 4,Serial number 7-8,,,,,,,,,,,,
+,,27,Serial NO 5,Serial number 9-10,,,,,,,,,,,,
+,,28,Module H,Inverter Module (high),,&*5,,,,,,,,,,
+,,29,Module L,Inverter Module (low),,&*5,,,,,,,,,,
+,,30,Com Address,Communicate address,W,01/01/54,,1,,,,,,,,
+,,31,FlashStart,Update firmware,W,1,,,,,,,,,,
+,,32,Reset User Info,Reset User Information,W,0x0001,,,,,,,,,,
+,,33,Reset to factory,Reset to factory,W,0x0001,,,,,,,,,,
+,,34,Manufacturer Info 8,Manufacturer information (high),,,ASCII,,,,,,,,,
+,,35,Manufacturer Info 7,Manufacturer information (middle),,,,,,,,,,,,
+,,36,Manufacturer Info 6,Manufacturer information (low),,,,,,,,,,,,
+,,37,Manufacturer Info 5,Manufacturer information (high),,,,,,,,,,,,
+,,38,Manufacturer Info 4,Manufacturer information (middle),,,,,,,,,,,,
+,,39,Manufacturer Info3,Manufacturer information (low),,,,,,,,,,,,
+,,40,Manufacturer Info 2,Manufacturer information (low),,,,,,,,,,,,
+,,41,Manufacturer Info 1,Manufacturer information (high),,,,,,,,,,,,
+,,42,bfailsafeEn,G100 fail safe,W,Enable:1 Disable:0,,,English G100 fail safe set,,,,,,,
+,,43,DTC,Device Type Code,,&*6,,,,,,,,,,
+,,44,TP,Input tracker num and output phase num,,Eg:0x020 3 is two MPPT and 3ph output,,,,,,,,,,
+,,45,Sys Year,System time-year,W,Year offset is 0,,,Local time,,,,,,,
+,,46,Sys Month,System time- Month,W,,,,,,,,,,,
+,,47,Sys Day,System time- Day,W,,,,,,,,,,,
+,,48,Sys Hour,System time- Hour,W,,,,,,,,,,,
+,,49,Sys Min,System time- Min,W,,,,,,,,,,,
+,,50,Sys Sec,System time- Second,W,,,,,,,,,,,
+,,51,Sys Weekly,System Weekly,W,0-6,,,,,,,,,,
+,,52,Vac low,Grid voltage low limit protect,W,,0.1V,,,,,,,,,
+,,53,Vac high,Grid voltage high limit protect,W,,0.1V,,,,,,,,,
+,,54,Fac low,Grid frequency low limit protect,W,,0.01 Hz,,,,,,,,,
+,,55,Fac high,Grid high frequencylimit protect,W,,0.01 Hz,,,,,,,,,
+,,56,Vac low 2,Grid voltage low limit protect 2,W,,0.1V,,,,,,,,,
+,,57,Vac high 2,Grid voltage high limit protect 2,W,,0.1V,,,,,,,,,
+,,58,Fac low 2,Grid frequency low limit protect 2,W,,0.01 Hz,,,,,,,,,
+,,59,Fac high 2,Grid high frequency limit protect 2,W,,0.01 Hz,,,,,,,,,
+,,60,Vac low 3,Grid voltage low limit protect 3,W,,0.1V,,,,,,,,,
+,,61,Vac high 3,Grid voltage high limit protect 3,W,,0.1V,,,,,,,,,
+,,62,Fac low 3,Grid frequency low limit protect 3,W,,0.01Hz,,,,,,,,,
+,,63,Fac high 3,Grid frequency high limit protect 3,W,,0.01Hz,,,,,,,,,
+,,64,Vac low C,Grid low voltage limit connect to Grid,W,,0.1V,,,,,,,,,
+,,65,Vac high C,Grid high voltage limit connect to Grid,W,,0.1V,,,,,,,,,
+,,66,Fac low C,Grid low frequency limit connect to Grid,W,,0.01 Hz,,,,,,,,,
+,,67,Fac high C,Grid high frequency limit connect to Grid,W,,0.01 Hz,,,,,,,,,
+,,68,Vac low1 time,Grid voltage low limit protect time 1,W,,Cycle,,,,,,,,,
+,,69,Vac high1 time,Grid voltage high limit protect time 1,W,,Cycle,,,,,,,,,
+,,70,Vac low2 time,Grid voltage low limit protect time 2,W,,Cycle,,,,,,,,,
+,,71,Vac high2 time,Grid voltage high limit protect time 2,W,,Cycle,,,,,,,,,
+,,72,Fac low1 time,Grid frequency low limit protect time 1,W,,Cycle,,,,,,,,,
+,,73,Fac high1 time,Grid frequency high limit protect time 1,W,,Cycle,,,,,,,,,
+,,74,Fac low2 time,Grid frequency low limit protect time 2,W,,Cycle,,,,,,,,,
+,,75,Fac high2 time,Grid frequency high limit protect time 2,W,,Cycle,,,,,,,,,
+,,76,Vac low3 time,Grid voltage low limit protect time 3,W,,Cycle,,,,,,,,,
+,,77,Vac high3 time,Grid voltage high limit protect time 3,W,,Cycle,,,,,,,,,
+,,78,Fac low3 time,Grid frequency low limit protect time 3,W,,Cycle,,,,,,,,,
+,,79,Fac high3 time,Grid frequency high limit protect time 3,W,,Cycle,,,,,,,,,
+,,80,U10min,Volt protection for 10 min,W,,0.1V,1.1Vn,,,,,,,,
+,,81,PV Voltage High Fault,PV Voltage High Fault,W,,0.1V,,,,,,,,,
+,,82,FW Build No_ 5,Model letter version number (TJ),,,ASCII,,,,,,,,,
+,,83,FW Build No_ 4,Model letter version number (AA),,,ASCII,,,,,,,,,
+,,84,FW Build No_ 3,DSP1 FW Build No.,,,ASCII,,,,,,,,,
+,,85,FW Build No_ 2,DSP2/M0 FW Build No.,,,ASCII,,,,,,,,,
+,,86,FW Build No_ 1,CPLD/AFCI FW Build No.,,,ASCII,,,,,,,,,
+,,87,FW Build No_ 0,M3 FW Build No.,,,ASCII,,,,,,,,,
+,,88,ModbusVers ion,Modbus Version,,Eg:207 is V2.07,Int(16 bits),,,,,,,,,
+,,89,PFModel,Set PF function Model 0: PF=1 1: PF by set 2: default PF line 3: User PF line 4: UnderExcited (Inda) Reactive Power 5: OverExcited(Capa) Reactive Power 6:Q(v)model 7:Direct Control mode,W,,,,,,,,,,,
+,,90,GPRS IP Flag,Bit0-3:read:1;Set GPRS IP Successed Write:2;Read GPRS IP Successed Bit4-7:GPRS status,W,Bit0-3:ab out GPRS IP SET Bit4-7:ab out GRPRS Status,,,,,,,,,,
+,,91,FreqDerateS tart,Frequency derating start point,W,,0.01H Z,,,,,,,,,
+,,92,FLrate,Frequency - load limit rate,W,0-100,10tim es,,,,,,,,,
+,,93,V1S,CEI021 V1S Q(v),W,V1S<V2S,0.1V,,,,,,,,,
+,,94,V2S,CEI021 V2S Q(v),W,,0.1V,,,,,,,,,
+,,95,V1L,CEI021 V1L Q(v),W,V1L<V1S,0.1V,,,,,,,,,
+,,96,V2L,CEI021 V2L Q(v),W,V2L<V1L,0.1V,,,,,,,,,
+,,97,Qlockinpow er,Q(v) lock in active power of CEI021,W,0-100,Percen t,,,,,,,,,
+,,98,QlockOutpo wer,Q(v) lock Out active power of CEI021,W,0-100,Percen t,,,,,,,,,
+,,99,LIGridV,Lock in gird volt of CEI021 PF line,W,nVn,0.1V,,,,,,,,,
+,,100,LOGridV,Lock out gird volt of CEI021 PF line,W,nVn,0.1V,,,,,,,,,
+,,101,PFAdj1,PF adjust value 1,,4096 is 1,,,,,,,,,,
+,,102,PFAdj2,PF adjust value 2,,4096 is 1,,,,,,,,,,
+,,103,PFAdj3,PF adjust value 3,,4096 is 1,,,,,,,,,,
+,,104,PFAdj4,PF adjust value 4,,4096 is 1,,,,,,,,,,
+,,105,PFAdj5,PF adjust value 5,,4096 is 1,,,,,,,,,,
+,,106,PFAdj6,PF adjust value 6,,4096 is 1,,,,,,,,,,
+,,107,QVRPDelayTi meEE,QV Reactive Power delaytime,W,0-30,1S,3S,,,,,,,,
+,,108,OverFDeratD elayTimeEE,Overfrequency derati ngdelaytime,W,0-20,50ms,0,,,,,,,,
+,,109,QpercentMa x,Qmax for Q(V) curve,W,0-1000,0.10%,,,,,,,,,
+,,110,PFLineP1_LP,PF limit line point 1 load percent,W,0-255,percen t,,255 means no this point,,,,,,,
+,,111,PFLineP1_PF,PF limit line point 1 power factor,W,0-20000,,,,,,,,,,
+,,112,PFLineP2_LP,PF limit line point 2 load percent,W,0-255,percen t,,255 means no this point,,,,,,,
+,,113,PFLineP2_PF,PF limit line point 2power factor,W,0-20000,,,,,,,,,,
+,,114,PFLineP3_LP,PF limit line point 3 load percent,W,0-255,percen t,,255 means no this point,,,,,,,
+,,115,PFLineP3_PF,PF limit line point 3 power factor,W,0-20000,,,,,,,,,,
+,,116,PFLineP4_LP,PF limit line point 4 load percent,W,0-255,percen t,,255 means no this point,,,,,,,
+,,117,PFLineP4_PF,PF limit line point 4 power factor,W,0-20000,,,,,,,,,,
+,,118,Module 4,Inverter Module (4),,&*11,,,SxxBxx,,,,,,,
+,,119,Module 3,Inverter Module (3),,&*11,,,DxxTxx,,,,,,,
+,,120,Module 2,Inverter Module (2),,&*11,,,PxxUxx,,,,,,,
+,,121,Module 1,Inverter Module (1),,&*11,,,Mxxxx Power,,,,,,,
+,,122,ExportLimit_ En_dis,ExportLimit_En/dis,R/W,01/01/00,,,"ExportLimit enable, 0: Disable exportLimit; 1: Enable 485 exportLimit; 2: Enable 232 exportLimit; 3: Enable CT exportLimit;",,,,,,,
+,,123,ExportLimitP owerRate,ExportLimitPowerRate,R/W,-1000~+1 000,0.10%,,ExportLimit PowerRate,,,,,,,
+,,124,TrakerModel,Traker Model,W,0,1,2,,,,,0:Independent 1:DC Source 2:Parallel,,,
+,,125,INV Type_1,Inverter type-1,R,,ASCII,,Reserved,,,,,,,
+,,126,INV Type_2,Inverter type-2,R,,ASCII,,,,,,,,,
+,,127,INV Type_3,Inverter type-3,R,,ASCII,,,,,,,,,
+,,128,INV Type_4,Inverter type-4,R,,ASCII,,,,,,,,,
+,,129,INV Type_5,Inverter type-5,R,,ASCII,,,,,,,,,
+,,130,INV Type_6,Inverter type-6,R,,ASCII,,,,,,,,,
+,,131,INV Type_7,Inverter type-7,R,,ASCII,,,,,,,,,
+,,132,INV Type_8,Inverter type-8,R,,ASCII,,,,,,,,,
+,,133,BLVersion1,Boot loader version1,R,,,,Reserved,,,,,,,
+,,134,BLVersion2,Boot loader version2,R,,,,Reserved,,,,,,,
+,,135,BLVersion3,Boot loader version3,R,,,,Reserved,,,,,,,
+,,136,BLVersion4,Boot loader version4,R,,,,Reserved,,,,,,,
+,,137,Reactive P ValueH,Reactive PowerH,R/W,,0.1var,,,,,,,,,
+,,138,Reactive P ValueL,Reactive PowerL,R/W,,0.1var,,,,,,,,,
+,,139,ReactiveOut putPriorityE nable,ReactiveOutput Priority Enable,R/W,,0/1,,0:disable 1:enable,,,,,,,
+,,140,Reactive P Value_Ratio_,Reactive Power Ratio,R/W,,0.1,,,,,,,,,
+,,141,SvgFunction Enable,Svg enable on night,R/W,,0/1,,0:disable 1:enable,,,,,,,
+,,142,uwUnderFU ploadPoint,UnderF Upload Point,R/W,,0.01H Z,,,,,,,,,
+,,143,uwOFDerate RecoverPoin t,OFDerate RecoverPoint,R/W,,0.01H Z,,,,,,,,,
+,,144,uwOFDerate RecoverDela yTime,OFDerate RecoverDelayTime,R/W,0-30000,50ms,,,,,,,,,
+,,145,ZeroCurrent Enable,ZeroCurrent Enable,R/W,0-1,,,,,,,,,,
+,,146,uwZeroCurre ntStaticlowV olt,ZeroCurrent StaticlowVolt,R/W,46-230V,0.1V,115V,,,,,,,,
+,,147,uwZeroCurre ntStaticHigh Volt,ZeroCurrent StaticHighVolt,R/W,230-276V,0.1V,276V,,,,,,,,
+,,148,uwHVoltDerateHighPoint,HVoltDerate HighPoint,R/W,0-1000V,0.1V,,,,,,,,,
+,,149,uwHVoltDer ateLowPoint,HVoltDerate LowPoint,R/W,0-1000V,0.1V,,,,,,,,,
+,,150,uwQVPower StableTime,QVPower Stable Time,R/W,0-60S,0.1S,,,,,,,,,
+,,151,uwUnderFU ploadStopPo int,UnderF Upload StopPoint,R/W,,0.01H Z,,,,,,,,,
+,,152,fUnderFreqP oint,Underfrequency load start point,R/W,46.00-50. 00,0.01Hz,49.8,CEI,,,,,,,
+,,153,fUnderFreqE ndPoint,Underfrequency down load end point,R/W,46.00-50. 00,0.01Hz,49.1,CEI,,,,,,,
+,,154,fOverFreqPo int,Over frequency loading start point,R/W,50.00-52. 00,0.01Hz,50.2,CEI,,,,,,,
+,,155,fOverFreqEn dPoint,Over frequency loading end point,R/W,50.00-52. 00,0.01Hz,51.5,CEI,,,,,,,
+,,156,fUnderVoltP oint,Undervoltage load shedding start point,R/W,160-300,0.1V,220,CEI,,,,,,,
+,,157,fUnderVoltE ndPoint,Undervoltage derating end point,R/W,160-300,0.1V,207,CEI,,,,,,,
+,,158,fOverVoltPoi nt,Overvoltage loading start point,R/W,160-300,0.1V,230,CEI,,,,,,,
+,,159,fOverVoltEn dPoint,Overvoltage loading end point,R/W,160-300,0.1V,245,CEI,,,,,,,
+,,160,uwNominal GridVolt,NominalGridVolt Select,R/W,0~3,,,UL,,,,,,,
+,,161,uwGridWatt Delay,GridWatt DelayTime,R/W,0~3000,20ms,,UL,,,,,,,
+,,162,uwReconnec tStartSlope,Reconnect StartSlope,R/W,1~1000,0.1,,UL,,,,,,,
+,,163,uwLFRTEE,LFRT1 Freq,R/W,5500~650 0,0.01Hz,,UL,,,,,,,
+,,164,uwLFRTTime EE,LFRT1 Time,R/W,,20ms,,UL,,,,,,,
+,,165,uwLFRT2EE,LFRT2 Freq,R/W,5500~650 0,0.01Hz,,UL,,,,,,,
+,,166,uwLFRTTime 2EE,LFRT2 Time,R/W,,20ms,,UL,,,,,,,
+,,167,uwHFRTEE,HFRT1 Freq,R/W,5500~650 0,0.01Hz,,UL,,,,,,,
+,,168,uwHFRTTim eEE,HFRT1 Time,R/W,,20ms,,UL,,,,,,,
+,,169,uwHFRT2EE,HFRT2 Freq,R/W,5500~650 0,0.01Hz,,UL,,,,,,,
+,,170,uwHFRTTim e2EE,HFRT2 Time,R/W,,20ms,,UL,,,,,,,
+,,171,uwHVRTEE,HVRT1 Volt,R/W,,0.001 Un,,UL,,,,,,,
+,,172,uwHVRTTim eEE,HVRT1 Time,R/W,,20ms,,UL,,,,,,,
+,,173,uwHVRT2EE,HVRT2 Volt,R/W,,0.001 Un,,UL,,,,,,,
+,,174,uwHVRTTim e2EE,HVRT2 Time,R/W,,0.001 Un,,UL,,,,,,,
+,,175,uwUnderFU ploadDelayTi me,UnderF UploadDelayTime,R/W,0-2s,50ms,0s,50549,,,,,,,
+,,176,uwUnderFU ploadRateEE,UnderF UploadRate,R/W,,,,50549,,,,,,,
+,,177,uwGridResta rt_H_Freq,GridRestart HighFreq,R/W,,0.01Hz,,50549,,,,,,,
+,,178,OverFDeratR esponseTim e,OverFDerat ResponseTime,W/R,0-500,,,,,,,,,,
+,,179,UnderFUplo adResponse Time,UnderFUpload ResponseTime,W/R,0-500,,,,,,,,,,
+,,180,MeterLink,Whether to elect the meter,R/W,,,,0: Missed, 1: Received,,,,,,
+,,181,OPT Number,Number of connection optimizers,R/W,0-64,,,The total number of optimizers connected to the inverter,,,,,,,
+,,182,OPT ConfigOK Flag,Optimizer configuration completion flag,R/W,,,,0x00:Not configured success 0x01:Configuration is complete,,,,,,,
+,,183,PvStrScan,String Num,R/W,0?8?16? 32,,,0:Not support Other:PvString Num,,,,,,,
+,,184,BDCLinkNum,BDC parallel Num,R/W,,,,The number of BDCs connected to the current machine Default is 0,,,,,,,
+,,185,PackNum,Number of battery modules,R,,,,Total number of battery modules currently associated with all BDCs,,,,,,,
+,,186,Reserved,,,,,,,,,,,,,
+,,187,VPP function enable status,VPP function enable status,R,,,,0:Disable 1:Enable,,,,,,,
+,,188,dataLog Connect Server status,dataLog Connect Server status,,,,,0:connection succeeded 1:Connection failed,,,,,,,
+,,201,PID Working Model,PID Operating mode,W,0: automati c 1: continuo us 2: All night,,,,,,,,,,
+,,202,PID On_Off Ctrl,PID Break control,W,0:On 1:Off,,,,,,,,,,
+,,203,PID Volt Option,PID Output voltage option,W,300~1000,V,,,,,,,,,
+,,209,New Serial NO,Serial number 1-2,,,ASCII,,,,,,,,,
+,,210,New Serial NO,Serial number 3-4,,,ASCII,,,,,,,,,
+,,211,New Serial NO,Serial number 5-6,,,ASCII,,,,,,,,,
+,,212,New Serial NO,Serial number 7-8,,,ASCII,,,,,,,,,
+,,213,New Serial NO,Serial number 9-10,,,ASCII,,,,,,,,,
+,,214,New Serial NO,Serial number 11-12,,,ASCII,,,,,,,,,
+,,215,New Serial NO,Serial number 13-14,,,ASCII,,,,,,,,,
+,,216,New Serial,Serial number 15-16,,,ASCII,,,,,,,,,
+,,217,New Serial,Serial number 17-18,,,ASCII,,,,,,,,,
+,,218,New Serial,Serial number 19-20,,,ASCII,,,,,,,,,
+,,219,New Serial,Serial number 21-22,,,ASCII,,,,,,,,,
+,,220,New Serial,Serial number 23-24,,,ASCII,,,,,,,,,
+,,221,New Serial,Serial number 25-26,,,ASCII,,,,,,,,,
+,,222,New Serial,Serial number 27-28,,,ASCII,,,,,,,,,
+,,223,New Serial,Serial number 29-30,,,ASCII,,,,,,,,,
+,,229,EnergyAdjust,Power generation incremental calibration coefficient,W/R,,0.10%,,1-1000,(Percent ratio),,,,,,
+,,230,IslandDisable,Island Disable or not. 1:disable 0:Enable,W,0,1,,,0,,,,,,
+,,231,FanCheck,Start Fan Check,W,1,,,,,,,,,,
+,,232,EnableNLine,Enable N Line of grid,W,1,,0,,,,,,,,
+,,233,wCheckHard ware,wCheckHardware Bit0: GFCIBreak; Bit1:SPSDamage Bit8:EepromReadWarni ng Bit9:EEWriteWarning ??,,,,,,,,,,,,
+,,234,wCheckHard ware2,,,,,,reserved,,,,,,,
+,,235,ubNToGNDD etect,Dis/enable N to GND detect function,W,1:enable 0:disable,,1,,,,,,,,
+,,236,NonStdVacE nable,Enable/Disable Nonstandard Grid voltage range,W,0-2,,0,0:Disable; 1:Enable Voltgrade1 2:Enable Voltgrade2,,,,,,,
+,,237,uwEnableSp ecSet,Disablse/enable appointed spec setting,W,1:enable 0:disable,Binary,0x000 0,Bit 0: Hungary,,,,,,,
+,,238,Fast MPPT enable,About Fast mppt,,0,1,2,,,,0,Reserved,,,
+,,240,Check Step,,W,,,,,,,,,,,
+,,241,INV_Lng,Inverter Longitude,W,,,,Longitude,,,,,,,
+,,242,INV_Lat,Inverter Latitude,W,,,,Latitude,,,,,,,
+,,304,uwAntiBackf lowFailPowe rLimitEE,Anti-backflow failure power percentage,R/W,0-1000,0.10%,,Anti-backflow failure default setting power percentage,,,,,,,
+,,305,Qloadspeed,Reactive loading speed,R/W,0-100,1.00%,,Reactive power adjustment speed setting item, n%Pn/s, 0 means that the loading speed is not enabled, that is, it is directly loaded to the set value,,,
+,,306,bParallelAnti BackflowEna ble,ParallelAnti-Backflow Enable,R/W,0-1,,,Parallel anti-Backflow open enable bit 1: enable 0:disable,,,,,,,
+,,307,uwAntiBackf lowFailureRe sponseTime,AntiBackflowFailure ResponseTime,R/W,01/01/00,1s,,AntiBackflow Failure Response Time,,,,,,,
+,,308,uwParallelAn tiBackflowPo werLimitEE,ParallelAntiBackflowPo wer,R/W,0-1000,0.10%,,Parallel AntiBackflow Power limit value setting,,,,,,,
+,,309,bISOCheckC md,ISO detection command,R/W,0-1,1,,ISO detection command,,,,,,,
+,,310,bGPRSStatus,GPRS Status 1: module not working 2: no sim card 3: No internet 4. TCP not connecting to server 5. TCP connection succeeded,R/W,0-255,1,,,,,,,,,
+,,311,uwQmax_In ductive,The inductive Qmax of the Q(V) curve,R/W,0-1000,0.10%,,,,,,,,,
+,,312,uwQmax_Capactive,The Capactive Qmax of the Q(V) curve,R/W,0-1000,0.10%,,,,,,,,,
+,,313,uwReactiveP owerAdjustF ailureRespon seTime,ReactivePowerAdjust Failur ResponseTime,R/W,0-5000,S,,,,,,,,,
+,,314,bSuperAntiB ackflowEnab le,SuperAntiBackflow Enable,R/W,,,,0:disable,1:enable,,,,,,
+,,315,uwReactiveP owerStableT ime,ReactivePowerStableTi me,R/W,0-200,S,,,,,,,,,
+,,316,uwQpStable Time,QpStableTime,R/W,0-200,S,,,,,,,,,
+,,317,uwPuDerate Time,PuDerateTime,R/W,0-200,S,,,,,,,,,
+,,318,uwQVModel Q2Point,QV mode Q2 set point reactive power percentage,R/W,0-2000,0.10%,,Capacitive 30% ( The corresponding setting is 700); Inductive 30% (The corresponding setting is 1300); used for IEE1547,,,,,,,
+,,319,uwQVModel Q3Point,QV mode Q3 set point reactive power percentage,R/W,0-2000,,,,,,0.10%,,,,
+,,320,bVrefModel Enable,VrefModelEnable,R/W,0 : Vref mode for QV curve is not active 1 : Vref mode for QV curve is active,,,"When the Vref mode is not activated, the V1~V4 and Q1~Q4 upper computer of the QV curve can be adjusted; When Vref mode is activated, V1~V4 of the QV curve are determined with Vref and cannot be changed, and Q1~Q4 can be modified by the host computer .used for IEE1547",,,,,,,
+,,321,uwVrefMod elFilterTime,VrefModelFilterTime,R/W,0-5000,S,,Activate Vref mode, the output filter value is equal to Vref with in the set time .used for IEE1547,,,,,,
+,,322,uwUserQPM odeP1Krate,Active power P1 set point percentage for QP mode,R/W,0-1000,0.10%,,used for IEE1547,,,,,,,
+,,323,uwUserQPM odeP2Krate,Active power P2 set point percentage for QP mode,R/W,0-1000,0.10%,,used for IEE1547,,,,,,,
+,,324,uwUserQPM odeP3Krate,Active power P3 set point percentage for QP mode,R/W,0-1000,0.10%,,used for IEE1547,,,,,,,
+,,325,uwUserQPM odeQ1Krate,Reactive power Q1 set point percentage for QP mode,R/W,-1000-10 00,0.10%,,-1000~1000:Inductive(100%) ~ Capacitive(100%),,,,,,,
+,,326,uwUserQPM odeQ2Krate,Reactive power Q2 set point percentage for QP mode,R/W,-1000-10 00,0.10%,,-1000~1000:Inductive(100%) ~ Capacitive(100%),,,,,,,
+,,327,uwUserQPM odeQ3Krate,Reactive power Q3 set point percentage for QP mode,R/W,-1000-10 00,0.10%,,-1000~1000:Inductive(100%) ~ Capacitive(100%),,,,,,,
+,,328,uwAcVoltHig hDeratPowe rLimit,AcVoltHighDeratPower Limit,R/W,0-1000,0.10%,,,,,,,,,
+,,329,BackflowSin gleCtrl,BackflowSingleCtrl,R/W,0: disable 1: enable,,,,,,,,,,
+,,330,bAntiBackflo wProtectMo de,AntiBackflowProtectM ode,R/W,0-3,,,Used for Australian,,,,,,,
+,,331,uwUnderFU ploadZeroPo werPoint,UnderfreqUploadZeroP owerPoint,W,,0.01H Z,,,,,,,,,
+,,332,FreqDerateZ eroPowerPoi nt,FreqDerateZeroPowerP oint,W,,0.01H Z,,,,,,,,,
+,,333,bFreqDerati ngStopMode Enable,FreqDeratingStopMode Enable,R/W,0-1,,,,,,,,,,
+,,334,bFreqIncreas ingEnable,FreqIncreasingEnable,R/W,0-1,,,,,,,,,,
+,,335,uwFreqIncre asingRecove rTime,FreqIncreasingRecover Time,R/W,,50ms,,,,,,,,,
+,,336,uwFreqIncre asingEndLow Point,FreqIncreasingEndLow Point,R/W,,0.01H Z,,,,,,,,,
+,,337,bFreqIncreas ingStopMod eEnable,FreqIncreasingStopMo deEnable,R/W,0-1,,,,,,,,,,
+,,338,uwUserQpC hrP1Krate,User QP function,R/W,0-1000,0.10%,,,,,,,,,
+,,339,uwUserQpC hrP2Krate,User QP function,R/W,0-1000,0.10%,,,,,,,,,
+,,340,uwUserQpC hrP3Krate,User QP function,R/W,0-1000,0.10%,,,,,,,,,
+,,341,wUserQpChr Q1Krate,User QP function,R/W,-1000-10 00,0.10%,,,-1000~1000:Inductive(100%) ~ Capacitive(100%),,,,,,
+,,342,wUserQpChr Q2Krate,User QP function,R/W,-1000-10 00,0.10%,,,-1000~1000:Inductive(100%) ~ Capacitive(100%),,,,,,
+,,343,wUserQpChr Q3Krate,User QP function,R/W,-1000-10 00,0.10%,,,-1000~1000:Inductive(100%) ~ Capacitive(100%),,,,,,
+,,344,uwFreqDerat ingRecoverL owPoint,FreqDeratingRecoverLo wPoint,R/W,,0.01H Z,,,,,,,,,
+,,345,uwFreqIncre asingRecove rHighPoint,FreqIncreasingRecover HighPoint,R/W,,0.01H Z,,,,,,,,,
+,,336,uwFreqIncre asingEndLow Point,FreqIncreasingEndLow Point ,R/W ,,0.01H Z,,,,,,,,,
+,,337,bFreqIncreas ingStopMod Eenable,FreqIncreasingStopMo deEnable ,R/W ,0-1 ,,,,,,,,,,
+,,338,uwUserQpC HrP1Krate,User QP function, charge P1 set point Percentage,R/W ,0-1000 ,0.10%,,,,,,,,
+,,339,uwUserQpC HrP2Krate,User QP function, charge P2 set point Percentage,R/W ,0-1000 ,0.10%,,,,,,,,
+,,340,uwUserQpC HrP3Krate,User QP function, charge P3 set point Percentage,R/W ,0-1000 ,0.10%,,,,,,,,
+,,341,wUserQpChr Q1Krate,User QP function, charge Q1 set point Percentage,R/W ,-1000-10 00,0.10%,-1000~1000:Inductive(100%)~ Capacitive(100%),,,,,,,
+,,342,wUserQpChr Q2Krate,User QP function, charge Q2 set point Percentage,R/W ,-1000-10 00,0.10%,,,,,,,,
+,,343,wUserQpChr Q3Krate,User QP function, charge Q3 set point percentage ,R/W ,-1000-10 00,0.10%,,,,,,,,
+,,344,uwFreqDerat ingRecoverL OwPoint,FreqDeratingRecoverLo Wpoint,R/W ,,0.01Hz,,,,,,,,,
+,,345,uwFreqIncre asingRecove rHighPoint ,FreqIncreasingRecover HighPoint,R/W ,,0.01Hz,,,,,,,,,
+,,532,TurnOffUnlo adSpeed,TurnOffUnloadSpeed,W/R,0-1000,0.10%,,"0 means not enabled, that is, the function is not enabled; 1-1000 means n%Pn/min",,,,,,,
+,,533,LimitDevice,Anti-backflow equipment selection,W/R,0-3,,,1:Meter 3:CT,,,,,,,
+,,534,PowerSetOn DCSourceMo de,Power settings in dc source mode,W/R,0-90000,,,The unit is W,,,,,,,
+,,535,OUFreqGrad e1En, Over-under-frequencyGrade1Enable, currently only used by CEI0-21,W/R,0-1,,,0:disable 1:enable,,,,,,
+,,536,Country Set,Country settings under the same safety regulations,W/R,0-200,,,For mobile APP use only,,,,,,,
+,,538,InterlockEna ble,Three-machine communication Interlock function mode,W/R,0-2,,,0:disable 1: Slave Enable 2. host enable,,,,,,,
+,,539,OvTemperDe ratePoint,Over temperature derate point,W/R,,,,,,,,,,,
+,,540,SafetySetPas sword,Switch between different safety regulations to set the password,W/R,,,,,,,,,,,
+,,541,AFCI Onoff,AFCI Onoff,W/R,0xA0/0xA 5,,,0xA0:AFCI off 0xA5:AFCI on,,,,,,,
+,,542,AfciSelfChec k,AfciSelfCheck,W/R,,,,0:No self check 1: self check,,,,,,,
+,,543,AfciReset,AfciReset,W/R,,,,0:Not Reset 1: Reset,,,,,,,
+,,544,AFCIValue1,AFCIThresholdValue (low),W/R,0-65000,,,,,,,,,,
+,,545,AFCIValue2,AFCIThresholdValue (middle),W/R,0-65000,,,,,,,,,,
+,,546,AFCIValue3,AFCIThresholdValue (High),W/R,0-65000,,,,,,,,,,
+,,547,OverThresho ldValueMaxC nt,OverThresholdValueMa xCnt,W/R,0-255,,,,,,,,,,
+,,548,AFCIScanTyp eEnable,AFCI curve scan type,W/R,1~4,,,1:A road strength,,,,,,,
+,,549,PowerVoltSt opModeEn,PowerVoltStopModeEn,W/R,0?1,,,0:disable 1:enable The power is restoredwhenthe voltage is less thantherecovery point,,,,,,,
+,,550,VoltWattRec overTime,Voltage active power recovery time,W/R,0-15000,20ms,,,,,,,,,
+,,551,HvoltDerateStopPower,Voltage active cut-off power,W/R,-16400,,,,,,,,,,
+,,552,QVTimeExpo nent,QVTimeExponent,WR,01/01/55,,,Q varies exponentially with time,,,,,,,
+,,553,Volt_Watt Watt1,Voltage active V1 point,WR,0-11400,,,,,,,,,,
+,,554,Volt_Watt Watt2,Voltage active V2 point,WR,0-11400,,,,,,,,,,
+,,600,Volt_Var Var1,Voltage reactive V1 point,WR,0-1000,,,,0%~100.0%,US latest safety regulations,,,,,
+,,601,Volt_Var Var2,Voltage reactive V2 point,WR,0-1000,,,,0%~100.0%,US latest safety regulations,,,,,
+,,602,Volt_Var Var3,Voltage reactive V3 point,WR,0-1000,,,,0%~100.0%,US latest safety regulations,,,,,
+,,603,Volt_Var Var4,Voltage reactive V4 point,WR,0-1000,,,,0%~100.0%,US latest safety regulations,,,,,
+,,605,OPModEner gize,Allowed inverter output power,R/W,0/1,,,0: output power not allowed 1: allowable output power For US models,,,,,,,
+,,608,OneKeySetB DCMode,One key to set battery mode function,R/W,,,,0: self-use 1: battery priority 2: Grid priority 255:Disable Currently used for US models,,,,,,,
+,,609,PowerOutpu tEnable,Zero Power Output Enable,,,,,0:Zero Power Output 1:Unlimited output power(default is 1),,,,,,,
+,,610,DealDebugP araFlag,Flag bit for clearing debug variables,,,,,Currently only bit0 and bit1 are used bit0 is used to manually clear the Debug data uploaded to the server bit1 is used to manually clear the fault codes that need to be powered off to clear,,,,,,,
+,,612,bAcCoupleE n,AcCoupleEn,R/W,0-1,,,0:disable 1:enable,,,,,,,
+,,660,ReloadCmd,M3 remote command,,,,,0xA0: Initialize safety defaults 0xAA: Reboot M3 remotely,,,,,,,
+,,1000,Float charge current limit,When charge current battery need is lower than this value,W,,0.1A,,600,CC current,,,,,,
+,,1001,PF CMD memory state,Set the following 19-22 CMD will be memory ornot(1/0) these settings are the initial value.,W,0or1,,,,,0,Means these settings will be acting or not when next power on(02 repeat),,,,
+,,1002,VbatStartF orDischarg e,LV Vbat,R/W,,0.1V,,Lead-acid battery LV voltage,,,,,,,
+,,1003,VbatlowWa rnClr,LoadPercent(only lead-Acid): 45.5V <20% 48.0V 20%~50% 49.0V >50,W,,0.1V,,Clear battery low voltage error voltage point,,,,,,,
+,,1004,Vbatstopfo rdischarge,Should stop discharge when lower than this voltage(only lead-Acid): 46.0V <20% 44.8V 20%~50% 44.2V >50%,W,,0.01V,,,,,,,,,
+,,1005,Vbat stop for charge,Should stop charge when higher than this voltage,W,,0.01V,5800,,,,,,,,
+,,1006,Vbat start for discharge,Should not discharge when lower than this voltage,W,,0.01V,4800,,,,,,,,
+,,1007,Vbat constant charge,can charge when lower than this voltage,W,,0.01V,5800,CV voltage(acid),,,,,,,
+,,1008,EESysInfo_S ysSetEn,"Bit0:Resved; Bit1:Resved; Bit2:Resved; Bit3:Resved; Bit4:Resved; Bit5:bDischargeEn; Bit6:ForceDischrEn; Bit7:ChargeEn; Bit8:bForceChrEn; Bit9:bBackUpEn; Bit10:bInvLimitLoadE; Bit11:bSpLimitLoadEn; Bit12:bACChargeEn; Bit13:bPVLoadLimitEn; Bit14,15:UnUsed;",W,,,,System Enable,,,,,,,
+,,1009,Battemp lower limit d,Battery temperature lower limit for discharge,W,0-200:0-2 0? 1000-140 0:-40-0?,0.1?,1170,,,,,,,,
+,,1010,Bat temp upper limit d,Battery temperature upper limit for discharge,W,200-1000,0.1?,420,,,,,,,,
+,,1011,Bat temp lower limit c,Battery temperature lower limit for charge,W,0-200:0-2 0? 1000-140 0:-40-0?,0.1?,30,Lower temperature limit,,,,,,,
+,,1012,Bat temp upper limit c,Battery temperature upper limit for charge,W,200-1000,0.1?,370,Upper temperature limit,,,,,,,
+,,1013,uwUnderFr eDischarge DelyTime,Under Fre Delay Time,s,0-20,50ms,,Under Fre Delay Time,,,,,,,
+,,1014,BatMdlSeri alNum,Battery serial number,W,12:00:00 AM,,,SPH4-11K used,,,,,,,
+,,1015,BatMdlPara llNum,Battery parallel section,W,12:00:00 AM,,,SPH4-11K used,,,,,,,
+,,1016,DRMS_EN,/,/,/,/,/,0:disable 1:enable,,,,,,,
+,,1017,Bat First Start Time 4,High eight:hours Low eight: minutes,,0-23 0-59,,,,,,,,,,
+,,1018,Bat First Stop Time 4,High eight:hours Low eight: minutes,,0-23 0-59,,,,,,,,,,
+,,1019,BatFirst on_off Switch 4,Enable:1 Disable:0,,0 or 1,,,Battery priority enable 1,,,,,,,
+,,1020,Bat First Start Time 5,High eight:hours Low eight: minutes,,0-23 0-59,,,,,,,,,,
+,,1021,Bat First Stop Time 5,High eight:hours Low eight: minutes,,0-23 0-59,,,,,,,,,,
+,,1022,BatFirst on_off Switch 5,Enable:1 Disable:0,,0 or 1,,,Battery priority enable 1,,,,,,,
+,,1023,Bat First Start Time 6,High eight:hours Low eight: minutes,,0-23 0-59,,,,,,,,,,
+,,1024,Bat First Stop Time 6,High eight:hours Low eight: minutes,,0-23 0-59,,,,,,,,,,
+,,1025,BatFirst on_off Switch 6,Enable:1 Disable:0,,0 or 1,,,Battery priority enable 1,,,,,,,
+,,1026,Grid First Start Time 4,High eight:hours Low eight: minutes,,0-23 0-59,,,,,,,,,,
+,,1027,Grid First Stop Time 4,High eight:hours Low eight: minutes,,0-23 0-59,,,,,,,,,,
+,,1028,Grid First Stop Switch 4,Enable:1 Disable:0,,0 or 1,,,Grid priority enable,,,,,,,
+,,1029,Grid First Start Time 5,High eight:hours Low eight: minutes,,0-23 0-59,,,,,,,,,,
+,,1030,Grid First Stop Time 5,High eight:hours Low eight: minutes,,0-23 0-59,,,,,,,,,,
+,,1031,Grid First Stop Switch 5,Enable:1 Disable:0,,0 or 1,,,Grid priority enable,,,,,,,
+,,1032,Grid First Start Time 6,High eight:hours Low eight: minutes,,0-23 0-59,,,,,,,,,,
+,,1033,Grid First Stop Time 6,High eight:hours Low eight: minutes,,0-23 0-59,,,,,,,,,,
+,,1034,Grid First Stop Switch 6,Enable:1 Disable:0,,0 or 1,,,Grid priority enable,,,,,,,
+,,1035,Bat First Start Time 4,High eight:hours Low eight: minutes,,0-23 0-59,,,,,,,,,,
+,,1037,bCTMode,Use the CTMode to Choose RFCT \ Cable CT\METER,W,2:METER 1:cWirele ssCT 0:cWiredC T,,0,,,,,,,,
+,,1038,CTAdjust,CTAdjust enable,W,0:disable 1:enable,,0,,,,,,,,
+,,1044,Priority,ForceChrEn/ForceDischr En Load first/bat first /grid first,R,0.Load(de fault)/1.B attery/2.G rid,,,bForceChrEn/disbForceDischrE n/dis,,,,,,,
+,,1047,AgingTestSt ep Cmd,Command for aging test,,0: default 1: charge 2: discharge,,,Cmd for aging test,,,,,,,
+,,1048,BatteryTyp e,Battery type choose of buck-boost input,,0:Lithium 1:Lead-aci d 2:other,,0,Battery type,,,,,,,
+,,1060,BuckUpsFunE n,Ups function enable or disable,,0:disable 1:enable,,,,,,,,,,
+,,1061,BuckUPSVoltSet,UPS output voltage,,0:230 1:208 2:240,,230V,,,,,,,,
+,,1062,UPSFreqSet,UPS output frequency,,0:50Hz 1:60Hz,,50Hz,,,,,,,,
+,,1070,GridFirstDisch argePowerRat e,Discharge Power Rate when Grid First,W,0-100,1.00%,,Discharge Power Rate when Grid First,,,,,,,
+,,1071,GridFirstStopS OC,Stop Discharge soc when Grid First,W,0-100,1.00%,,Stop Discharge soc when Grid First,,,,,,,
+,,1080,Grid First Start Time 1,High eight bit:hour Low eight bit:minute,,0-23 0-59,,,,,,,,,,
+,,1081,Grid First Stop Time 1,High eight bit:hour Low eight bit:minute,,0-23 0-59,,,,,,,,,,
+,,1082,Grid First Stop Switch 1,Enable :1 Disable:0,,0 or 1,,,Grid First enable,,,,,,,
+,,1083,Grid First Start Time 2,High eight bit:hour Low eight bit:minute,,0-23 0-59,,,,,,,,,,
+,,1084,Grid First Stop Time 2,High eight bit:hour Low eight bit:minute,,0-23 0-59,,,,,,,,,,
+,,1085,Grid First Stop Switch 2,ForceDischarge.bSwitch&L CD_SET_FORCE_TRUE_2)= =LCD_SET_FORCE_TRUE_2,,0 or 1,,,Grid First enable,,ForceDischarge; LCD_SET_FORCE_T RUE_2,,,,,
+,,1086,Grid First Start Time 3,High eight bit:hour Low eight bit:minute,,0-23 0-59,,,,,,,,,,
+,,1087,Grid First Stop Time 3,High eight bit:hour Low eight bit:minute,,0-23 0-59,,,,,,,,,,
+,,1088,Grid First Stop Switch 3,Enable :1 Disable:0,,0 or 1,,,Grid First enable,,,,,,,
+,,1090,BatFirstPower Rate,Charge Power Rate when Bat First,W,0-100,1.00%,,Charge Power Rate when Bat First,,,,,,,
+,,1091,wBatFirst stop SOC,Stop Charge soc when Bat First,W,0-100,1.00%,,Stop Charge soc when Bat First,,,,,,,
+,,1092,AC charge Switch,When Bat First Enable:1 Disable:0,,Enable:1 Disable:0,,,AC Charge Enable,,,,,,,
+,,1100,Bat First Start Time 1,High eight bit:hour Low eight bit:minute,,0-23 0-59,,,,,,,,,,
+,,1101,Bat First Stop Time 1,High eight bit:hour Low eight bit:minute,,0-23 0-59,,,,,,,,,,
+,,1102,BatFirst on_off Switch 1,Enable :1 Disable:0,,0 or 1,,,Bat First Enable1,,,,,,,
+,,1103,Bat First Start Time 2,High eight bit:hour Low eight bit:minute,,0-23 0-59,,,,,,,,,,
+,,1104,Bat First Stop Time 2,High eight bit:hour Low eight bit:minute,,0-23 0-59,,,,,,,,,,
+,,1105,BatFirston_off Switch 2,Enable :1 Disable:0,,0 or 1,,,Bat First Enable2,,,,,,,
+,,1106,Bat First Start Time 3,High eight bit:hour Low eight bit:minute,,0-23 0-59,,,,,,,,,,
+,,1107,Bat First Stop Time 3,High eight bit:hour Low eight bit:minute,,0-23 0-59,,,,,,,,,,
+,,1108,BatFirston_off Switch 3,Enable :1 Disable:0,,0 or 1,,,Bat First Enable3,,,,,,,
+,,1110,Load First Start Time 1,High eight bit:hour Low eight bit:minute,,0-23 0-59,,,,,SPA/ reserve,,,,,
+,,1111,Load First Stop Time 1,High eight bit:hour Low eight bit:minute,,0-23 0-59,,,,,SPA/ reserve,,,,,
+,,1112,Load First Switch 1,Enable :1 Disable:0,,0 or 1,,,Load First Enable,,SPA/ reserve,,,,,
+,,1113,Load First Start Time2,High eight bit:hour Low eight bit:minute,,0-23 0-59,,,,,SPA/ reserve,,,,,
+,,1114,Load First Stop Time 2,High eight bit:hour Low eight bit:minute,,0-23 0-59,,,,,SPA/ reserve,,,,,
+,,1115,Load First Switch 2,Enable :1 Disable:0,,0 or 1,,,Load First Enable,,SPA/ reserve,,,,,
+,,1116,Load First Start Time 3,High eight bit:hour Low eight bit:minute,,0-23 0-59,,,,,SPA/ reserve,,,,,
+,,1117,Load First Stop Time 3,High eight bit:hour Low eight bit:minute,,0-23 0-59,,,,,SPA/ reserve,,,,,
+,,1118,Load First Switch 3,Enable :1 Disable:0,,0 or 1,,,Load First Enable,,SPA/ reserve,,,,,
+,,1119,NewEPowerC alcFlag,/,,/,,,/,,0:The old formula 1 : The new formula,,,,,
+,,1120,BackUpEn,BackUp Enable,,,,,,,MIX US,,,,,
+,,1121,SGIPEn,SGIP Enable,,,,,,,MIX US,,,,,
+,,1125,BatSerialNO_ 8_B1,Product serial number of the first PACK of energy storage batteries,,/,ASCII,,,,,,,,,
+,,1126,BatSerialNO_ 7_B1,,,/,ASCII,,,,,,,,,
+,,1127,BatSerialNO_ 6_B1,,,/,ASCII,,,,,,,,,
+,,1128,BatSerialNO_ 5_B1,,,/,ASCII,,,,,,,,,
+,,1129,BatSerialNO_ 4_B1,,,/,ASCII,,,,,,,,,
+,,1130,BatSerialNO_ 3_B1,,,/,ASCII,,,,,,,,,
+,,1131,BatSerialNO_ 2_B1,,,/,ASCII,,,,,,,,,
+,,1132,BatSerialNO_ 1_B1,,,,,,,,,,,,,
+,,1244,Com version NameH,Name of the battery main control firmware version,,,ASCII,,,,,,,,,
+,,1245,Com version NameL,Name of the battery main control firmware version,,,ASCII,,,,,,,,,
+,,1246,Com version No,Version of the battery main control firmware,,,digital,,,,,,,,,
+,,1247,Com version NameH,Name of battery monitoring firmware version,,,ASCII,,,,,,,,,
+,,1248,Com version NameL,Name of battery monitoring firmware version,,,ASCII,,,,,,,,,
+,,1249,Com version No,Battery monitoring firmware version,,,digital,,,,,,,,,
+,,3000,ExportLimitFa iledPowerRat e,The power rate when exportLimit failed,R/W,,0.10%,,,,The power rate when exportLimit failed,,,,,
+,,3001,New Serial NO,Serial number 1-2,R/W,,ASCII,,,,The new model uses the following registers to record the serial number; The representation is the same as the original: one register holds two characters and the new serial number is 30 characters.,,,,,
+,,3002,New Serial NO,Serial number 3-4,R/W,,ASCII,,,,,,,,,
+,,3003,New Serial NO,Serial number 5-6,R/W,,ASCII,,,,,,,,,
+,,3004,New Serial NO,Serial number 7-8,R/W,,ASCII,,,,,,,,,
+,,3005,New Serial NO,Serial number 9-10,R/W,,ASCII,,,,,,,,,
+,,3006,New Serial NO,Serial number 11-12,R/W,,ASCII,,,,,,,,,
+,,3007,New Serial NO,Serial number 13-14,R/W,,ASCII,,,,,,,,,
+,,3008,New Serial NO,Serial number 15-16,R/W,,ASCII,,,,,,,,,
+,,3009,New Serial NO,Serial number 17-18,R/W,,ASCII,,,,,,,,,
+,,3010,New Serial NO,Serial number 19-20,R/W,,ASCII,,,,,,,,,
+,,3011,New Serial NO,Serial number 21-22,R/W,,ASCII,,,,,,,,,
+,,3012,New Serial NO,Serial number 23-24,R/W,,ASCII,,,,,,,,,
+,,3013,New Serial NO,Serial number 25-26,R/W,,ASCII,,,,,,,,,
+,,3014,New Serial NO,Serial number 27-28,R/W,,ASCII,,,,,,,,,
+,,3015,New Serial NO,Serial number 29-30,R/W,,ASCII,,,,,,,,,
+,,3016,DryContactFu ncEn,DryContact function enable,R/W,0:Disable 1: Enable,,,,,DryContact function enable,,,,,
+,,3017,DryContactOn Rate,The power rate of drycontact turn on,R/W,0~1000,0.10%,,,,The power rate of drycontact turn on,,,,,
+,,3018,bWorkMode,WorkMode 0:default 1: System Retrofit 2: Multi-Parallel,R/W,1,2,3,,,,,,MIN2.5~6KTL-XH/ XA Double CT special,,
+,,3019,DryContactOffRate,Dry contact closure power,R/W ,0~100 0,0.10%,,,,Dry contact closure power pe rcentage,,,,,
+,,3020,BoxCtrlInvOrder,Off-net box control instruct ion,R/W ,,,,,,,,,,,
+,,3021,ExterCommOf fGridEn,External communication setting manual off-network enable,R/W,,,,,,0x00: Disable; (default) 0x01: Enable;,,,,,
+,,3022,uwBdcStopW orkOfBusVolt,BdcStopWorkOfBusVolt,R,,,,,,,,,,,
+,,3023,bGridType,GridType---0:SinglePhase 1:ThreePhase 2:SplitPhase,R/W,1,2,3,,,,,MIN2.5~6KTL-XH/ XA Double CT special,,,
+,,3024,Float charge current limit,When charge current battery need is lower than this value enter into float charge,R/W,,0.1A,,600,,CC current,,,,,
+,,3025,VbatWarning,"""Battery-low"" warning setup voltage",R/W,,0.1V,,4800,,Lead acid battery LV voltage,,,,,
+,,3026,VbatlowWarn Clr,"""Battery-low"" warning clear voltage",R/W,,0.1V,,,,Clear battery low voltage error voltage point LoadPercent(only lead-Acid): 45.5V(Load < 20%); 48.0V(20%<=Load <=50%); 49.0V(Load > 50%);,,,,,
+,,3027,Vbatstopfordi scharge,Battery cut off voltage,R/W,,0.1V,,,,Should stop discharge when lower than this voltage(only lead-Acid): 46.0V(Load < 20%); 44.8V(20%<=Load <=50%); 44.2V(Load > 50%);,,,,,
+,,3028,Vbat stop for charge,Battery over charge voltage,R/W,,0.01V,,5800,,Should stop charge when higher than this voltage,,,,,
+,,3029,Vbat start for discharge,Battery start discharge voltage,R/W,,0.01V,,4800,,Should not discharge when lower than this voltage,,,,,
+,,3030,Vbat constant charge,Battery constant charge voltage,R/W,,0.01V,,5800,,CV voltage(acid) can charge when lower than this voltage,,,,,
+,,3031,Battemp lower limit d,Battery temperature lower limit for discharge,R/W,,0.1?,,1170,,0-200:0-20? 1000-1400: -40-0?,,,,,
+,,3032,Bat temp upper limit d,Battery temperature upper limit for discharge,R/W,,0.1?,,420,,,,,,,
+,,3033,Bat temp lower limit c,Battery temperature lower limit for charge,R/W,,0.1?,,30,,Battery temperature lower limit 0-200:0-20? 1000-1400: -40-0?,,,,,
+,,3034,Bat temp upper limit c,Battery temperature upper limit for charge,R/W,,0.1?,,370,,Battery temperature upper limit,,,,,
+,,3035,uwUnderFreD ischargeDelyT ime,Under Fre Delay Time,R/W,,50ms,,,,Under Fre Delay Time,,,,,
+,,3036,GridFirstDisch argePowerRat e,Discharge Power Rate when Grid First,W,0-100 ,1.00%,,,,,,,,,
+,,3037,GridFirstStopS OC,Stop Discharge soc when Grid First,W,0-100 ,1.00%,,,,,,,,,
+,,3038,Time 1_xh_ Start,Period 1: [Start Time ~ End Time] [Charge/Discharge] [Disable/Enable] 3038 enable charge and discharge,R/W,,,,,,,,,,,"Bit0~7: minutes; Bit8~12: hour; Bit13~14, 0: load priority; 1: battery priority; 2: Grid priority; Bit15, 0: prohibited; 1: enabled;"
+,,3039,Time 1_xh_ End,,R/W,,,,,,Bit0~7: minutes; Bit8~12: hour; Bit13~15: reserved,,,,,
+,,3040,Time 2_xh_ Start,Time period 2: [start time ~ end time] [charge / discharge] [disable / enable] 3040 enable charge and discharge,R/W,,,,,,,,,,,"Bit0~7: minutes; Bit8~12: hour; Bit13~14, 0: load priority; 1: battery priority; 2: Grid priority; Bit15, 0: prohibited; 1:"
+,,3041,Time 2_xh_ End,,R/W,,,,,,enabled;,,,,,
+,,3042,Time 3_xh_ Start,With Time1,R/W,,,,,,With Time1,,,,,
+,,3043,Time 3_xh_ End,,R/W,,,,,,With Time1,,,,,
+,,3044,Time 4_xh_ Start,With Time1,R/W,,,,,,With Time1,,,,,
+,,3045,Time 4_xh_ End,,R/W,,,,,,With Time1,,,,,
+,,3047,BatFirstPower Rate,Charge Power Rate when Bat First,,,,,,,,,,,,
+,,3048,wBatFirst stop SOC,Stop Charge soc when Bat First,,,,,,,,,,,,
+,,3049,AcChargeEna ble,AcChargeEnable,,,,,,,Enable :1 Disable:0,,,,,
+,,3050,Time 5_xh_ Start,With Time1,R/W,,,,,,With Time1,,,,,
+,,3051,Time 5_xh_ End,,R/W,,,,,,With Time1,,,,,
+,,3052,Time 6_xh_ Start,With Time1,R/W,,,,,,With Time1,,,,,
+,,3053,Time 6_xh_ End,,R/W,,,,,,With Time1,,,,,
+,,3054,Time 7_xh_ Start,With Time1,R/W,,,,,,With Time1,,,,,
+,,3055,Time 7_xh_ End,,R/W,,,,,,With Time1,,,,,
+,,3056,Time 8_xh_ Start,With Time1,R/W,,,,,,With Time1,,,,,
+,,3057,Time 8_xh_ End,,R/W,,,,,,With Time1,,,,,
+,,3058,Time 9_xh_ Start,With Time1,R/W,,,,,,With Time1,,,,,
+,,3059,Time 9_xh_ End,,R/W,,,,,,With Time1,,,,,
+,,3070,BatteryType,Battery type choose of buck-boost input,R/W,,,,,,Battery type 0:Lithium 1:Lead-acid 2:other,,,,,
+,,3071,BatMdlSeria_ ParalNum,BatMdlSeria/ParalNum,R/W,,,,,,BatMdlSeria/Paral Num; SPH4-11K used The upper 8 bits indicate the number of series segments; The lower 8 bits indicate the number of parallel sections;,,,,,
+,,3079,UpsFunEn,Ups function enable or disable,R/W,,,,0,,0:disable 1:enable,,,,,
+,,3080,UPSVoltSet,UPS output voltage,R/W,,,,0,,0:230V 1:208V 2:240V,,,,,
+,,3081,UPSFreqSet,UPS output frequency,R/W,,,,0,,0:50Hz 1:60Hz,,,,,
+,,3082,bLoadFirstSto pSocSet,StopSoc When LoadFirst,R/W,13-100,,,,,ratio,,,,,
+,,3085,Com Address,Communication addr,R/W,,,,1,,1 : Communication addr=1 1 ~ 254 : Communication addr=1~254,,,,,
+,,3086,BaudRate,Communication BaudRate,R/W,,,,0,,0: 9600 bps 1: 38400 bps,,,,,
+,,3087,Serial NO_ 1,Serial Number 1-2,R/W,,ASCII,,,,For battery,,,,,
+,,3088,Serial NO_ 2,Serial Number 3-4,R/W,,ASCII,,,,,,,,,
+,,3089,Serial NO_ 3,Serial Number 5-6,R/W,,ASCII,,,,,,,,,
+,,3090,Serial NO_ 4,Serial Number 7-8,R/W,,ASCII,,,,,,,,,
+,,3091,Serial No_ 5,Serial Number 9-10,R/W,,ASCII,,,,,,,,,
+,,3092,Serial No_6,Serial Number 11-12,R/W,,ASCII,,,,,,,,,
+,,3093,Serial No_ 7,Serial Number 13-14,R/W,,ASCII,,,,,,,,,
+,,3094,Serial No_ 8,Serial Number 15-16,R/W,,ASCII,,,,,,,,,
+,,3095,BdcResetCmd,BDC Reset command,R/W,,,,,,0:Invalid data 1:Reset setting parameters 2:Reset correction parameter 3:Clear historical power,,,,,
+,,3096,ARKM3 Code,BDCMonitoring software code,R,,ASCII,,,,ZEBA,,,,,
+,,3098,DTC,DTC,R,,,,,,,,,,,
+,,3099,FW Code,DSP software code,R,,ASCII,,,,,,,,,
+,,3101,Processor1 FW Vision,DSP Software Version,R,,ASCII,,,,,,,,,
+,,3102,BusVoltRef,Minimum BUS voltage for charging and discharging batteries,R,,,,,,,,,,,
+,,3103,ARKM3Ver,BDC monitoring software version,R,,,,,,,,,,,
+,,3104,BMS_MCUVer sion,BMS hardware version information,R,1,,,,,,,,,,
+,,3105,BMS_FW,BMS software version information,R,1,,,,,,,,,,
+,,3106,BMS_Info,BMS ManufacturerName,R,1,,,,,,,,,,
+,,3107,BMSCommTy pe,BMSCommType,R,1,,,,,BMSCommunicati on interface type: 0: RS485; 1: CAN;,,,,,
+,,3108,Module 4,BDCmodel (4),R/W,&*11,,,,,SxxBxx,,,,,
+,,3109,Module 3,BDCmodel (3),R/W,&*11,,,,,DxxTxx,,,,,
+,,3110,Module 2,BDCmodel (2),R/W,&*11,,,,,PxxUxx,,,,,
+,,3111,Module 1,BDCmodel (1),R/W,&*11,,,,,Mxxxx,,,,,
+,,3113,unProtocolVe r,BDCProtocolVer,R,1,,,,,Bit8-bit15 The major version number ranges from 0-256. In principle, it cannot be changed Bit0-bit7 Minor version number [0-256]. If the protocol is changed, you need to update this version No.,,,
+,,3114,uwCertificatio nVer,BDC CertificationVer,R,1,,,,,,,,,,
+,,3125,Time Month1,Use with Time1-9(us) Add month time,R/W,,,,,,,"bit0~3:month_L; bit4~7: month_H bit8, 0:disable 1:enable Bit9~15:reserve",,,,
+,,3126,Time Month2,Use with Time10-18(us) Add month time,R/W,,,,,,,With Time Month1,,,,
+,,3127,Time Month3,Use with Time19-27(us) Add month time,R/W,,,,,,,With Time Month1,,,,
+,,3128,Time Month4,Use with Time28-36(us) Add month time,R/W,,,,,,,With Time Month1,,,,
+,,3129,Time 1_us_ start,time1:[starttime~endtime],R/W,,,,,,"bit0~6:min; bit7~11:hour; bit12~14, 0:loadfirst;",,,,,
+,,3130,Time 1_us_ end,,R/W,,,,,,,"1:batfirst; 2:gridfirst; 3: anti-reflux bit15, 0:disable; 1:enable;",,,,
+,,3131,Time 2_us_ start,Same as above,R/W,,,,,,Same as Time 1 (us),,,,,
+,,3132,Time 2_us_ end,Same as above,R/W,,,,,,Same as Time 1 (us),,,,,
+,,3133,Time 3_us_ start,Same as above,R/W,,,,,,Same as Time 1 (us),,,,,
+,,3134,Time 3_us_ end,Same as above,R/W,,,,,,Same as Time 1 (us),,,,,
+,,3135,Time 4_us_ start,Same as above,R/W,,,,,,Same as Time 1 (us),,,,,
+,,3135,Time 4_us_ end,Same as above,R/W,,,,,,Same as Time 1 (us),,,,,
+,,3137,Time 5_us_ start,Same as above,R/W,,,,,,Same as Time 1 (us),,,,,
+,,3138,Time 5_us_ end,Same as above,R/W,,,,,,Same as Time 1 (us),,,,,
+,,3139,Time 6_us_ start,Same as above,R/W,,,,,,Same as Time 1 (us),,,,,
+,,3140,Time 6_us_ end,Same as above,R/W,,,,,,Same as Time 1 (us),,,,,
+,,3141,Time 7_us_ start,Same as above,R/W,,,,,,Same as Time 1 (us),,,,,
+,,3142,Time 7_us_ end,Same as above,R/W,,,,,,,,,,,
+,,3143,Time 8_us_ start,Same as above,R/W,,,,,,Same as Time 1 (us),,,,,
+,,3144,Time 8_us_ end,Same as above,R/W,,,,,,,,,,,
+,,3145,Time 9_us_ start,Same as above,R/W,,,,,,Same as Time 1 (us),,,,,
+,,3146,Time 9_us_ end,Same as above,R/W,,,,,,,,,,,
+,,3147,Time 10_us_ start,Same as above,R/W,,,,,,Same as Time 1 (us),,,,,
+,,3148,Time 10_us_ end,Same as above,R/W,,,,,,,,,,,
+,,3149,Time 11_us_ start,Same as above,R/W,,,,,,Same as Time 1 (us),,,,,
+,,3150,Time 11_us_ end,Same as above,R/W,,,,,,,,,,,
+,,3151,Time 12_us_ start,Same as above,R/W,,,,,,Same as Time 1 (us),,,,,
+,,3152,Time 12_us_ end,Same as above,R/W,,,,,,,,,,,
+,,3153,Time 13_us_ start,Same as above,R/W,,,,,,Same as Time 1 (us),,,,,
+,,3154,Time 13_us_ end,Same as above,R/W,,,,,,,,,,,
+,,3155,Time 14_us_ start,Same as above,R/W,,,,,,Same as Time 1 (us),,,,,
+,,3156,Time 14_us_ end,Same as above,R/W,,,,,,,,,,,
+,,3157,Time 15_us_ start,Same as above,R/W,,,,,,Same as Time 1 (us),,,,,
+,,3158,Time 15_us_ end,Same as above,R/W,,,,,,,,,,,
+,,3159,Time 16_us_ start,Same as above,R/W,,,,,,,,,,,
+,,3160,Time 16_us_ end,Same as above,R/W,,,,,,,,,,,
+,,3201,SpecialDay1,SpecialDay1(month, Day),R/W,,,,,,,"bit0~7:day; bit8~14:month bit15, 0:disable 1: enable",,,
+,,3202,SpecialDay1_Time1_Start,Start time,R/W,,,,,,"bit0~6:min; bit7~11:hour; bit12~14, 0:loadfirst; 1:batfirst; 2:gridfirst; 3: anti-reflux bit15, 0: disable; 1: enable;",,,,,
+,,3203,SpecialDay1_Time1_End,endtime,R/W,,,,,,bit0~6:min; bit7~11:hour; bit12~15:reserve,,,,,
+,,3204,SpecialDay1_ Time2_Start,Same as above,R/W,,,,,,Same as SpecialDay1_Time 1,,,,,
+,,3205,SpecialDay1_ Time2_End,,R/W,,,,,,,,,,,
+,,3206,SpecialDay1_ Time3_Start,Same as above,R/W,,,,,,Same as SpecialDay1_Time 1,,,,,
+,,3207,SpecialDay1_ Time3_End,,R/W,,,,,,,,,,,
+,,3208,SpecialDay1_ Time4_Start,Same as above,R/W,,,,,,Same as SpecialDay1_Time 1,,,,,
+,,3209,SpecialDay1_ Time4_End,,R/W,,,,,,,,,,,
+,,3210,SpecialDay1_ Time5_Start,Same as above,R/W,,,,,,Same as SpecialDay1_Time 1,,,,,
+,,3211,SpecialDay1_ Time5_End,,R/W,,,,,,,,,,,
+,,3212,SpecialDay1_ Time6_Start,Same as above,R/W,,,,,,Same as SpecialDay1_Time 1,,,,,
+,,3213,SpecialDay1_ Time6_End,,R/W,,,,,,,,,,,
+,,3214,SpecialDay1_ Time7_Start,Same as above,R/W,,,,,,Same as SpecialDay1_Time 1,,,,,
+,,3215,SpecialDay1_ Time7_End,,R/W,,,,,,,,,,,
+,,3216,SpecialDay1_ Time8_Start,Same as above,R/W,,,,,,Same as SpecialDay1_Time 1,,,,,
+,,3217,SpecialDay1_ Time8_End,,R/W,,,,,,,,,,,
+,,3218,SpecialDay1_ Time9_Start,Same as above,R/W,,,,,,Same as SpecialDay1_Time 1,,,,,
+,,3219,SpecialDay1_ Time9_End,,R/W,,,,,,,,,,,
+,,3220,SpecialDay2,SpecialDay2(month, Day),R/W,,,,,,,"bit0~7:day; bit8~14:month bit15, 0:disable 1:enable",,,
+,,3221,SpecialDay2_ Time1_Start,Start time,R/W,,,,,,"bit0~6: min; bit7~11: hour; bit12~14, 0: loadfirst; 1: batfirst; 2: gridfirst; 3: anti-reflux bit15, 0: disable; 1: enable;",,,,,
+,,3222,SpecialDay2_ Time1_End,endtime,R/W,,,,,,bit0~6: min; bit7~11: hour; bit12~15:reserve,,,,,
+,,3223,SpecialDay2_ Time2_Start,Same as above,R/W,,,,,,Same as SpecialDay2_Time 1,,,,,
+,,3224,SpecialDay2_ Time2_End,,R/W,,,,,,,,,,,
+,,3225,SpecialDay2_ Time3_Start,Same as above,R/W,,,,,,Same as SpecialDay2_Time 1,,,,,
+,,3226,SpecialDay2_ Time3_End,,R/W,,,,,,,,,,,
+,,3227,SpecialDay2_ Time4_Start,Same as above,R/W,,,,,,Same as SpecialDay2_Time 1,,,,,
+,,3228,SpecialDay2_ Time4_End,,R/W,,,,,,,,,,,
+,,3229,SpecialDay2_ Time5_Start,Same as above,R/W,,,,,,Same as SpecialDay2_Time 1,,,,,
+,,3230,SpecialDay2_ Time5_End,,R/W,,,,,,,,,,,
+,,3231,SpecialDay2_ Time6_Start,Same as above,R/W,,,,,,Same as SpecialDay2_Time 1,,,,,
+,,3232,SpecialDay2_ Time6_End,,R/W,,,,,,,,,,,
+,,3233,SpecialDay2_ Time7_Start,Same as above,R/W,,,,,,Same as SpecialDay2_Time 1,,,,,
+,,3234,SpecialDay2_ Time7_End,,R/W,,,,,,,,,,,
+,,3235,SpecialDay2_ Time8_Start,Same as above,R/W,,,,,,Same as SpecialDay2_Time 1,,,,,
+,,3236,SpecialDay2_ Time8_End,,R/W,,,,,,,,,,,
+,,3237,SpecialDay2_ Time9_Start,Same as above,R/W,,,,,,Same as SpecialDay2_Time 1,,,,,
+,,3238,SpecialDay2_ Time9_End,,R/W,,,,,,,,,,,

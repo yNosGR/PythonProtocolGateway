@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from enum import Enum
 import glob
 import logging
+import time
 from typing import Union
 from defs.common import strtoint
 import itertools
@@ -10,6 +11,11 @@ import json
 import re
 import os
 import ast
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from configparser import SectionProxy
 
 class Data_Type(Enum):
     BYTE = 1
@@ -206,6 +212,12 @@ class registry_map_entry:
     read_command : bytes = None
     ''' for transports/protocols that require sending a command ontop of "register" '''
 
+    read_interval : int = 1000
+    ''' how often to read register in ms'''
+
+    next_read_timestamp : int = 0
+    ''' unix timestamp in ms '''
+
     write_mode : WriteMode = WriteMode.READ
     ''' enable disable reading/writing '''
 
@@ -240,12 +252,14 @@ class protocol_settings:
     settings : dict[str, str]
     ''' default settings provided by protocol json '''
 
+    transport_settings : 'SectionProxy' = None
+
     byteorder : str = "big"
 
     _log : logging.Logger = None
 
 
-    def __init__(self, protocol : str, settings_dir : str = 'protocols'):
+    def __init__(self, protocol : str, transport_settings : 'SectionProxy' = None, settings_dir : str = 'protocols'):
 
         #apply log level to logger
         self._log_level = getattr(logging, logging.getLevelName(logging.getLogger().getEffectiveLevel()), logging.INFO)
@@ -254,6 +268,7 @@ class protocol_settings:
 
         self.protocol = protocol
         self.settings_dir = settings_dir
+        self.transport_settings = transport_settings
 
         #load variable mask
         self.variable_mask = []
@@ -358,11 +373,20 @@ class protocol_settings:
         registry_map : list[registry_map_entry] = []
         register_regex = re.compile(r'(?P<register>(?:0?x[\da-z]+|[\d]+))\.(b(?P<bit>x?\d{1,2})|(?P<byte>x?\d{1,2}))')
 
+        read_interval_regex = re.compile(r'(?P<value>[\.\d]+)(?P<unit>[xs]|ms)')
+
+
         data_type_regex = re.compile(r'(?P<datatype>\w+)\.(?P<length>\d+)')
 
         range_regex = re.compile(r'(?P<reverse>r|)(?P<start>(?:0?x[\da-z]+|[\d]+))[\-~](?P<end>(?:0?x[\da-z]+|[\d]+))')
         ascii_value_regex = re.compile(r'(?P<regex>^\[.+\]$)')
         list_regex = re.compile(r'\s*(?:(?P<range_start>(?:0?x[\da-z]+|[\d]+))-(?P<range_end>(?:0?x[\da-z]+|[\d]+))|(?P<element>[^,\s][^,]*?))\s*(?:,|$)')
+
+
+        #load read_interval from transport settings, for #x per register read intervals
+        transport_read_interval : int = 1000
+        if self.transport_settings is not None:
+            transport_read_interval = self.transport_settings.getint("read_interval", transport_read_interval)
 
 
         if not os.path.exists(path): #return empty is file doesnt exist.
@@ -392,9 +416,37 @@ class protocol_settings:
             # Initialize variables to hold numeric and character parts
             unit_multiplier : float = 1
             unit_symbol : str = ''
+            read_interval : int = 0
+            ''' read interval in ms '''
 
              #clean up doc name, for extra parsing
             row['documented name'] = row['documented name'].strip().lower().replace(' ', '_')
+
+            #region read_interval
+
+
+            if 'read interval' in row:
+                row['read interval'] = row['read interval'].lower() #ensure is all lower case
+                match = read_interval_regex.search(row['read interval'])
+                if match:
+                    unit = match.group('unit')
+                    value = match.group('value')
+                    if value:
+                        value = float(value)
+                        if unit == 'x':
+                            read_interval = int((transport_read_interval * 1000) * value)
+                        else: # seconds or ms
+                            read_interval = value
+                            if unit != 'ms':
+                                read_interval *= 1000
+
+            if read_interval == 0:
+                read_interval = transport_read_interval * 1000
+                if "read_interval" in self.settings:
+                    try:
+                        read_interval = int(self.settings['read_interval'])
+                    except ValueError:
+                        read_interval = transport_read_interval * 1000
 
 
             #region overrides
@@ -589,6 +641,9 @@ class protocol_settings:
             if "writable" in row:
                 writeMode = WriteMode.fromString(row['writable'])
 
+            if "write" in row:
+                writeMode = WriteMode.fromString(row['write'])
+
             for i in r:
                 item = registry_map_entry(
                                             registry_type = registry_type,
@@ -608,6 +663,7 @@ class protocol_settings:
                                             value_max=value_max,
                                             value_regex=value_regex,
                                             read_command = read_command,
+                                            read_interval=read_interval,
                                             write_mode=writeMode
                                         )
                 registry_map.append(item)
@@ -706,7 +762,8 @@ class protocol_settings:
 
             return registry_map
 
-    def calculate_registry_ranges(self, map : list[registry_map_entry], max_register : int) -> list[tuple]:
+    def calculate_registry_ranges(self, map : list[registry_map_entry], max_register : int, init : bool = False) -> list[tuple]:
+
         ''' read optimization; calculate which ranges to read'''
         max_batch_size = 45 #see manual; says max batch is 45
 
@@ -718,6 +775,10 @@ class protocol_settings:
 
         start = -max_batch_size
         ranges : list[tuple] = []
+
+        timestamp_ms = int(time.time() * 1000)
+        if init : #hack so that all registers are read initially without adding extra if in loop
+            timestamp_ms = 0
 
         while (start := start+max_batch_size) <= max_register:
 
@@ -731,7 +792,10 @@ class protocol_settings:
                     if register.write_mode == WriteMode.WRITEONLY: ##Write Only; skip
                         continue
 
-                    registers.append(register.register)
+                    #we are assuming calc registry ranges is being called EVERY READ.
+                    if register.next_read_timestamp < timestamp_ms:
+                        register.next_read_timestamp = timestamp_ms + register.read_interval
+                        registers.append(register.register)
 
             if registers: #not empty
                 ranges.append((min(registers), max(registers)-min(registers)+1)) ## APPENDING A TUPLE!
@@ -781,7 +845,7 @@ class protocol_settings:
                 size = item.register
 
         self.registry_map_size[registry_type] = size
-        self.registry_map_ranges[registry_type] = self.calculate_registry_ranges(self.registry_map[registry_type], self.registry_map_size[registry_type])
+        self.registry_map_ranges[registry_type] = self.calculate_registry_ranges(self.registry_map[registry_type], self.registry_map_size[registry_type], init=True)
 
     def process_register_bytes(self, registry : dict[int,bytes], entry : registry_map_entry):
         ''' process bytes into data'''

@@ -11,8 +11,8 @@ The .csv files hold the registry or address definitions.
 CSV = comma seperated values... spreadsheets. 
 delimeter for csv can be , or ; ( not both )
 
-| variable name | data type | register|documented name|description|writable|values |
-| -- | -- | -- | -- | -- | -- | -- | 
+| variable name | data type | register| documented name|description|writable|values | read interval |
+| -- | -- | -- | -- | -- | -- | -- | -- |
 
 
 ### variable name
@@ -78,6 +78,28 @@ for example:
 2. defines the values for flag data types, such as 16BIT_FLAGS; any data type can be used. 
 the format for these flags is json. these flags / codes can also be defined via the .json file by naming them as such:
 "{{document_name}}_codes"
+
+### read interval
+provides a per register read interval; the minimum value is the configured transport read interval.
+
+#x for read_interval from transport config * #
+#s for plainold seconds
+#ms for miliseconds
+
+for example:
+``` 
+[transport.modbus]
+read_interval = 7
+ ```
+
+```7x```
+would set the read interval for that register to 49 seconds.
+
+```7s```
+would set the read interval to 7s
+
+```1s```
+because the transport read interval is 7 seconds, the read interval would effectively be 7 seconds
 
 ##### Bit Flag Example
 ```
