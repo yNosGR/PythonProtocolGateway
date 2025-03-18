@@ -642,6 +642,9 @@ class protocol_settings:
             writeMode : WriteMode = WriteMode.READ
             if "writable" in row:
                 writeMode = WriteMode.fromString(row['writable'])
+
+            if "write" in row:
+                writeMode = WriteMode.fromString(row['write'])
             
             for i in r:
                 item = registry_map_entry(
