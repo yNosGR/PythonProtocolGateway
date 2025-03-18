@@ -37,7 +37,7 @@ protocol_version = eg4_v58.custom
 {protocol_name}.registry_map.csv contains configuration for generic "registers". 
  
 ### csv format:
-https://github.com/HotNoob/PythonProtocolGateway/wiki/Creating-and-Editing-Protocols-%E2%80%90-JSON-%E2%80%90-CSV#csv
+[creating_and_editing_protocols.md](documentation/usage/creating_and_editing_protocols.md) - Creating and editing protocolss
 
 ## egv_v58
 ```
