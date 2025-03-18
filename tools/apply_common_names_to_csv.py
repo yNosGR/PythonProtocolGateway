@@ -28,7 +28,7 @@ with open(path, newline='') as csvfile:
                 continue
 
             if not row['variable name'].strip(): #if empty, apply name
-                row['variable name'] = common_names[row['documented name']] 
+                row['variable name'] = common_names[row['documented name']]
                 print(row['documented name'] + ' -> ' + common_names[row['documented name']])
                 new_csv.append(row)
                 continue
@@ -37,7 +37,7 @@ with open(path, newline='') as csvfile:
 # Write data to the output CSV
 with open(save_path, 'w', newline='') as outfile:
     writer = csv.DictWriter(outfile, fieldnames=fieldnames)
-    writer.writeheader()  
-    writer.writerows(new_csv) 
+    writer.writeheader()
+    writer.writerows(new_csv)
 
 print("saved to "+save_path)

@@ -17,7 +17,7 @@ with open(common_path, 'r') as file:
 with open(path, newline='') as csvfile:
     # Create a CSV reader object
     reader = csv.DictReader(csvfile, delimiter=';') #compensate for openoffice
-    
+
     # Iterate over each row in the CSV file
     for row in reader:
         if row['variable name'] and row['documented name']:

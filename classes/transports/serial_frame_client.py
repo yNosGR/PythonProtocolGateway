@@ -63,11 +63,11 @@ class serial_frame_client():
         buffer = bytearray()
         self.pending_frames.clear()
 
-        #for shatty order sensitive protocols. 
+        #for shatty order sensitive protocols.
         # Clear input buffers
         if reset_buffer:
             self.client.reset_input_buffer()
-        
+
         timedout = time.time() + self.timeout
         self.client.timeout = self.timeout
         frameCount = 0
@@ -93,11 +93,11 @@ class serial_frame_client():
                     eoi_index = buffer.find(self.eoi)
 
                     if eoi_index != -1:
-                        
+
                         frame = buffer[len(self.soi):eoi_index]
                         if frames == 1:
                             return frame
-                        
+
                         if frameCount > 1:
                             # Extract and store the complete frame
                             self.pending_frames.append(frame)
@@ -110,7 +110,7 @@ class serial_frame_client():
 
                         # Find next SOI index in the remaining buffer
                         soi_index = buffer.find(self.soi)
-                        
+
                     else:
                         # If no EOI is found and buffer size exceeds max_frame_size, clear buffer
                         if len(buffer) > self.max_frame_size:
@@ -164,5 +164,5 @@ class serial_frame_client():
                             self.on_message(frame)
 
             time.sleep(0.01)
-        
-    
+
+

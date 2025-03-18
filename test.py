@@ -1,3 +1,5 @@
+import re
+import ast
 
 #pip install "python-can[gs_usb]"
 
@@ -40,7 +42,7 @@ try:
             # The data is a 2-byte value (un16)
             soc_bytes = msg.data[:2]
             soc = int.from_bytes(soc_bytes, byteorder='big', signed=False) / 100.0
-            
+
             print(f"State of Charge: {soc:.2f}%")
 
         if msg.arbitration_id == 0x0355:
@@ -60,10 +62,6 @@ except KeyboardInterrupt:
     print("Listening stopped.")
 
 quit()
-
-import re
-import ast
-
 
 # Define the register string
 register = "x4642.[ 1 + ((( [battery 1 number of cells] *2 )+ (1~[battery 1 number of temperature] *2)) ) ]"
@@ -115,7 +113,7 @@ def evaluate_ranges(expression):
 
     return results
 
-def evaluate_expression(expression):   
+def evaluate_expression(expression):
      # Define a regular expression pattern to match "maths"
     var_pattern = re.compile(r'\[(?P<maths>.*?)\]')
 
@@ -124,15 +122,15 @@ def evaluate_expression(expression):
         try:
             maths = match.group("maths")
             maths = re.sub(r'\s', '', maths) #remove spaces, because ast.parse doesnt like them
-            
+
             # Parse the expression safely
             tree = ast.parse(maths, mode='eval')
 
             # Evaluate the expression
             end_value = eval(compile(tree, filename='', mode='eval'))
-                
+
             return str(end_value)
-        except :
+        except Exception:
             return match.group(0)
 
     # Replace variables with their values

@@ -20,14 +20,13 @@ if sys.version_info < (3, 9):
 
 import argparse
 
-import atexit
 import os
 import logging
 import sys
 import traceback
 from configparser import ConfigParser, NoOptionError
 
-from classes.protocol_settings import protocol_settings,Data_Type,registry_map_entry,Registry_Type,WriteMode
+from classes.protocol_settings import protocol_settings,registry_map_entry
 from classes.transports.transport_base import transport_base
 
 
@@ -39,15 +38,15 @@ __logo = """
 ██╔═══╝   ╚██╔╝     ██║   ██╔══██║██║   ██║██║╚██╗██║                                                                                
 ██║        ██║      ██║   ██║  ██║╚██████╔╝██║ ╚████║                                                                                
 ╚═╝        ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝                                                                                
-                                                                                                                                     
+
 ██████╗ ██████╗  ██████╗ ████████╗ ██████╗  ██████╗ ██████╗ ██╗          ██████╗  █████╗ ████████╗███████╗██╗    ██╗ █████╗ ██╗   ██╗
 ██╔══██╗██╔══██╗██╔═══██╗╚══██╔══╝██╔═══██╗██╔════╝██╔═══██╗██║         ██╔════╝ ██╔══██╗╚══██╔══╝██╔════╝██║    ██║██╔══██╗╚██╗ ██╔╝
 ██████╔╝██████╔╝██║   ██║   ██║   ██║   ██║██║     ██║   ██║██║         ██║  ███╗███████║   ██║   █████╗  ██║ █╗ ██║███████║ ╚████╔╝ 
 ██╔═══╝ ██╔══██╗██║   ██║   ██║   ██║   ██║██║     ██║   ██║██║         ██║   ██║██╔══██║   ██║   ██╔══╝  ██║███╗██║██╔══██║  ╚██╔╝  
 ██║     ██║  ██║╚██████╔╝   ██║   ╚██████╔╝╚██████╗╚██████╔╝███████╗    ╚██████╔╝██║  ██║   ██║   ███████╗╚███╔███╔╝██║  ██║   ██║   
 ╚═╝     ╚═╝  ╚═╝ ╚═════╝    ╚═╝    ╚═════╝  ╚═════╝ ╚═════╝ ╚══════╝     ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝   ╚═╝   
-                                                                                                                                     
-"""
+
+"""  # noqa: W291
 
 
 class CustomConfigParser(ConfigParser):
@@ -58,7 +57,7 @@ class CustomConfigParser(ConfigParser):
             if 'fallback' in kwargs: #override kwargs fallback, for manually handling here
                 fallback = kwargs['fallback']
                 kwargs['fallback'] = None
-                
+
             for name in option:
                 value = super().get(section, name, *args, **kwargs)
                 if value:
@@ -67,14 +66,14 @@ class CustomConfigParser(ConfigParser):
             if not value:
                 value = fallback
 
-            if value == None:
+            if value is None:
                 raise NoOptionError(option[0], section)
         else:
             value = super().get(section, option, *args, **kwargs)
 
         if isinstance(value, int):
             return value
-        
+
         return value.strip() if value is not None else value
 
 class Protocol_Gateway:
@@ -131,14 +130,14 @@ class Protocol_Gateway:
 
                 if not transport_type and not protocol_version:
                     raise ValueError('Missing Transport / Protocol Version')
-                
-            
-                if not transport_type and protocol_version: #get transport from protocol settings... 
+
+
+                if not transport_type and protocol_version: #get transport from protocol settings...
                     protocolSettings : protocol_settings = protocol_settings(protocol_version)
 
                     if not transport_type and not protocolSettings.transport:
                         raise ValueError('Missing Transport')
-                    
+
                     if not transport_type:
                         transport_type = protocolSettings.transport
 
@@ -194,26 +193,26 @@ class Protocol_Gateway:
                         if not transport.connected:
                             transport.connect() #reconnect
                         else: #transport is connected
-                            
+
                             info = transport.read_data()
 
                             if not info:
                                 continue
-                            
+
                             #todo. broadcast option
                             if transport.bridge:
                                 for to_transport in self.__transports:
                                     if to_transport.transport_name == transport.bridge:
                                         to_transport.write_data(info, transport)
                                         break
-              
+
             except Exception as err:
                 traceback.print_exc()
                 self.__log.error(err)
 
             time.sleep(7)
 
-   
+
 
 
 

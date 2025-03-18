@@ -33,7 +33,7 @@ class transport_base:
     _log : logging.Logger = None
 
     def __init__(self, settings : 'SectionProxy', protocolSettings : 'protocol_settings' = None) -> None:
-        
+
         self.transport_name = settings.name #section name
 
         #apply log level to logger
@@ -42,8 +42,8 @@ class transport_base:
         self._log : logging.Logger = logging.getLogger(short_name + f"[{self.transport_name}]")
 
         self._log.setLevel(self._log_level)
-        
-        self.type = self.__class__.__name__ 
+
+        self.type = self.__class__.__name__
 
         self.protocolSettings = protocolSettings
         if not self.protocolSettings: #if not, attempt to load. lazy i know
@@ -67,7 +67,7 @@ class transport_base:
                 self.write_enabled = settings.getboolean(["write_enabled", "enable_write"], self.write_enabled)
             else:
                 self.write_enabled = settings.getboolean("write", self.write_enabled)
-                
+
         self.update_identifier()
 
 
@@ -93,8 +93,10 @@ class transport_base:
 
     #lets convert this to dict[str, registry_map_entry]
     def read_data(self) -> dict[str,str]:
-        ''' general purpose read function for between transports; 
-        return type may be changed to dict[str, registrsy_map_entry]. still thinking about this'''
+        '''
+        general purpose read function for between transports;
+        return type may be changed to dict[str, registrsy_map_entry]. still thinking about this
+        '''
         pass
 
 

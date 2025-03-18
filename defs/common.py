@@ -11,15 +11,15 @@ def strtobool (val):
     val = val.lower()
     if val in ('y', 'yes', 't', 'true', 'on', '1'):
         return 1
-    
+
     return 0
 
 def strtoint(val : str) -> int:
     ''' converts str to int, but allows for hex string input, identified by x prefix'''
 
-    if isinstance(val, int): #is already int. 
+    if isinstance(val, int): #is already int.
         return val
-    
+
     val = val.lower().strip()
 
     if val and val[0] == 'x':
@@ -29,7 +29,7 @@ def strtoint(val : str) -> int:
             val = '0' + val
 
         return int.from_bytes(bytes.fromhex(val), byteorder='big')
-    
+
     if val and val.startswith("0x"):
         val = val[2:]
         # Pad the string with a leading zero
@@ -37,25 +37,25 @@ def strtoint(val : str) -> int:
             val = '0' + val
 
         return int.from_bytes(bytes.fromhex(val), byteorder='big')
-    
+
     if not val: #empty
         return 0
-    
+
     return int(val)
 
 def get_usb_serial_port_info(port : str = '') -> str:
     for p in serial.tools.list_ports.comports():
         if str(p.device).upper() == port.upper():
             return "["+hex(p.vid)+":"+hex(p.pid)+":"+str(p.serial_number)+":"+str(p.location)+"]"
-        
+
     return ""
 
 def find_usb_serial_port(port : str =  '', vendor_id : str = '', product_id : str = '', serial_number : str = '', location : str = '') -> str:
     if not port.startswith('['):
         return port
-    
+
     port = port.replace('None', '')
-    
+
     match  = re.match(r"\[(?P<vendor>[\da-zA-Z]+|):?(?P<product>[\da-zA-Z]+|):?(?P<serial>[\da-zA-Z]+|):?(?P<location>[\d\-]+|)\]", port)
     if match:
         vendor_id = int(match.group("vendor"), 16) if match.group("vendor") else ''
@@ -72,5 +72,5 @@ def find_usb_serial_port(port : str =  '', vendor_id : str = '', product_id : st
     else:
         print("Bad Port Pattern", port)
         return None
-            
+
     return None

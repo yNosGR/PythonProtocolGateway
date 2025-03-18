@@ -9,8 +9,8 @@ import os
 
 
 from .transport_base import transport_base
-from ..protocol_settings import Data_Type, Registry_Type, registry_map_entry, protocol_settings
-from defs.common import strtobool, strtoint
+from ..protocol_settings import Registry_Type, registry_map_entry, protocol_settings
+from defs.common import strtoint
 from collections import OrderedDict
 
 from typing import TYPE_CHECKING
@@ -46,7 +46,7 @@ class canbus(transport_base):
     cacheTimeout : int = 120
     ''' seconds to keep message in cache '''
 
-    emptyTime : float = None 
+    emptyTime : float = None
     ''' the last time values were read for watchdog'''
 
     watchDogTime : float = 120
@@ -93,7 +93,7 @@ class canbus(transport_base):
 
 
         thread = threading.Thread(target=self.start_loop)
-        thread.daemon = True 
+        thread.daemon = True
         thread.start()
 
         self.connected = True
@@ -116,21 +116,21 @@ class canbus(transport_base):
         if not self.linux:
             self._log.error("socketcan status not implemented for windows")
             return True
-        
+
         try:
             with open(f'/sys/class/net/{self.port}/operstate', 'r') as f:
                 state = f.read().strip()
             return state == 'up'
         except FileNotFoundError:
             return False
-        
+
     def start_loop(self):
         self.read_bus(self.bus)
 
     def read_bus(self, bus : can.BusABC):
         ''' read canbus asynco and store results in cache'''
         msg = None #fix scope bug
-        
+
         while True:
             try:
                 msg = self.bus.recv()  # This will be non-blocking with asyncio
@@ -145,13 +145,13 @@ class canbus(transport_base):
             except Exception as e:
                 # Handle unexpected errors
                 self._log.error(f"An unexpected error occurred: {e}")
-                
+
 
             if msg:
                 self._log.info(f"Received message: {msg.arbitration_id:X}, data: {msg.data}")
-                
-                with self.lock: 
-                    #convert bytearray to bytes; were working with bytes. 
+
+                with self.lock:
+                    #convert bytearray to bytes; were working with bytes.
                     self.cache[msg.arbitration_id] = (bytes(msg.data), time.time())
 
                 #time.sleep(1) no need for sleep because recv is blocking
@@ -159,27 +159,27 @@ class canbus(transport_base):
 
     def clean_cache(self):
         current_time = time.time()
-    
+
         with self.lock:
             # Create a list of keys to remove (don't remove while iterating)
             keys_to_delete = [msg_id for msg_id, (_, timestamp) in self.cache.items() if current_time - timestamp > self.cacheTimeout]
-        
+
             # Remove old messages from the dictionary
             for key in keys_to_delete:
                 del self.cache[key]
 
     def init_after_connect(self):
         return True
-    
+
         ''' todo, a startup phase to get serial number'''
         #from transport_base settings
         if self.write_enabled:
             self.enable_write()
 
         #if sn is empty, attempt to autoread it
-        if not self.device_serial_number: 
+        if not self.device_serial_number:
             self.device_serial_number = self.read_serial_number()
-            
+
     def read_serial_number(self) -> str:
         ''' not so simple in canbus'''
         return ''
@@ -187,7 +187,7 @@ class canbus(transport_base):
         print("read SN: " +serial_number)
         if serial_number:
             return serial_number
-        
+
         sn2 = ""
         sn3 = ""
         fields = ['Serial No 1', 'Serial No 2', 'Serial No 3', 'Serial No 4', 'Serial No 5']
@@ -200,19 +200,19 @@ class canbus(transport_base):
                 if not hasattr(data, 'registers') or data.registers is None:
                     self._log.critical("Failed to get serial number register ("+field+") ; exiting")
                     exit()
-                    
+
                 serial_number = serial_number  + str(data.registers[0])
 
                 data_bytes = data.registers[0].to_bytes((data.registers[0].bit_length() + 7) // 8, byteorder='big')
-                sn2 = sn2 + str(data_bytes.decode('utf-8')) 
+                sn2 = sn2 + str(data_bytes.decode('utf-8'))
                 sn3 = str(data_bytes.decode('utf-8')) + sn3
 
             time.sleep(self.modbus_delay*2) #sleep inbetween requests so modbus can rest
-        
+
         print(sn2)
         print(sn3)
-        
-        if not re.search("[^a-zA-Z0-9\_]", sn2) :
+
+        if not re.search(r"[^a-zA-Z0-9\_]", sn2) :
             serial_number = sn2
 
         return serial_number
@@ -236,7 +236,7 @@ class canbus(transport_base):
 
         new_info = self.protocolSettings.process_registery(registry, self.protocolSettings.get_registry_map(Registry_Type.ZERO))
 
-        info.update(new_info) 
+        info.update(new_info)
 
         currentTime = time.time()
 
@@ -255,13 +255,13 @@ class canbus(transport_base):
 
     def read_variable(self, variable_name : str, registry_type : Registry_Type, entry : registry_map_entry = None):
         ''' read's variable from cache'''
-        ##clean for convinecne  
+        ##clean for convinecne
         if variable_name:
             variable_name = variable_name.strip().lower().replace(' ', '_')
 
         registry_map = self.protocolSettings.get_registry_map(registry_type)
 
-        if entry == None:
+        if entry is None:
             for e in registry_map:
                 if e.variable_name == variable_name:
                     entry = e

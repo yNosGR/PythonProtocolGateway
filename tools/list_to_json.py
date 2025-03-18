@@ -19,7 +19,7 @@ while True:
         pairs = user_input.split("=")
     else:
         pairs = user_input.split()
-    
+
 
     # Create a dictionary from the key-value pairs
     result = {}
@@ -34,7 +34,7 @@ while True:
         else:
             key, value = pair.split(":")
 
-        
+
         result[key.strip()] = value.strip()
 
     # Convert the dictionary to JSON
