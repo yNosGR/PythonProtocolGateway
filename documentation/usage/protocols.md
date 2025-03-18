@@ -37,7 +37,7 @@ protocol_version = eg4_v58.custom
 {protocol_name}.registry_map.csv contains configuration for generic "registers". 
  
 ### csv format:
-[creating_and_editing_protocols.md](documentation/usage/creating_and_editing_protocols.md) - Creating and editing protocolss
+[creating_and_editing_protocols.md](creating_and_editing_protocols.md) - Creating and editing protocolss
 
 ## egv_v58
 ```
