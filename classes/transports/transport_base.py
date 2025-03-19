@@ -1,12 +1,16 @@
-
 import logging
-from classes.protocol_settings import Registry_Type,protocol_settings,registry_map_entry
+from typing import TYPE_CHECKING, Callable
 
-from typing import Callable
-from typing import TYPE_CHECKING
+from classes.protocol_settings import (
+    Registry_Type,
+    protocol_settings,
+    registry_map_entry,
+)
+
 if TYPE_CHECKING:
-    from .transport_base import transport_base
     from configparser import SectionProxy
+
+    from .transport_base import transport_base
 
 class transport_base:
     type : str = ''

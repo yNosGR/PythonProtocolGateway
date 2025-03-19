@@ -1,7 +1,8 @@
-from typing import Callable
-import serial
 import threading
 import time
+from typing import Callable
+
+import serial
 
 
 class serial_frame_client():

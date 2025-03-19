@@ -1,16 +1,16 @@
-import time
-import struct
 import logging
-from classes.protocol_settings import Registry_Type
-from pymodbus.client.sync import ModbusSerialClient, BaseModbusClient
-from pymodbus.transaction import ModbusRtuFramer
+import struct
+import time
 
-from pymodbus.factory import ClientDecoder
-from pymodbus.constants import Defaults
-
-from pymodbus.utilities import checkCRC, computeCRC
+from pymodbus.client.sync import BaseModbusClient, ModbusSerialClient
 from pymodbus.compat import byte2int
-from pymodbus.framer import FRAME_HEADER, BYTE_ORDER
+from pymodbus.constants import Defaults
+from pymodbus.factory import ClientDecoder
+from pymodbus.framer import BYTE_ORDER, FRAME_HEADER
+from pymodbus.transaction import ModbusRtuFramer
+from pymodbus.utilities import checkCRC, computeCRC
+
+from classes.protocol_settings import Registry_Type
 
 _logger = logging.getLogger(__name__)
 

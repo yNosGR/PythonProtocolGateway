@@ -1,19 +1,20 @@
 import atexit
+import json
 import random
 import time
-import json
 import warnings
+from configparser import SectionProxy
 
 import paho.mqtt.client
-import paho.mqtt.properties
 import paho.mqtt.packettypes
-
-from paho.mqtt.client import Client as MQTTClient, MQTT_ERR_NO_CONN
+import paho.mqtt.properties
+from paho.mqtt.client import MQTT_ERR_NO_CONN
+from paho.mqtt.client import Client as MQTTClient
 
 from defs.common import strtobool
+
+from ..protocol_settings import Registry_Type, WriteMode, registry_map_entry
 from .transport_base import transport_base
-from configparser import SectionProxy
-from ..protocol_settings import registry_map_entry, WriteMode, Registry_Type
 
 
 class mqtt(transport_base):

@@ -1,18 +1,17 @@
+import ast
 import csv
-from dataclasses import dataclass
-from enum import Enum
 import glob
-import logging
-import time
-from typing import Union
-from defs.common import strtoint
 import itertools
 import json
-import re
+import logging
 import os
-import ast
+import re
+import time
+from dataclasses import dataclass
+from enum import Enum
+from typing import TYPE_CHECKING, Union
 
-from typing import TYPE_CHECKING
+from defs.common import strtoint
 
 if TYPE_CHECKING:
     from configparser import SectionProxy

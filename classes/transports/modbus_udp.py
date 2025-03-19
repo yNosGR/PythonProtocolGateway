@@ -1,7 +1,10 @@
-from classes.protocol_settings import Registry_Type, protocol_settings
-from pymodbus.client.sync import ModbusUdpClient
-from .transport_base import transport_base
 from configparser import SectionProxy
+
+from pymodbus.client.sync import ModbusUdpClient
+
+from classes.protocol_settings import Registry_Type, protocol_settings
+
+from .transport_base import transport_base
 
 
 class modbus_udp(transport_base):

@@ -1,5 +1,7 @@
-import serial.tools.list_ports
 import re
+
+import serial.tools.list_ports
+
 
 def strtobool (val):
     """Convert a string representation of truth to true (1) or false (0).

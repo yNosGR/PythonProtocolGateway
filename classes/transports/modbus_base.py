@@ -3,13 +3,20 @@ import json
 import os
 import re
 import time
+from typing import TYPE_CHECKING
+
 from pymodbus.exceptions import ModbusIOException
 
-from .transport_base import transport_base
-from ..protocol_settings import Data_Type, Registry_Type, registry_map_entry, protocol_settings
 from defs.common import strtobool
 
-from typing import TYPE_CHECKING
+from ..protocol_settings import (
+    Data_Type,
+    Registry_Type,
+    protocol_settings,
+    registry_map_entry,
+)
+from .transport_base import transport_base
+
 if TYPE_CHECKING:
     from configparser import SectionProxy
     try:

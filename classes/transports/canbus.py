@@ -1,19 +1,19 @@
-import re
-import time
-import can
 import asyncio
-import threading
-import platform
 import os
-
-
-
-from .transport_base import transport_base
-from ..protocol_settings import Registry_Type, registry_map_entry, protocol_settings
-from defs.common import strtoint
+import platform
+import re
+import threading
+import time
 from collections import OrderedDict
-
 from typing import TYPE_CHECKING
+
+import can
+
+from defs.common import strtoint
+
+from ..protocol_settings import Registry_Type, protocol_settings, registry_map_entry
+from .transport_base import transport_base
+
 if TYPE_CHECKING:
     from configparser import SectionProxy
 

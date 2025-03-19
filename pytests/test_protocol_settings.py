@@ -1,8 +1,8 @@
-import sys
-import os
-import pytest
 import glob
+import os
+import sys
 
+import pytest
 
 #move up a folder for tests
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))

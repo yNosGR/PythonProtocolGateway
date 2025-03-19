@@ -1,19 +1,18 @@
-from enum import Enum
 import struct
+from enum import Enum
+from typing import TYPE_CHECKING
 
 import serial
 
-from ..Object import Object
-
-from .serial_frame_client import serial_frame_client
-from .transport_base import transport_base
 from defs.common import find_usb_serial_port, get_usb_serial_port_info
 
+from ..Object import Object
+from .serial_frame_client import serial_frame_client
+from .transport_base import transport_base
 
-
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from configparser import SectionProxy
+
     from classes.protocol_settings import protocol_settings, registry_map_entry
 
 

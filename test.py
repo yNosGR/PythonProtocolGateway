@@ -1,12 +1,11 @@
-import re
 import ast
+import re
 
 #pip install "python-can[gs_usb]"
-
-import can #v4.2.0+
+import can  #v4.2.0+
 
 if False:
-    import usb #pyusb - requires https://github.com/mcuee/libusb-win32
+    import usb  #pyusb - requires https://github.com/mcuee/libusb-win32
 
 
 

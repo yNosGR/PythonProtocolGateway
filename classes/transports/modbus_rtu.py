@@ -1,7 +1,6 @@
-from classes.protocol_settings import Registry_Type, protocol_settings
-
 import inspect
 
+from classes.protocol_settings import Registry_Type, protocol_settings
 
 try:
     from pymodbus.client.sync import ModbusSerialClient
@@ -9,9 +8,12 @@ except ImportError:
     from pymodbus.client import ModbusSerialClient
 
 
-from .modbus_base import modbus_base
 from configparser import SectionProxy
+
 from defs.common import find_usb_serial_port, get_usb_serial_port_info, strtoint
+
+from .modbus_base import modbus_base
+
 
 class modbus_rtu(modbus_base):
     port : str = "/dev/ttyUSB0"

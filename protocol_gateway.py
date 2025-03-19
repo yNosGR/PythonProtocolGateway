@@ -19,16 +19,14 @@ if sys.version_info < (3, 9):
 
 
 import argparse
-
-import os
 import logging
+import os
 import sys
 import traceback
 from configparser import ConfigParser, NoOptionError
 
-from classes.protocol_settings import protocol_settings,registry_map_entry
+from classes.protocol_settings import protocol_settings, registry_map_entry
 from classes.transports.transport_base import transport_base
-
 
 __logo = """
 

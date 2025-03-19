@@ -8,8 +8,9 @@ try:
 except ImportError:
     from pymodbus.client import ModbusTcpClient
 
-from .modbus_base import modbus_base
 from configparser import SectionProxy
+
+from .modbus_base import modbus_base
 
 
 class modbus_tcp(modbus_base):
