@@ -1,24 +1,28 @@
-
 import logging
-from classes.protocol_settings import Registry_Type,protocol_settings,registry_map_entry
+from typing import TYPE_CHECKING, Callable
 
-from typing import Callable
-from typing import TYPE_CHECKING
+from classes.protocol_settings import (
+    Registry_Type,
+    protocol_settings,
+    registry_map_entry,
+)
+
 if TYPE_CHECKING:
-    from .transport_base import transport_base
     from configparser import SectionProxy
 
+    from .transport_base import transport_base
+
 class transport_base:
-    type : str = ''
-    protocolSettings : 'protocol_settings'
-    protocol_version : str = ''
-    transport_name : str = ''
-    device_name : str = ''
-    device_serial_number : str = ''
-    device_manufacturer : str = 'hotnoob'
-    device_model : str = 'hotnoob'
-    device_identifier : str = 'hotnoob'
-    bridge : str = ''
+    type : str = ""
+    protocolSettings : "protocol_settings"
+    protocol_version : str = ""
+    transport_name : str = ""
+    device_name : str = ""
+    device_serial_number : str = ""
+    device_manufacturer : str = "hotnoob"
+    device_model : str = "hotnoob"
+    device_identifier : str = "hotnoob"
+    bridge : str = ""
     write_enabled : bool = False
     max_precision : int = 2
 
@@ -27,18 +31,18 @@ class transport_base:
 
     connected : bool = False
 
-    on_message : Callable[['transport_base', registry_map_entry, str], None] = None
+    on_message : Callable[["transport_base", registry_map_entry, str], None] = None
     ''' callback, on message recieved '''
 
     _log : logging.Logger = None
 
-    def __init__(self, settings : 'SectionProxy') -> None:
+    def __init__(self, settings : "SectionProxy") -> None:
 
         self.transport_name = settings.name #section name
 
         #apply log level to logger
-        self._log_level = getattr(logging, settings.get('log_level', fallback='INFO'), logging.INFO)
-        short_name : str = __name__[__name__.rfind('.'): ] if '.' in __name__ else None
+        self._log_level = getattr(logging, settings.get("log_level", fallback="INFO"), logging.INFO)
+        short_name : str = __name__[__name__.rfind("."): ] if "." in __name__ else None
         self._log : logging.Logger = logging.getLogger(short_name + f"[{self.transport_name}]")
 
         self._log.setLevel(self._log_level)
@@ -48,7 +52,7 @@ class transport_base:
         if settings:
             self.device_serial_number = settings.get(["device_serial_number", "serial_number"], self.device_serial_number)
             self.device_manufacturer = settings.get(["device_manufacturer", "manufacturer"], self.device_manufacturer)
-            self.device_name = settings.get(['device_name', 'name'], fallback=self.device_manufacturer+"_"+self.device_serial_number)
+            self.device_name = settings.get(["device_name", "name"], fallback=self.device_manufacturer+"_"+self.device_serial_number)
             self.bridge = settings.get("bridge", self.bridge)
             self.read_interval = settings.getfloat("read_interval", self.read_interval)
             self.max_precision = settings.getint(["max_precision", "precision"], self.max_precision)
@@ -59,7 +63,7 @@ class transport_base:
 
             #load a protocol_settings class for every transport; required for adv features. ie, variable timing.
             #must load after settings
-            self.protocol_version = settings.get('protocol_version')
+            self.protocol_version = settings.get("protocol_version")
             if self.protocol_version:
                 self.protocolSettings = protocol_settings(self.protocol_version, transport_settings=settings)
 
@@ -74,7 +78,7 @@ class transport_base:
     def update_identifier(self):
         self.device_identifier = self.device_serial_number.strip().lower()
 
-    def init_bridge(self, from_transport : 'transport_base'):
+    def init_bridge(self, from_transport : "transport_base"):
         pass
 
     @classmethod
@@ -87,7 +91,7 @@ class transport_base:
     def connect(self):
         pass
 
-    def write_data(self, data : dict[str, registry_map_entry], from_transport : 'transport_base'):
+    def write_data(self, data : dict[str, registry_map_entry], from_transport : "transport_base"):
         ''' general purpose write function for between transports'''
         pass
 
@@ -116,7 +120,7 @@ class transport_base:
     def analyse_protocol(self):
         pass
 
-    def validate_protocol(self, protocolSettings : 'protocol_settings') -> float:
+    def validate_protocol(self, protocolSettings : "protocol_settings") -> float:
         ''' validates protocol'''
         pass
     #endregion

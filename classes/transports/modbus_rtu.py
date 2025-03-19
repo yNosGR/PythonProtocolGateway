@@ -1,7 +1,6 @@
-from classes.protocol_settings import Registry_Type, protocol_settings
-
 import inspect
 
+from classes.protocol_settings import Registry_Type, protocol_settings
 
 try:
     from pymodbus.client.sync import ModbusSerialClient
@@ -9,9 +8,12 @@ except ImportError:
     from pymodbus.client import ModbusSerialClient
 
 
-from .modbus_base import modbus_base
 from configparser import SectionProxy
+
 from defs.common import find_usb_serial_port, get_usb_serial_port_info, strtoint
+
+from .modbus_base import modbus_base
+
 
 class modbus_rtu(modbus_base):
     port : str = "/dev/ttyUSB0"
@@ -19,7 +21,7 @@ class modbus_rtu(modbus_base):
     baudrate : int = 9600
     client : ModbusSerialClient
 
-    pymodbus_slave_arg = 'unit'
+    pymodbus_slave_arg = "unit"
 
     def __init__(self, settings : SectionProxy, protocolSettings : protocol_settings = None):
         super().__init__(settings, protocolSettings=protocolSettings)
@@ -43,8 +45,8 @@ class modbus_rtu(modbus_base):
         self.addresses = [address]
 
         # pymodbus compatability; unit was renamed to address
-        if 'slave' in inspect.signature(ModbusSerialClient.read_holding_registers).parameters:
-            self.pymodbus_slave_arg = 'slave'
+        if "slave" in inspect.signature(ModbusSerialClient.read_holding_registers).parameters:
+            self.pymodbus_slave_arg = "slave"
 
 
         # Get the signature of the __init__ method
@@ -56,16 +58,16 @@ class modbus_rtu(modbus_base):
             self.client = modbus_base.clients[client_str]
             return
 
-        if 'method' in init_signature.parameters:
-            self.client = ModbusSerialClient(method='rtu', port=self.port,
+        if "method" in init_signature.parameters:
+            self.client = ModbusSerialClient(method="rtu", port=self.port,
                                         baudrate=int(self.baudrate),
-                                        stopbits=1, parity='N', bytesize=8, timeout=2
+                                        stopbits=1, parity="N", bytesize=8, timeout=2
                                         )
         else:
             self.client = ModbusSerialClient(
                             port=self.port,
                             baudrate=int(self.baudrate),
-                            stopbits=1, parity='N', bytesize=8, timeout=2
+                            stopbits=1, parity="N", bytesize=8, timeout=2
                             )
 
         #add to clients
@@ -73,12 +75,12 @@ class modbus_rtu(modbus_base):
 
     def read_registers(self, start, count=1, registry_type : Registry_Type = Registry_Type.INPUT, **kwargs):
 
-        if 'unit' not in kwargs:
-            kwargs = {'unit': int(self.addresses[0]), **kwargs}
+        if "unit" not in kwargs:
+            kwargs = {"unit": int(self.addresses[0]), **kwargs}
 
         #compatability
-        if self.pymodbus_slave_arg != 'unit':
-            kwargs['slave'] = kwargs.pop('unit')
+        if self.pymodbus_slave_arg != "unit":
+            kwargs["slave"] = kwargs.pop("unit")
 
         if registry_type == Registry_Type.INPUT:
             return self.client.read_input_registers(address=start, count=count, **kwargs)
@@ -89,12 +91,12 @@ class modbus_rtu(modbus_base):
         if not self.write_enabled:
             return
 
-        if 'unit' not in kwargs:
-            kwargs = {'unit': self.addresses[0], **kwargs}
+        if "unit" not in kwargs:
+            kwargs = {"unit": self.addresses[0], **kwargs}
 
         #compatability
-        if self.pymodbus_slave_arg != 'unit':
-            kwargs['slave'] = kwargs.pop('unit')
+        if self.pymodbus_slave_arg != "unit":
+            kwargs["slave"] = kwargs.pop("unit")
 
         self.client.write_register(register, value, **kwargs) #function code 0x06 writes to holding register
 

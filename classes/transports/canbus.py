@@ -1,29 +1,29 @@
-import re
-import time
-import can
 import asyncio
-import threading
-import platform
 import os
-
-
-
-from .transport_base import transport_base
-from ..protocol_settings import Registry_Type, registry_map_entry, protocol_settings
-from defs.common import strtoint
+import platform
+import re
+import threading
+import time
 from collections import OrderedDict
-
 from typing import TYPE_CHECKING
+
+import can
+
+from defs.common import strtoint
+
+from ..protocol_settings import Registry_Type, protocol_settings, registry_map_entry
+from .transport_base import transport_base
+
 if TYPE_CHECKING:
     from configparser import SectionProxy
 
 class canbus(transport_base):
     ''' canbus is a more passive protocol; todo to include active commands to trigger canbus responses '''
 
-    interface : str = 'socketcan'
+    interface : str = "socketcan"
     ''' bustype / interface for canbus device '''
 
-    port : str = ''
+    port : str = ""
     ''' 'can0' '''
 
     baudrate : int = 500000
@@ -55,11 +55,11 @@ class canbus(transport_base):
     linux : bool = True
 
 
-    def __init__(self, settings : 'SectionProxy', protocolSettings : 'protocol_settings' = None):
+    def __init__(self, settings : "SectionProxy", protocolSettings : "protocol_settings" = None):
         super().__init__(settings, protocolSettings=protocolSettings)
 
         #check if running on windows or linux
-        self.linux = platform.system() != 'Windows'
+        self.linux = platform.system() != "Windows"
 
 
         self.port = settings.get(["port", "channel"], "")
@@ -107,6 +107,7 @@ class canbus(transport_base):
             print("socketcan setup not implemented for windows")
             return
 
+        # ruff: noqa: S605, S607
         self._log.info("restart and configure socketcan")
         os.system("ip link set can0 down")
         os.system("ip link set can0 type can restart-ms 100")
@@ -118,11 +119,12 @@ class canbus(transport_base):
             return True
 
         try:
-            with open(f'/sys/class/net/{self.port}/operstate', 'r') as f:
+            with open(f"/sys/class/net/{self.port}/operstate", "r") as f:
                 state = f.read().strip()
-            return state == 'up'
         except FileNotFoundError:
             return False
+        else:
+            return state == "up"
 
     def start_loop(self):
         self.read_bus(self.bus)
@@ -182,7 +184,7 @@ class canbus(transport_base):
 
     def read_serial_number(self) -> str:
         ''' not so simple in canbus'''
-        return ''
+        return ""
         serial_number = str(self.read_variable("Serial Number", Registry_Type.HOLDING))
         print("read SN: " +serial_number)
         if serial_number:
@@ -190,22 +192,22 @@ class canbus(transport_base):
 
         sn2 = ""
         sn3 = ""
-        fields = ['Serial No 1', 'Serial No 2', 'Serial No 3', 'Serial No 4', 'Serial No 5']
+        fields = ["Serial No 1", "Serial No 2", "Serial No 3", "Serial No 4", "Serial No 5"]
         for field in fields:
             self._log.info("Reading " + field)
             registry_entry = self.protocolSettings.get_holding_registry_entry(field)
             if registry_entry is not None:
                 self._log.info("Reading " + field + "("+str(registry_entry.register)+")")
                 data = self.read_modbus_registers(registry_entry.register, registry_type=Registry_Type.HOLDING)
-                if not hasattr(data, 'registers') or data.registers is None:
+                if not hasattr(data, "registers") or data.registers is None:
                     self._log.critical("Failed to get serial number register ("+field+") ; exiting")
                     exit()
 
                 serial_number = serial_number  + str(data.registers[0])
 
-                data_bytes = data.registers[0].to_bytes((data.registers[0].bit_length() + 7) // 8, byteorder='big')
-                sn2 = sn2 + str(data_bytes.decode('utf-8'))
-                sn3 = str(data_bytes.decode('utf-8')) + sn3
+                data_bytes = data.registers[0].to_bytes((data.registers[0].bit_length() + 7) // 8, byteorder="big")
+                sn2 = sn2 + str(data_bytes.decode("utf-8"))
+                sn3 = str(data_bytes.decode("utf-8")) + sn3
 
             time.sleep(self.modbus_delay*2) #sleep inbetween requests so modbus can rest
 
@@ -257,7 +259,7 @@ class canbus(transport_base):
         ''' read's variable from cache'''
         ##clean for convinecne
         if variable_name:
-            variable_name = variable_name.strip().lower().replace(' ', '_')
+            variable_name = variable_name.strip().lower().replace(" ", "_")
 
         registry_map = self.protocolSettings.get_registry_map(registry_type)
 

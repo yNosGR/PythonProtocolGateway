@@ -1,17 +1,16 @@
-import re
 import ast
+import re
 
 #pip install "python-can[gs_usb]"
-
-import can #v4.2.0+
+import can  #v4.2.0+
 
 if False:
-    import usb #pyusb - requires https://github.com/mcuee/libusb-win32
+    import usb  #pyusb - requires https://github.com/mcuee/libusb-win32
 
 
 
 # Candlelight firmware on Linux
-bus = can.interface.Bus(interface='socketcan', channel='can0', bitrate=500000)
+bus = can.interface.Bus(interface="socketcan", channel="can0", bitrate=500000)
 
 # Stock slcan firmware on Linux
 #bus = can.interface.Bus(bustype='slcan', channel='/dev/ttyACM0', bitrate=500000)
@@ -41,21 +40,21 @@ try:
         if msg.arbitration_id == 0x0FFF:
             # The data is a 2-byte value (un16)
             soc_bytes = msg.data[:2]
-            soc = int.from_bytes(soc_bytes, byteorder='big', signed=False) / 100.0
+            soc = int.from_bytes(soc_bytes, byteorder="big", signed=False) / 100.0
 
             print(f"State of Charge: {soc:.2f}%")
 
         if msg.arbitration_id == 0x0355:
             # Extract and print SOC value (U16, 0.01%)
-            soc_value = int.from_bytes(msg.data[0:0 + 2], byteorder='little')
+            soc_value = int.from_bytes(msg.data[0:0 + 2], byteorder="little")
             print(f"State of Charge (SOC) Value: {soc_value / 100:.2f}%")
 
             # Extract and print SOH value (U16, 1%)
-            soh_value = int.from_bytes(msg.data[2:2 + 2], byteorder='little')
+            soh_value = int.from_bytes(msg.data[2:2 + 2], byteorder="little")
             print(f"State of Health (SOH) Value: {soh_value:.2f}%")
 
             # Extract and print HiRes SOC value (U16, 0.01%)
-            hires_soc_value = int.from_bytes(msg.data[4:4 + 2], byteorder='little')
+            hires_soc_value = int.from_bytes(msg.data[4:4 + 2], byteorder="little")
             print(f"High Resolution SOC Value: {hires_soc_value / 100:.2f}%")
 
 except KeyboardInterrupt:
@@ -72,7 +71,7 @@ vars = {"battery 1 number of cells": 8, "battery 1 number of temperature": 2}
 # Function to evaluate mathematical expressions
 def evaluate_variables(expression):
     # Define a regular expression pattern to match variables
-    var_pattern = re.compile(r'\[([^\[\]]+)\]')
+    var_pattern = re.compile(r"\[([^\[\]]+)\]")
 
     # Replace variables in the expression with their values
     def replace_vars(match):
@@ -87,7 +86,7 @@ def evaluate_variables(expression):
 
 def evaluate_ranges(expression):
     # Define a regular expression pattern to match ranges
-    range_pattern = re.compile(r'\[.*?((?P<start>\d+)\s?\~\s?(?P<end>\d+)).*?\]')
+    range_pattern = re.compile(r"\[.*?((?P<start>\d+)\s?\~\s?(?P<end>\d+)).*?\]")
 
     # Find all ranges in the expression
     ranges = range_pattern.findall(expression)
@@ -115,19 +114,19 @@ def evaluate_ranges(expression):
 
 def evaluate_expression(expression):
      # Define a regular expression pattern to match "maths"
-    var_pattern = re.compile(r'\[(?P<maths>.*?)\]')
+    var_pattern = re.compile(r"\[(?P<maths>.*?)\]")
 
     # Replace variables in the expression with their values
     def replace_vars(match):
         try:
             maths = match.group("maths")
-            maths = re.sub(r'\s', '', maths) #remove spaces, because ast.parse doesnt like them
+            maths = re.sub(r"\s", "", maths) #remove spaces, because ast.parse doesnt like them
 
             # Parse the expression safely
-            tree = ast.parse(maths, mode='eval')
+            tree = ast.parse(maths, mode="eval")
 
             # Evaluate the expression
-            end_value = eval(compile(tree, filename='', mode='eval'))
+            end_value = ast.literal_eval(compile(tree, filename="", mode="eval"))
 
             return str(end_value)
         except Exception:
