@@ -357,10 +357,12 @@ class modbus_base(transport_base):
         current_value = current_registers[entry.register]
 
         if not self.protocolSettings.validate_registry_entry(entry, current_value):
-            raise ValueError(f"Invalid value in register '{current_value}'. Unsafe to write")
+            err = f"Invalid value in register '{current_value}'. Unsafe to write"
+            raise ValueError(err)
 
         if not self.protocolSettings.validate_registry_entry(entry, value):
-            raise ValueError(f"Invalid new value, '{value}'. Unsafe to write")
+            err = f"Invalid new value, '{value}'. Unsafe to write"
+            raise ValueError(err)
 
         #handle codes
         if entry.variable_name+"_codes" in self.protocolSettings.codes:

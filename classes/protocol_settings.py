@@ -237,13 +237,16 @@ class registry_map_entry:
 
 
 class protocol_settings:
+
     protocol : str
     transport : str
     settings_dir : str
     variable_mask : list[str]
     ''' list of variables to allow and exclude all others '''
+
     variable_screen : list[str]
     ''' list of variables to exclude '''
+
     registry_map : dict[Registry_Type, list[registry_map_entry]] = {}
     registry_map_size : dict[Registry_Type, int] = {}
     registry_map_ranges : dict[Registry_Type, list[tuple]] = {}
@@ -801,6 +804,8 @@ class protocol_settings:
                 ranges.append((min(registers), max(registers)-min(registers)+1)) ## APPENDING A TUPLE!
 
         return ranges
+
+
     def find_protocol_file(self, file : str, base_dir : str = '' ) -> str:
 
         path = base_dir + '/' + file
@@ -1230,7 +1235,7 @@ class protocol_settings:
                     tree = ast.parse(maths, mode='eval')
 
                     # Evaluate the expression
-                    end_value = eval(compile(tree, filename='', mode='eval'))
+                    end_value = ast.literal_eval(compile(tree, filename='', mode='eval'))
 
                     return str(end_value)
                 except Exception:

@@ -119,7 +119,7 @@ class mqtt(transport_base):
             self.__reconnecting = time.time()
             try:
                 self._log.warning("Attempting to reconnect("+str(attempt)+")...")
-                if random.randint(0,1): #alternate between methods because built in reconnect might be unreliable.
+                if random.randint(0,1): # noqa: S311 alternate between methods because built in reconnect might be unreliable.
                     self.client.reconnect()
                 else:
                     self.client.loop_stop()

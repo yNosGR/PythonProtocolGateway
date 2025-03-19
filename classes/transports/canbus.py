@@ -107,6 +107,7 @@ class canbus(transport_base):
             print("socketcan setup not implemented for windows")
             return
 
+        # ruff: noqa: S605, S607
         self._log.info("restart and configure socketcan")
         os.system("ip link set can0 down")
         os.system("ip link set can0 type can restart-ms 100")
@@ -120,9 +121,10 @@ class canbus(transport_base):
         try:
             with open(f'/sys/class/net/{self.port}/operstate', 'r') as f:
                 state = f.read().strip()
-            return state == 'up'
         except FileNotFoundError:
             return False
+        else:
+            return state == 'up'
 
     def start_loop(self):
         self.read_bus(self.bus)

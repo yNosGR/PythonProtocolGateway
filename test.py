@@ -127,7 +127,7 @@ def evaluate_expression(expression):
             tree = ast.parse(maths, mode='eval')
 
             # Evaluate the expression
-            end_value = eval(compile(tree, filename='', mode='eval'))
+            end_value = ast.literal_eval(compile(tree, filename='', mode='eval'))
 
             return str(end_value)
         except Exception:
