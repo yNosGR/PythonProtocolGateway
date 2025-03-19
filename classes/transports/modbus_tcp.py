@@ -17,7 +17,7 @@ class modbus_tcp(modbus_base):
     port : str = 502
     host : str = ""
     client : ModbusTcpClient
-    pymodbus_slave_arg = 'unit'
+    pymodbus_slave_arg = "unit"
 
     def __init__(self, settings : SectionProxy, protocolSettings : protocol_settings = None):
         self.host = settings.get("host", "")
@@ -27,8 +27,8 @@ class modbus_tcp(modbus_base):
         self.port = settings.getint("port", self.port)
 
         # pymodbus compatability; unit was renamed to address
-        if 'slave' in inspect.signature(ModbusTcpClient.read_holding_registers).parameters:
-            self.pymodbus_slave_arg = 'slave'
+        if "slave" in inspect.signature(ModbusTcpClient.read_holding_registers).parameters:
+            self.pymodbus_slave_arg = "slave"
 
         client_str = self.host+"("+str(self.port)+")"
         #check if client is already initialied
@@ -45,12 +45,12 @@ class modbus_tcp(modbus_base):
 
     def read_registers(self, start, count=1, registry_type : Registry_Type = Registry_Type.INPUT, **kwargs):
 
-        if 'unit' not in kwargs:
-            kwargs = {'unit': 1, **kwargs}
+        if "unit" not in kwargs:
+            kwargs = {"unit": 1, **kwargs}
 
         #compatability
-        if self.pymodbus_slave_arg != 'unit':
-            kwargs['slave'] = kwargs.pop('unit')
+        if self.pymodbus_slave_arg != "unit":
+            kwargs["slave"] = kwargs.pop("unit")
 
         if registry_type == Registry_Type.INPUT:
             return self.client.read_input_registers(start, count, **kwargs  )

@@ -5,9 +5,9 @@ import re
 input_string = "1=Charger Only;2=Inverter Only;3=On;4=Off"
 while True:
     user_input = input("Enter Data: ")
-    user_input  = re.sub(r'\s+', " ", user_input)
-    user_input  = re.sub(r'\:\s+', ":", user_input)
-    user_input  = re.sub(r'\s+\:', ":", user_input)
+    user_input  = re.sub(r"\s+", " ", user_input)
+    user_input  = re.sub(r"\:\s+", ":", user_input)
+    user_input  = re.sub(r"\s+\:", ":", user_input)
 
     # Split the string into key-value pairs
 

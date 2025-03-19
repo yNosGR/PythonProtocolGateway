@@ -8,17 +8,17 @@ def extract_first_header(file_path):
         for line in file:
             line = line.strip()
             if line.startswith("#"):
-                return line.replace('#', '')
+                return line.replace("#", "")
     return None
 
 
 def generate_readme(directory : str, folder_order : str = [], output_file : str ="README.md"):
-    with open(directory+'/'+output_file, "w", encoding="utf-8") as readme:
+    with open(directory+"/"+output_file, "w", encoding="utf-8") as readme:
         readme.write("# README Index\n\n")
         readme.write("This README file contains an index of all files in the documentation directory.\n\n")
         readme.write("## File List\n\n")
 
-        note_file : str = directory+'/note.md'
+        note_file : str = directory+"/note.md"
         if os.path.exists(note_file):
             readme.write("\n## Additional Notes\n\n")
             with open(note_file, "r", encoding="utf-8") as note:
@@ -33,7 +33,7 @@ def generate_readme(directory : str, folder_order : str = [], output_file : str 
             relative_folder = os.path.relpath(root, directory).replace("\\", "/") #use linux path structure
 
             #exclude . folders
-            if relative_folder[0] == '.':
+            if relative_folder[0] == ".":
                 continue
 
             if relative_folder != previous_folder:

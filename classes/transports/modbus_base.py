@@ -29,7 +29,7 @@ class modbus_base(transport_base):
 
 
     #this is specifically static
-    clients : dict[str, 'BaseModbusClient'] = {}
+    clients : dict[str, "BaseModbusClient"] = {}
     ''' str is identifier, dict of clients when multiple transports use the same ports '''
 
     #non-static here for reference, type hinting, python bs ect...
@@ -49,27 +49,27 @@ class modbus_base(transport_base):
     send_holding_register : bool = True
     send_input_register : bool = True
 
-    def __init__(self, settings : 'SectionProxy', protocolSettings : 'protocol_settings' = None):
+    def __init__(self, settings : "SectionProxy", protocolSettings : "protocol_settings" = None):
         super().__init__(settings)
 
-        self.analyze_protocol_enabled = settings.getboolean('analyze_protocol', fallback=self.analyze_protocol_enabled)
-        self.analyze_protocol_save_load = settings.getboolean('analyze_protocol_save_load', fallback=self.analyze_protocol_save_load)
+        self.analyze_protocol_enabled = settings.getboolean("analyze_protocol", fallback=self.analyze_protocol_enabled)
+        self.analyze_protocol_save_load = settings.getboolean("analyze_protocol_save_load", fallback=self.analyze_protocol_save_load)
 
 
         #get defaults from protocol settings
-        if 'send_input_register' in self.protocolSettings.settings:
-            self.send_input_register = strtobool(self.protocolSettings.settings['send_input_register'])
+        if "send_input_register" in self.protocolSettings.settings:
+            self.send_input_register = strtobool(self.protocolSettings.settings["send_input_register"])
 
-        if 'send_holding_register' in self.protocolSettings.settings:
-            self.send_holding_register = strtobool(self.protocolSettings.settings['send_holding_register'])
+        if "send_holding_register" in self.protocolSettings.settings:
+            self.send_holding_register = strtobool(self.protocolSettings.settings["send_holding_register"])
 
-        if 'batch_delay' in self.protocolSettings.settings:
-            self.modbus_delay = float(self.protocolSettings.settings['batch_delay'])
+        if "batch_delay" in self.protocolSettings.settings:
+            self.modbus_delay = float(self.protocolSettings.settings["batch_delay"])
 
         #allow enable/disable of which registers to send
-        self.send_holding_register = settings.getboolean('send_holding_register', fallback=self.send_holding_register)
-        self.send_input_register = settings.getboolean('send_input_register', fallback=self.send_input_register)
-        self.modbus_delay = settings.getfloat(['batch_delay', 'modbus_delay'], fallback=self.modbus_delay)
+        self.send_holding_register = settings.getboolean("send_holding_register", fallback=self.send_holding_register)
+        self.send_input_register = settings.getboolean("send_input_register", fallback=self.send_input_register)
+        self.modbus_delay = settings.getfloat(["batch_delay", "modbus_delay"], fallback=self.modbus_delay)
         self.modbus_delay_setting = self.modbus_delay
 
 
@@ -101,22 +101,22 @@ class modbus_base(transport_base):
 
         sn2 = ""
         sn3 = ""
-        fields = ['Serial No 1', 'Serial No 2', 'Serial No 3', 'Serial No 4', 'Serial No 5']
+        fields = ["Serial No 1", "Serial No 2", "Serial No 3", "Serial No 4", "Serial No 5"]
         for field in fields:
             self._log.info("Reading " + field)
             registry_entry = self.protocolSettings.get_holding_registry_entry(field)
             if registry_entry is not None:
                 self._log.info("Reading " + field + "("+str(registry_entry.register)+")")
                 data = self.read_modbus_registers(registry_entry.register, registry_type=Registry_Type.HOLDING)
-                if not hasattr(data, 'registers') or data.registers is None:
+                if not hasattr(data, "registers") or data.registers is None:
                     self._log.critical("Failed to get serial number register ("+field+") ; exiting")
                     exit()
 
                 serial_number = serial_number  + str(data.registers[0])
 
-                data_bytes = data.registers[0].to_bytes((data.registers[0].bit_length() + 7) // 8, byteorder='big')
-                sn2 = sn2 + str(data_bytes.decode('utf-8'))
-                sn3 = str(data_bytes.decode('utf-8')) + sn3
+                data_bytes = data.registers[0].to_bytes((data.registers[0].bit_length() + 7) // 8, byteorder="big")
+                sn2 = sn2 + str(data_bytes.decode("utf-8"))
+                sn3 = str(data_bytes.decode("utf-8")) + sn3
 
             time.sleep(self.modbus_delay*2) #sleep inbetween requests so modbus can rest
 
@@ -178,7 +178,7 @@ class modbus_base(transport_base):
 
         return info
 
-    def validate_protocol(self, protocolSettings : 'protocol_settings') -> float:
+    def validate_protocol(self, protocolSettings : "protocol_settings") -> float:
         score_percent = self.validate_registry(Registry_Type.HOLDING)
         return score_percent
 
@@ -204,13 +204,13 @@ class modbus_base(transport_base):
         self._log.info("validation score: " + str(score) + " of " + str(maxScore) + " : " + str(round(percent)) + "%")
         return percent
 
-    def analyze_protocol(self, settings_dir : str = 'protocols'):
+    def analyze_protocol(self, settings_dir : str = "protocols"):
         print("=== PROTOCOL ANALYZER ===")
         protocol_names : list[str] = []
         protocols : dict[str,protocol_settings] = {}
 
         for file in glob.glob(settings_dir + "/*.json"):
-            file = file.lower().replace(settings_dir, '').replace('/', '').replace('\\', '').replace('\\', '').replace('.json', '')
+            file = file.lower().replace(settings_dir, "").replace("/", "").replace("\\", "").replace("\\", "").replace(".json", "")
             print(file)
             protocol_names.append(file)
 
@@ -283,7 +283,7 @@ class modbus_base(transport_base):
         def evaluate_score(entry : registry_map_entry, val):
             score = 0
             if entry.data_type == Data_Type.ASCII:
-                if val and not re.match('[^a-zA-Z0-9_-]', val): #validate ascii
+                if val and not re.match("[^a-zA-Z0-9_-]", val): #validate ascii
                     mod = 1
                     if entry.concatenate:
                         mod = len(entry.concatenate_registers)
@@ -419,7 +419,7 @@ class modbus_base(transport_base):
     def read_variable(self, variable_name : str, registry_type : Registry_Type, entry : registry_map_entry = None):
         ##clean for convinecne
         if variable_name:
-            variable_name = variable_name.strip().lower().replace(' ', '_')
+            variable_name = variable_name.strip().lower().replace(" ", "_")
 
         registry_map = self.protocolSettings.get_registry_map(registry_type)
 
@@ -485,7 +485,7 @@ class modbus_base(transport_base):
 
             if isinstance(register, bytes) or register.isError() or isError: #sometimes weird errors are handled incorrectly and response is a ascii error string
                 if isinstance(register, bytes):
-                    self._log.error(register.decode('utf-8'))
+                    self._log.error(register.decode("utf-8"))
                 else:
                     self._log.error(register.__str__)
                 self.modbus_delay += self.modbus_delay_increament #increase delay, error is likely due to modbus being busy

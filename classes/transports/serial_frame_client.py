@@ -17,7 +17,7 @@ class serial_frame_client():
 
     max_frame_size : int = 256
 
-    port : str = '/dev/ttyUSB0'
+    port : str = "/dev/ttyUSB0"
     baud :  int = 9600
 
     timeout : float = 5
