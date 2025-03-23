@@ -12,6 +12,7 @@ from defs.common import strtobool
 from ..protocol_settings import (
     Data_Type,
     Registry_Type,
+    WriteMode,
     protocol_settings,
     registry_map_entry,
 )
@@ -204,6 +205,10 @@ class modbus_base(transport_base):
                     score = score + self.protocolSettings.validate_registry_entry(value, info[value.variable_name])
 
         maxScore = len(registry_map)
+        for entry in registry_map: #adjust max score to exclude disabled registers
+            if entry.write_mode == WriteMode.WRITEONLY or entry.write_mode == WriteMode.READDISABLED:
+                maxScore -= 1
+
         percent = score*100/maxScore
         self._log.info("validation score: " + str(score) + " of " + str(maxScore) + " : " + str(round(percent)) + "%")
         return percent

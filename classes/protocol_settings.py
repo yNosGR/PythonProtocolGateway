@@ -1,3 +1,4 @@
+import sys
 import ast
 import csv
 import glob
@@ -780,7 +781,7 @@ class protocol_settings:
 
         timestamp_ms = int(time.time() * 1000)
         if init : #hack so that all registers are read initially without adding extra if in loop
-            timestamp_ms = 0
+            timestamp_ms = sys.maxsize
 
         while (start := start+max_batch_size) <= max_register:
 
@@ -1162,10 +1163,12 @@ class protocol_settings:
                                 return len(entry.concatenate_registers)
 
             else: #default type
-                if int(val) >= entry.value_min and int(val) <= entry.value_max:
+                
+                intval = int(val)
+                if intval >= entry.value_min and intval <= entry.value_max:
                     return 1
 
-            self._log.error(f"validate_registry_entry fail overall {entry.value_min} / {entry.value_max} / {int(val)}")
+                self._log.error(f"validate_registry_entry fail overall {entry.value_min} / {entry.value_max} / {intval}")
 
             return 0
 
