@@ -24,6 +24,8 @@ class transport_base:
     device_identifier : str = "hotnoob"
     bridge : str = ""
     write_enabled : bool = False
+    write_unsafe  : bool = False
+    ''' by pass some write validation '''
     max_precision : int = 2
 
     read_interval : float = 0
@@ -56,10 +58,16 @@ class transport_base:
             self.bridge = settings.get("bridge", self.bridge)
             self.read_interval = settings.getfloat("read_interval", self.read_interval)
             self.max_precision = settings.getint(["max_precision", "precision"], self.max_precision)
-            if "write_enabled" in settings:
+            if "write_enabled" in settings or "enable_write" in settings:
                 self.write_enabled = settings.getboolean(["write_enabled", "enable_write"], self.write_enabled)
-            else:
-                self.write_enabled = settings.getboolean("write", self.write_enabled)
+
+            if "write" in settings:
+                if settings.get("write", "").lower() == "unsafe":
+                    self.write_enabled = True
+                    self.write_unsafe = True
+                else:
+                    self.write_enabled = settings.getboolean("write", self.write_enabled)
+
 
             #load a protocol_settings class for every transport; required for adv features. ie, variable timing.
             #must load after settings

@@ -129,6 +129,10 @@ class modbus_base(transport_base):
         return serial_number
 
     def enable_write(self):
+        if self.write_enabled and self.write_unsafe:
+            self._log.warning("enable write - validation SKIPPED")
+            return
+
         self._log.info("Validating Protocol for Writing")
         self.write_enabled = False
         score_percent = self.validate_protocol(Registry_Type.HOLDING)
