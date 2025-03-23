@@ -780,8 +780,6 @@ class protocol_settings:
         ranges : list[tuple] = []
 
         timestamp_ms = int(time.time() * 1000)
-        if init : #hack so that all registers are read initially without adding extra if in loop
-            timestamp_ms = sys.maxsize
 
         while (start := start+max_batch_size) <= max_register:
 
@@ -796,7 +794,7 @@ class protocol_settings:
                         continue
 
                     #we are assuming calc registry ranges is being called EVERY READ.
-                    if register.next_read_timestamp < timestamp_ms:
+                    if init or register.next_read_timestamp < timestamp_ms:
                         register.next_read_timestamp = timestamp_ms + register.read_interval
                         registers.append(register.register)
 
