@@ -403,7 +403,7 @@ class modbus_base(transport_base):
 
         #apply unit_mod before writing.
         if entry.unit_mod != 1:
-            value = int(value) / entry.unit_mod # say unitmod is 0.1. 100*0.1 = 10.0. 10 / 0.1 = 100.
+            value = int(float(value) / entry.unit_mod) # say unitmod is 0.1. 105*0.1 = 10.5. 10.5 / 0.1 = 105.
 
         #results[entry.variable_name]
         ushortValue : int = None #ushort
