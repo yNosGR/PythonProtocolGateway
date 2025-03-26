@@ -1,4 +1,3 @@
-import sys
 import ast
 import csv
 import glob
@@ -1161,7 +1160,6 @@ class protocol_settings:
                                 return len(entry.concatenate_registers)
 
             else: #default type
-                
                 intval = int(val)
                 if intval >= entry.value_min and intval <= entry.value_max:
                     return 1

@@ -16,7 +16,7 @@ from ..protocol_settings import (
     protocol_settings,
     registry_map_entry,
 )
-from .transport_base import transport_base, TransportWriteMode
+from .transport_base import TransportWriteMode, transport_base
 
 if TYPE_CHECKING:
     from configparser import SectionProxy
@@ -76,7 +76,7 @@ class modbus_base(transport_base):
 
         if self.analyze_protocol_enabled:
             self.connect()
-            self.analyze_protocol() 
+            self.analyze_protocol()
             quit()
 
     def init_after_connect(self):
@@ -441,7 +441,7 @@ class modbus_base(transport_base):
 
         if ushortValue is None:
             raise ValueError("Invalid value - None")
-        
+
         self._log.info(f"WRITE: {current_value} => {value} ( {registry[entry.register]} => {ushortValue} ) to Register {entry.register}")
         self.write_register(entry.register, ushortValue)
         entry.next_read_timestamp = 0 #ensure is read next interval
