@@ -377,7 +377,7 @@ class modbus_base(transport_base):
 
 
         temp_map = [entry]
-        ranges = self.protocolSettings.calculate_registry_ranges(temp_map, init=True) #init=True to bypass timechecks
+        ranges = self.protocolSettings.calculate_registry_ranges(temp_map, self.protocolSettings.registry_map_size[registry_type], init=True) #init=True to bypass timechecks
         registry = self.read_modbus_registers( ranges=ranges, registry_type=registry_type)
         info = self.protocolSettings.process_registery(registry, temp_map)
         #read current value
@@ -419,13 +419,16 @@ class modbus_base(transport_base):
             clear_mask = ~(bit_mask)  # Mask for clearing the bits to be updated
 
             # Clear the bits to be updated in the current_value
-            ushortValue = current_value & clear_mask
+            ushortValue = registry[entry.register] & clear_mask
 
             # Set the bits according to the new_value at the specified bit position
             ushortValue |= (new_val << bit_index) & bit_mask
 
+            #bit_size = Data_Type.getSize(entry.data_type)
             bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
+            bit_index = entry.register_bit
             check_value = (ushortValue >> bit_index) & bit_mask
+
 
             if check_value != new_val:
                 raise ValueError("something went wrong bitwise")
@@ -435,7 +438,7 @@ class modbus_base(transport_base):
         if ushortValue is None:
             raise ValueError("Invalid value - None")
 
-        self._log.info(f"WRITE: {current_value} => {ushortValue} to Register {entry.register}")
+        self._log.info(f"WRITE: {current_value} => {value} ( {registry[entry.register]} => {ushortValue} ) to Register {entry.register}")
         self.write_register(entry.register, ushortValue)
 
 
