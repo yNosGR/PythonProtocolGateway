@@ -43,6 +43,19 @@ class modbus_tcp(modbus_base):
 
         super().__init__(settings, protocolSettings=protocolSettings)
 
+    def write_register(self, register : int, value : int, **kwargs):
+        if not self.write_enabled:
+            return
+
+        if "unit" not in kwargs:
+            kwargs = {"unit": 1, **kwargs}
+
+        #compatability
+        if self.pymodbus_slave_arg != "unit":
+            kwargs["slave"] = kwargs.pop("unit")
+
+        self.client.write_register(register, value, **kwargs) #function code 0x06 writes to holding register
+
     def read_registers(self, start, count=1, registry_type : Registry_Type = Registry_Type.INPUT, **kwargs):
 
         if "unit" not in kwargs:

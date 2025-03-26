@@ -178,7 +178,7 @@ class mqtt(transport_base):
 
     def client_on_message(self, client, userdata, msg):
         """ The callback for when a PUBLISH message is received from the server. """
-        self._log.info(msg.topic+" "+str(msg.payload.decode("utf-8")))
+        self._log.info("MQTT MSG: " + msg.topic+" "+str(msg.payload.decode("utf-8")))
 
         #self.protocolSettings.validate_registry_entry
         if msg.topic in self.__write_topics:

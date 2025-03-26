@@ -16,7 +16,7 @@ from ..protocol_settings import (
     protocol_settings,
     registry_map_entry,
 )
-from .transport_base import transport_base
+from .transport_base import transport_base, TransportWriteMode
 
 if TYPE_CHECKING:
     from configparser import SectionProxy
@@ -76,7 +76,7 @@ class modbus_base(transport_base):
 
         if self.analyze_protocol_enabled:
             self.connect()
-            self.analyze_protocol()
+            self.analyze_protocol() 
             quit()
 
     def init_after_connect(self):
@@ -130,8 +130,8 @@ class modbus_base(transport_base):
         return serial_number
 
     def enable_write(self):
-        if self.write_enabled and self.write_unsafe:
-            self._log.warning("enable write - validation SKIPPED")
+        if self.write_enabled and self.write_mode == TransportWriteMode.UNSAFE:
+            self._log.warning("enable write - WARNING - UNSAFE MODE - validation SKIPPED")
             return
 
         self._log.info("Validating Protocol for Writing")
@@ -140,6 +140,13 @@ class modbus_base(transport_base):
         if(score_percent > 90):
             self.write_enabled = True
             self._log.warning("enable write - validation passed")
+        elif self.write_mode == TransportWriteMode.RELAXED:
+            self.write_enabled = True
+            self._log.warning("enable write - WARNING - RELAXED MODE")
+        else:
+            self._log.error("enable write FAILED - WRITE DISABLED")
+
+
 
     def write_data(self, data : dict[str, str], from_transport : transport_base) -> None:
         if not self.write_enabled:
@@ -372,13 +379,13 @@ class modbus_base(transport_base):
         current_registers = self.read_modbus_registers(start=entry.register, end=entry.register, registry_type=registry_type)
         current_value = current_registers[entry.register]
 
-        if not self.protocolSettings.validate_registry_entry(entry, current_value):
-            err = f"Invalid value in register '{current_value}'. Unsafe to write"
-            raise ValueError(err)
+        if not self.write_mode == TransportWriteMode.UNSAFE:
+            if not self.protocolSettings.validate_registry_entry(entry, current_value):
+                self._log.error(f"WRITE_ERROR: Invalid value in register '{current_value}'. Unsafe to write")
+                #raise ValueError(err)
 
-        if not self.protocolSettings.validate_registry_entry(entry, value):
-            err = f"Invalid new value, '{value}'. Unsafe to write"
-            raise ValueError(err)
+            if not self.protocolSettings.validate_registry_entry(entry, value):
+                self._log.error(f"WRITE_ERROR: Invalid new value, '{value}'. Unsafe to write")
 
         #handle codes
         if entry.variable_name+"_codes" in self.protocolSettings.codes:
@@ -422,6 +429,7 @@ class modbus_base(transport_base):
         if ushortValue is None:
             raise ValueError("Invalid value - None")
 
+        self._log.info(f"WRITE: {current_value} => {ushortValue} to Register {entry.register}")
         self.write_register(entry.register, ushortValue)
 
 

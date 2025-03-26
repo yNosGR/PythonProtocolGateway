@@ -1166,7 +1166,7 @@ class protocol_settings:
                 if intval >= entry.value_min and intval <= entry.value_max:
                     return 1
 
-                self._log.error(f"validate_registry_entry fail overall {entry.value_min} / {entry.value_max} / {intval}")
+                self._log.error(f"validate_registry_entry '{entry.variable_name}' fail (INT) {intval} != {entry.value_min}~{entry.value_max}")
 
             return 0
 

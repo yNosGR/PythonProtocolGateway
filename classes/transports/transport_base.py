@@ -1,3 +1,4 @@
+from enum import Enum
 import logging
 from typing import TYPE_CHECKING, Callable
 
@@ -12,6 +13,44 @@ if TYPE_CHECKING:
 
     from .transport_base import transport_base
 
+class TransportWriteMode(Enum):
+    READ = 0x00
+    ''' READ ONLY '''
+    WRITE = 0x01
+    ''' Standard Write Mode, ALL SAFTIES IN PLACE'''
+    RELAXED = 0x02
+    ''' less strict - initial protocol validation skipped'''
+    UNSAFE = 0x03
+    ''' skip all safties '''
+
+    @classmethod
+    def fromString(cls, name : str):
+        name = name.strip().upper()
+
+        #common inputs
+        alias : dict[str,TransportWriteMode] = {
+            "" : "READ", #default
+            "FALSE"     : "READ",
+            "NO"    : "READ",
+            "READ"  : "READ",
+            "R"  : "READ",
+
+            "TRUE"    : "WRITE",
+            "YES"    : "WRITE",
+            "WRITE"     : "WRITE",
+            "W"   : "WRITE",
+
+            "RELAXED"    : "RELAXED",
+            "UNSAFE"    : "UNSAFE",
+        }
+
+        if name in alias:
+            name = alias[name]
+        else:
+            name = "READ" #default
+
+        return getattr(cls, name)
+
 class transport_base:
     type : str = ""
     protocolSettings : "protocol_settings"
@@ -23,9 +62,11 @@ class transport_base:
     device_model : str = "hotnoob"
     device_identifier : str = "hotnoob"
     bridge : str = ""
+    
     write_enabled : bool = False
-    write_unsafe  : bool = False
-    ''' by pass some write validation '''
+    ''' deprecated -- use / move to write_mode'''
+    write_mode : TransportWriteMode = None
+
     max_precision : int = 2
 
     read_interval : float = 0
@@ -62,11 +103,9 @@ class transport_base:
                 self.write_enabled = settings.getboolean(["write_enabled", "enable_write"], self.write_enabled)
 
             if "write" in settings:
-                if settings.get("write", "").lower() == "unsafe":
+                self.write_mode = TransportWriteMode.fromString(settings.get("write", ""))
+                if self.write_mode != TransportWriteMode.READ:
                     self.write_enabled = True
-                    self.write_unsafe = True
-                else:
-                    self.write_enabled = settings.getboolean("write", self.write_enabled)
 
 
             #load a protocol_settings class for every transport; required for adv features. ie, variable timing.
