@@ -401,6 +401,10 @@ class modbus_base(transport_base):
                     value = key
                     break
 
+        #apply unit_mod before writing.
+        if entry.unit_mod != 1:
+            value = int(value) / entry.unit_mod # say unitmod is 0.1. 100*0.1 = 10.0. 10 / 0.1 = 100.
+
         #results[entry.variable_name]
         ushortValue : int = None #ushort
         if entry.data_type == Data_Type.USHORT:
@@ -437,7 +441,7 @@ class modbus_base(transport_base):
 
         if ushortValue is None:
             raise ValueError("Invalid value - None")
-
+        
         self._log.info(f"WRITE: {current_value} => {value} ( {registry[entry.register]} => {ushortValue} ) to Register {entry.register}")
         self.write_register(entry.register, ushortValue)
 
