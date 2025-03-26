@@ -375,9 +375,15 @@ class modbus_base(transport_base):
     def write_variable(self, entry : registry_map_entry, value : str, registry_type : Registry_Type = Registry_Type.HOLDING):
         """ writes a value to a ModBus register; todo: registry_type to handle other write functions"""
 
+
+        temp_map = [entry]
+        ranges = self.protocolSettings.calculate_registry_ranges(temp_map, init=True) #init=True to bypass timechecks
+        registry = self.read_modbus_registers( ranges=ranges, registry_type=registry_type)
+        info = self.protocolSettings.process_registery(registry, temp_map)
         #read current value
-        current_registers = self.read_modbus_registers(start=entry.register, end=entry.register, registry_type=registry_type)
-        current_value = current_registers[entry.register]
+        #current_registers = self.read_modbus_registers(start=entry.register, end=entry.register, registry_type=registry_type)
+        #current_value = current_registers[entry.register]
+        current_value = info[entry.variable_name]
 
         if not self.write_mode == TransportWriteMode.UNSAFE:
             if not self.protocolSettings.validate_registry_entry(entry, current_value):
