@@ -444,6 +444,7 @@ class modbus_base(transport_base):
         
         self._log.info(f"WRITE: {current_value} => {value} ( {registry[entry.register]} => {ushortValue} ) to Register {entry.register}")
         self.write_register(entry.register, ushortValue)
+        entry.next_read_timestamp = 0 #ensure is read next interval
 
 
     def read_variable(self, variable_name : str, registry_type : Registry_Type, entry : registry_map_entry = None):
