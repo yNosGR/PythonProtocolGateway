@@ -175,7 +175,9 @@ class modbus_base(transport_base):
                 continue
 
             #calculate ranges dynamically -- for variable read timing
-            ranges = self.protocolSettings.calculate_registry_ranges(self.protocolSettings.registry_map[registry_type], self.protocolSettings.registry_map_size[registry_type])
+            ranges = self.protocolSettings.calculate_registry_ranges(self.protocolSettings.registry_map[registry_type],
+                                                                     self.protocolSettings.registry_map_size[registry_type],
+                                                                     timestamp=self.last_read_time)
 
             registry = self.read_modbus_registers(ranges=ranges, registry_type=registry_type)
             new_info = self.protocolSettings.process_registery(registry, self.protocolSettings.get_registry_map(registry_type))

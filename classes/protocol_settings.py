@@ -764,7 +764,7 @@ class protocol_settings:
 
             return registry_map
 
-    def calculate_registry_ranges(self, map : list[registry_map_entry], max_register : int, init : bool = False) -> list[tuple]:
+    def calculate_registry_ranges(self, map : list[registry_map_entry], max_register : int, init : bool = False, timestamp: int = 0) -> list[tuple]:
 
         ''' read optimization; calculate which ranges to read'''
         max_batch_size = 45 #see manual; says max batch is 45
@@ -778,7 +778,10 @@ class protocol_settings:
         start = -max_batch_size
         ranges : list[tuple] = []
 
-        timestamp_ms = int(time.time() * 1000)
+        if timestamp > 0:
+            timestamp_ms = timestamp*1000
+        else:
+            timestamp_ms = int(time.time() * 1000)
 
         while (start := start+max_batch_size) <= max_register:
 
