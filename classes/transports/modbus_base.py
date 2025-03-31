@@ -392,8 +392,9 @@ class modbus_base(transport_base):
                 self._log.error(f"WRITE_ERROR: Invalid value in register '{current_value}'. Unsafe to write")
                 #raise ValueError(err)
 
-            if not self.protocolSettings.validate_registry_entry(entry, value):
-                self._log.error(f"WRITE_ERROR: Invalid new value, '{value}'. Unsafe to write")
+            if not (entry.data_type == Data_Type._16BIT_FLAGS or entry.data_type == Data_Type._8BIT_FLAGS or entry.data_type == Data_Type._32BIT_FLAGS): #skip validation for write; validate further down
+                if not self.protocolSettings.validate_registry_entry(entry, value):
+                    self._log.error(f"WRITE_ERROR: Invalid new value, '{value}'. Unsafe to write")
 
         #handle codes
         if entry.variable_name+"_codes" in self.protocolSettings.codes:
@@ -438,6 +439,32 @@ class modbus_base(transport_base):
 
             if check_value != new_val:
                 raise ValueError("something went wrong bitwise")
+        elif entry.data_type == Data_Type._16BIT_FLAGS or entry.data_type == Data_Type._8BIT_FLAGS or entry.data_type == Data_Type._32BIT_FLAGS:
+            #16 bit flags
+            flag_size : int = Data_Type.getSize(entry.data_type)
+
+            if re.match(r"^[0-1]{"+flag_size+"}$", current_value): #bitflag string
+                #is string of 01... s
+                # Convert binary string to an integer
+                value = int(current_value, 2)
+
+                # Ensure it fits within ushort range (0-65535)
+                if value > 65535:
+                    return self._log.error(f"WRITE_ERROR: '{value}' Exceeds 65535. Unsafe to write")
+            else:
+                return self._log.error(f"WRITE_ERROR: Invalid new value for bitflags, '{value}'. Unsafe to write")
+
+            #apply bitmasks
+            bit_index = entry.register_bit
+            bit_mask = ((1 << bit_size) - 1) << bit_index  # Create a mask for extracting X bits starting from bit_index
+            clear_mask = ~(bit_mask)  # Mask for clearing the bits to be updated
+
+            # Clear the bits to be updated in the current_value
+            ushortValue = registry[entry.register] & clear_mask
+
+            # Set the bits according to the new_value at the specified bit position
+            ushortValue |= (value << bit_index) & bit_mask
+
         else:
             raise TypeError("Unsupported data type")
 
