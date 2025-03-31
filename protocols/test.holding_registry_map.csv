@@ -20,7 +20,7 @@ variable name,data type,writable,register,documented name,description,values,uni
 ,,W,21,decimal,,0-59,0.1,
 ,8bit_flags,W,22,bit_flags1,,"{""b0"": ""bit 0"", ""b1"": ""bit 1"",""b2"": ""bit 2"",""b3"": ""bit 3"", ""b4"": ""bit 4"",""b5"": ""bit 5"", ""b6"": ""bit 6"", ""b7"": ""bit 7""}",,
 ,8bit_flags,W,22.b8,bit_flags2,,"{""b0"": ""bit 0"", ""b1"": ""bit 1"",""b2"": ""bit 2"",""b3"": ""bit 3"", ""b4"": ""bit 4"",""b5"": ""bit 5"", ""b6"": ""bit 6"", ""b7"": ""bit 7""}",,
-,1bit,W,23.b4,1bit,,0~1,,
+,1bit,W,23,1bit_0,,0~1,,
 ,1bit,W,23.b5,1bit_1,,0~1,,
 ,1bit,W,23.b6,1bit_2,,0~1,,
 ,1bit,W,23.b7,1bit_3,,0~1,,
