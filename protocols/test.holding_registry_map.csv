@@ -18,4 +18,4 @@ variable name,data type,writable,register,documented name,description,values,uni
 ,8bit,W,14,Time_Minute,,0-59,,
 ,8bit,W,14.b8,Time_Second,,0-59,,
 ,,W,21,decimal,,0-59,0.1,
-
+,8bit_flags,,22.b8,bit_flags,,"{""b0"": ""bit 0"", ""b1"": ""bit 1"",""b2"": ""bit 2"",""b3"": ""bit 3"", ""b4"": ""bit 4"",""b5"": ""bit 5"", ""b6"": ""bit 6"", ""b7"": ""bit 7""}",,
