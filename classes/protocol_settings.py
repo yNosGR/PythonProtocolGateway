@@ -1049,7 +1049,7 @@ class protocol_settings:
                     for i in range(start_bit, end):  # Iterate over each bit position (0 to 15)
                         # Check if the i-th bit is set
                         if (val >> i) & 1:
-                            flag_index = "b"+str(i+offset)
+                            flag_index = "b"+str(i+offset-start_bit)
                             if flag_index in self.codes[entry.documented_name+"_codes"]:
                                 flags.append(self.codes[entry.documented_name+"_codes"][flag_index])
 

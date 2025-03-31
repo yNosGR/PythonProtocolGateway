@@ -377,6 +377,7 @@ class modbus_base(transport_base):
     def write_variable(self, entry : registry_map_entry, value : str, registry_type : Registry_Type = Registry_Type.HOLDING):
         """ writes a value to a ModBus register; todo: registry_type to handle other write functions"""
 
+        value = value.strip()
 
         temp_map = [entry]
         ranges = self.protocolSettings.calculate_registry_ranges(temp_map, self.protocolSettings.registry_map_size[registry_type], init=True) #init=True to bypass timechecks
@@ -443,10 +444,10 @@ class modbus_base(transport_base):
             #16 bit flags
             flag_size : int = Data_Type.getSize(entry.data_type)
 
-            if re.match(r"^[0-1]{"+flag_size+"}$", current_value): #bitflag string
+            if re.match(rf"^[0-1]{{{flag_size}}}$", value): #bitflag string
                 #is string of 01... s
                 # Convert binary string to an integer
-                value = int(current_value, 2)
+                value = int(value[::-1], 2) #reverse string
 
                 # Ensure it fits within ushort range (0-65535)
                 if value > 65535:
@@ -456,7 +457,7 @@ class modbus_base(transport_base):
 
             #apply bitmasks
             bit_index = entry.register_bit
-            bit_mask = ((1 << bit_size) - 1) << bit_index  # Create a mask for extracting X bits starting from bit_index
+            bit_mask = ((1 << flag_size) - 1) << bit_index  # Create a mask for extracting X bits starting from bit_index
             clear_mask = ~(bit_mask)  # Mask for clearing the bits to be updated
 
             # Clear the bits to be updated in the current_value
