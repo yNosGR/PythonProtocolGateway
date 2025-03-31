@@ -390,12 +390,12 @@ class modbus_base(transport_base):
 
         if not self.write_mode == TransportWriteMode.UNSAFE:
             if not self.protocolSettings.validate_registry_entry(entry, current_value):
-                self._log.error(f"WRITE_ERROR: Invalid value in register '{current_value}'. Unsafe to write")
+                return self._log.error(f"WRITE_ERROR: Invalid value in register '{current_value}'. Unsafe to write")
                 #raise ValueError(err)
 
             if not (entry.data_type == Data_Type._16BIT_FLAGS or entry.data_type == Data_Type._8BIT_FLAGS or entry.data_type == Data_Type._32BIT_FLAGS): #skip validation for write; validate further down
                 if not self.protocolSettings.validate_registry_entry(entry, value):
-                    self._log.error(f"WRITE_ERROR: Invalid new value, '{value}'. Unsafe to write")
+                    return self._log.error(f"WRITE_ERROR: Invalid new value, '{value}'. Unsafe to write")
 
         #handle codes
         if entry.variable_name+"_codes" in self.protocolSettings.codes:
@@ -419,8 +419,8 @@ class modbus_base(transport_base):
             bit_size = Data_Type.getSize(entry.data_type)
 
             new_val = int(value)
-            if 0 > new_val or new_val > 2**bit_size:
-                raise ValueError("Invalid value")
+            if 0 > new_val or new_val > (2**bit_size -1): # Calculate max value for n bits: 2^n - 1
+                return self._log.error(f"WRITE_ERROR: Invalid new value, '{value}'. Exceeds value range. Unsafe to write")
 
             bit_index = entry.register_bit
             bit_mask = ((1 << bit_size) - 1) << bit_index  # Create a mask for extracting X bits starting from bit_index

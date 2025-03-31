@@ -1058,7 +1058,7 @@ class protocol_settings:
             else:
                 flags : list[str] = []
                 if end_bit > 0:
-                    end : int = 16 if end_bit >= 16 else end_bit
+                    end : int = 16 if end_bit >= 16 else end_bit    
                     for i in range(start_bit, end):  # Iterate over each bit position (0 to 15)
                         # Check if the i-th bit is set
                         if (val >> i) & 1:
