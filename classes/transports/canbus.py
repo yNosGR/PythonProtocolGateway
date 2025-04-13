@@ -56,7 +56,7 @@ class canbus(transport_base):
 
 
     def __init__(self, settings : "SectionProxy", protocolSettings : "protocol_settings" = None):
-        super().__init__(settings, protocolSettings=protocolSettings)
+        super().__init__(settings)
 
         #check if running on windows or linux
         self.linux = platform.system() != "Windows"

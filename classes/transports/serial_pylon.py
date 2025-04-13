@@ -58,7 +58,7 @@ class serial_pylon(transport_base):
     EOI : bytes = b"\x0d" # aka b"\r"
 
     def __init__(self, settings : "SectionProxy", protocolSettings : "protocol_settings" = None):
-        super().__init__(settings, protocolSettings=protocolSettings)
+        super().__init__(settings)
         '''address is required to be specified '''
         self.port = settings.get("port", "")
         if not self.port:
