@@ -160,5 +160,5 @@ donations would be appreciated.
 ```(btc) bc1qh394vazcguedkw2rlklnuhapdq7qgpnnz9c3t0```
 
 ### Use Docker - untested
-- ```docker build -t protocol_gateway ```
+- ```docker build . -t protocol_gateway ```
 - ```docker run --device=/dev/ttyUSB0 protocol_gateway```
