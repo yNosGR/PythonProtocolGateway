@@ -1,20 +1,20 @@
 import atexit
-import logging
+import json
 import random
 import time
-import json 
 import warnings
+from configparser import SectionProxy
 
 import paho.mqtt.client
-import paho.mqtt.properties
 import paho.mqtt.packettypes
-
-from paho.mqtt.client import Client as MQTTClient, MQTT_ERR_NO_CONN
+import paho.mqtt.properties
+from paho.mqtt.client import MQTT_ERR_NO_CONN
+from paho.mqtt.client import Client as MQTTClient
 
 from defs.common import strtobool
+
+from ..protocol_settings import Registry_Type, WriteMode, registry_map_entry
 from .transport_base import transport_base
-from configparser import SectionProxy
-from ..protocol_settings import registry_map_entry, WriteMode, Registry_Type
 
 
 class mqtt(transport_base):
@@ -27,12 +27,10 @@ class mqtt(transport_base):
     discovery_enabled : bool = False
     json : bool = False
     reconnect_delay : int = 7
-    ''' seconds '''
+    """ seconds """
 
     reconnect_attempts : int = 21
-    
     #max_precision : int = - 1
-
 
     holding_register_prefix : str = ""
     input_register_prefix : str = ""
@@ -45,35 +43,35 @@ class mqtt(transport_base):
     connected : bool = False
 
     def __init__(self, settings : SectionProxy):
-        self.host = settings.get('host', fallback="")
+        self.host = settings.get("host", fallback="")
         if not self.host:
             raise ValueError("Host is not set")
-        
-        self.port = settings.getint('port', fallback=self.port)
-        self.base_topic = settings.get('base_topic', fallback=self.base_topic).rstrip('/')
-        self.error_topic = settings.get('error_topic', fallback=self.error_topic).rstrip('/')
-        self.discovery_topic = settings.get('discovery_topic', fallback=self.discovery_topic)
-        self.discovery_enabled = strtobool(settings.get('discovery_enabled', self.discovery_enabled))
-        self.json = strtobool(settings.get('json', self.json))
-        self.reconnect_delay = settings.getint('reconnect_delay', fallback=7)
+
+        self.port = settings.getint("port", fallback=self.port)
+        self.base_topic = settings.get("base_topic", fallback=self.base_topic).rstrip("/")
+        self.error_topic = settings.get("error_topic", fallback=self.error_topic).rstrip("/")
+        self.discovery_topic = settings.get("discovery_topic", fallback=self.discovery_topic)
+        self.discovery_enabled = strtobool(settings.get("discovery_enabled", self.discovery_enabled))
+        self.json = strtobool(settings.get("json", self.json))
+        self.reconnect_delay = settings.getint("reconnect_delay", fallback=7)
         #self.max_precision = settings.getint('max_precision', fallback=self.max_precision)
 
         if not isinstance( self.reconnect_delay , int) or self.reconnect_delay < 1: #minumum 1 second
             self.reconnect_delay = 1
 
-        self.reconnect_attempts = settings.getint('reconnect_attempts', fallback=21)
+        self.reconnect_attempts = settings.getint("reconnect_attempts", fallback=21)
         if not isinstance( self.reconnect_attempts , int) or self.reconnect_attempts < 0: #minimum 0
             self.reconnect_attempts = 0
 
         self.holding_register_prefix = settings.get("holding_register_prefix", fallback="")
         self.input_register_prefix = settings.get("input_register_prefix", fallback="")
 
-        username = settings.get('user', fallback="")
-        password = settings.get('pass', fallback="")
+        username = settings.get("user", fallback="")
+        password = settings.get("pass", fallback="")
 
         if not username:
             raise ValueError("User is not set")
-        
+
         if not password:
             warnings.warn("MQTT Password is empty", RuntimeWarning)
 
@@ -95,7 +93,7 @@ class mqtt(transport_base):
 
         self.write_enabled = True #set default
         super().__init__(settings)
-        
+
 
     def connect(self):
         self._log.info("mqtt connect")
@@ -110,9 +108,9 @@ class mqtt(transport_base):
     def exit_handler(self):
         '''on exit handler'''
         self._log.warning("MQTT Exiting...")
-        self.client.publish( self.base_topic + '/' + self.device_identifier + "/availability","offline")
+        self.client.publish( self.base_topic + "/" + self.device_identifier + "/availability","offline")
         return
-    
+
     def mqtt_reconnect(self):
         self._log.info("Disconnected from MQTT Broker!")
         if self.__reconnecting != 0: #stop double calls
@@ -122,22 +120,22 @@ class mqtt(transport_base):
             self.__reconnecting = time.time()
             try:
                 self._log.warning("Attempting to reconnect("+str(attempt)+")...")
-                if random.randint(0,1): #alternate between methods because built in reconnect might be unreliable. 
+                if random.randint(0,1): # noqa: S311 alternate between methods because built in reconnect might be unreliable.
                     self.client.reconnect()
                 else:
                     self.client.loop_stop()
                     self.client.connect(str(self.host), int(self.port), 60)
                     self.client.loop_start()
 
-                #sleep to give a chance to reconnect. 
-                time.sleep(self.reconnect_delay)    
+                #sleep to give a chance to reconnect.
+                time.sleep(self.reconnect_delay)
                 if self.connected:
                     self.__reconnecting = 0
                     return
-            except:
+            except Exception:
                 self._log.warning("Reconnection failed. Retrying in "+str(self.reconnect_delay)+" second(s)...")
                 time.sleep(self.reconnect_delay)
-        
+
         #failed to reonnect
         self._log.critical("Failed to Reconnect, Too many attempts")
         self.__reconnecting = 0
@@ -155,48 +153,48 @@ class mqtt(transport_base):
 
     def write_data(self, data : dict[str, str], from_transport : transport_base):
         if not self.write_enabled:
-            return 
-        
+            return
+
         if self.connected:
             self.connected = self.client.is_connected()
-        
-        self._log.info(f"write data from [{from_transport.transport_name}] to mqtt transport")   
-        self._log.info(data)   
-        #have to send this every loop, because mqtt doesnt disconnect when HA restarts. HA bug. 
-        info = self.client.publish(self.base_topic + '/' + from_transport.device_identifier + "/availability","online", qos=0,retain=True)
+
+        self._log.info(f"write data from [{from_transport.transport_name}] to mqtt transport")
+        self._log.info(data)
+        #have to send this every loop, because mqtt doesnt disconnect when HA restarts. HA bug.
+        info = self.client.publish(self.base_topic + "/" + from_transport.device_identifier + "/availability","online", qos=0,retain=True)
         if info.rc == MQTT_ERR_NO_CONN:
             self.connected = False
 
         if(self.json):
             # Serializing json
             json_object = json.dumps(data, indent=4)
-            self.client.publish(self.base_topic+'/'+from_transport.device_identifier, json_object, 0, properties=self.mqtt_properties)
+            self.client.publish(self.base_topic+"/"+from_transport.device_identifier, json_object, 0, properties=self.mqtt_properties)
         else:
             for entry, val in data.items():
-                if isinstance(val, float) and self.max_precision >= 0: #apply max_precision on mqtt transport 
+                if isinstance(val, float) and self.max_precision >= 0: #apply max_precision on mqtt transport
                     val = round(val, self.max_precision)
 
-                self.client.publish(str(self.base_topic+'/'+from_transport.device_identifier+'/'+entry).lower(), str(val))
+                self.client.publish(str(self.base_topic+"/"+from_transport.device_identifier+"/"+entry).lower(), str(val))
 
     def client_on_message(self, client, userdata, msg):
         """ The callback for when a PUBLISH message is received from the server. """
-        self._log.info(msg.topic+" "+str(msg.payload.decode('utf-8')))
+        self._log.info("MQTT MSG: " + msg.topic+" "+str(msg.payload.decode("utf-8")))
 
         #self.protocolSettings.validate_registry_entry
         if msg.topic in self.__write_topics:
             entry = self.__write_topics[msg.topic]
-            self.on_message(self, entry, msg.payload.decode('utf-8'))
+            self.on_message(self, entry, msg.payload.decode("utf-8"))
             #self.write_variable(entry, value=str(msg.payload.decode('utf-8')))
 
     def init_bridge(self, from_transport : transport_base):
-        
+
         if from_transport.write_enabled:
             self.__write_topics = {}
             #subscribe to write topics
             for entry in from_transport.protocolSettings.get_registry_map(Registry_Type.HOLDING):
                 if entry.write_mode == WriteMode.WRITE or entry.write_mode == WriteMode.WRITEONLY:
                     #__write_topics
-                    topic : str = self.base_topic + '/'+ from_transport.device_identifier + "/write/" + entry.variable_name.lower().replace(' ', '_')
+                    topic : str = self.base_topic + "/"+ from_transport.device_identifier + "/write/" + entry.variable_name.lower().replace(" ", "_")
                     self.__write_topics[topic] = entry
                     self.client.subscribe(topic)
 
@@ -207,17 +205,17 @@ class mqtt(transport_base):
         self._log.info("Publishing HA Discovery Topics...")
 
         disc_payload = {}
-        disc_payload['availability_topic'] = self.base_topic + '/' + from_transport.device_identifier + "/availability"
+        disc_payload["availability_topic"] = self.base_topic + "/" + from_transport.device_identifier + "/availability"
 
         device = {}
-        device['manufacturer'] = from_transport.device_manufacturer
-        device['model'] = from_transport.device_model
-        device['identifiers'] = "hotnoob_" + from_transport.device_model + "_" + from_transport.device_serial_number
-        device['name'] = from_transport.device_name
+        device["manufacturer"] = from_transport.device_manufacturer
+        device["model"] = from_transport.device_model
+        device["identifiers"] = "hotnoob_" + from_transport.device_model + "_" + from_transport.device_serial_number
+        device["name"] = from_transport.device_name
 
         registry_map : list[registry_map_entry] = []
         for entries in from_transport.protocolSettings.registry_map.values():
-            registry_map.extend(entries)    
+            registry_map.extend(entries)
 
         length = len(registry_map)
         count = 0
@@ -226,12 +224,12 @@ class mqtt(transport_base):
 
             if item.concatenate and item.register != item.concatenate_registers[0]:
                 continue #skip all except the first register so no duplicates
-            
+
             if item.write_mode == WriteMode.READDISABLED: #disabled
                 continue
 
 
-            clean_name = item.variable_name.lower().replace(' ', '_').strip()
+            clean_name = item.variable_name.lower().replace(" ", "_").strip()
             if not clean_name: #if name is empty, skip
                 continue
 
@@ -243,36 +241,36 @@ class mqtt(transport_base):
                     clean_name = self.__holding_register_prefix + clean_name
 
 
-            print(('#Publishing Topic '+str(count)+' of ' + str(length) + ' "'+str(clean_name)+'"').ljust(100)+"#", end='\r', flush=True)
+            print(("#Publishing Topic "+str(count)+" of " + str(length) + ' "'+str(clean_name)+'"').ljust(100)+"#", end="\r", flush=True)
 
             #device['sw_version'] = bms_version
             disc_payload = {}
-            disc_payload['availability_topic'] = self.base_topic + '/' + from_transport.device_identifier + "/availability"
-            disc_payload['device'] = device
-            disc_payload['name'] = clean_name
-            disc_payload['unique_id'] = "hotnoob_" + from_transport.device_serial_number + "_"+clean_name
+            disc_payload["availability_topic"] = self.base_topic + "/" + from_transport.device_identifier + "/availability"
+            disc_payload["device"] = device
+            disc_payload["name"] = clean_name
+            disc_payload["unique_id"] = "hotnoob_" + from_transport.device_serial_number + "_"+clean_name
 
             writePrefix = ""
             if from_transport.write_enabled and ( item.write_mode == WriteMode.WRITE or item.write_mode == WriteMode.WRITEONLY ):
-                writePrefix = "" #home assistant doesnt like write prefix   
+                writePrefix = "" #home assistant doesnt like write prefix
 
-            disc_payload['state_topic'] = self.base_topic + '/' +from_transport.device_identifier + writePrefix+ "/"+clean_name
-            
+            disc_payload["state_topic"] = self.base_topic + "/" +from_transport.device_identifier + writePrefix+ "/"+clean_name
+
             if item.unit:
-                disc_payload['unit_of_measurement'] = item.unit
+                disc_payload["unit_of_measurement"] = item.unit
 
 
-            discovery_topic = self.discovery_topic+"/sensor/HN-" + from_transport.device_serial_number  + writePrefix + "/" + disc_payload['name'].replace(' ', '_') + "/config"
-            
+            discovery_topic = self.discovery_topic+"/sensor/HN-" + from_transport.device_serial_number  + writePrefix + "/" + disc_payload["name"].replace(" ", "_") + "/config"
+
             self.client.publish(discovery_topic,
                                        json.dumps(disc_payload),qos=1, retain=True)
-            
+
             #send WO message to indicate topic is write only
             if item.write_mode == WriteMode.WRITEONLY:
-                self.client.publish(disc_payload['state_topic'], "WRITEONLY")
-            
+                self.client.publish(disc_payload["state_topic"], "WRITEONLY")
+
             time.sleep(0.07) #slow down for better reliability
-        
-        self.client.publish(disc_payload['availability_topic'],"online",qos=0, retain=True)
+
+        self.client.publish(disc_payload["availability_topic"],"online",qos=0, retain=True)
         print()
         self._log.info("Published HA "+str(count)+"x Discovery Topics")

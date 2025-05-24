@@ -1,0 +1,28 @@
+line-length = 88
+indent-width = 4
+target-version = "py311"
+
+[lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+# McCabe complexity (`C901`) by default.
+
+select = ["BLE", "C", "DTZ", "E", "EM", "F", "FA", "FBT", "G", "I", "LOG", "S", "TRY", "W"]
+
+#select = ["ALL"]
+ignore = [
+"BLE001",
+"C901",
+"D",
+"EM101",
+"E501",
+"FBT001", "FBT002",
+"N",
+"RUF",
+"TRY003",
+]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"

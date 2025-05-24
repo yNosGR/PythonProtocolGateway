@@ -1,8 +1,10 @@
-import logging
-from classes.protocol_settings import Registry_Type, protocol_settings
-from pymodbus.client.sync import ModbusTlsClient
-from .transport_base import transport_base
 from configparser import SectionProxy
+
+from pymodbus.client.sync import ModbusTlsClient
+
+from classes.protocol_settings import Registry_Type, protocol_settings
+
+from .transport_base import transport_base
 
 
 class modbus_udp(transport_base):
@@ -11,15 +13,12 @@ class modbus_udp(transport_base):
 
     hostname : str = ""
     ''' optional for cert '''
-    
+
     certfile : str = ""
     keyfile : str = ""
-    client : ModbusTlsClient 
+    client : ModbusTlsClient
 
     def __init__(self, settings : SectionProxy, protocolSettings : protocol_settings = None):
-        #logger = logging.getLogger(__name__)
-        #logging.basicConfig(level=logging.DEBUG)
-
         self.host = settings.get("host", "")
         if not self.host:
             raise ValueError("Host is not set")
@@ -29,19 +28,19 @@ class modbus_udp(transport_base):
         self.certfile = settings.get("certfile", "")
         if not self.certfile:
             raise ValueError("certfile is not set")
-        
+
         self.keyfile = settings.get("keyfile", "")
         if not self.keyfile:
             raise ValueError("keyfile is not set")
-        
+
         self.hostname = settings.get("hostname", self.host)
 
-        self.client = ModbusTlsClient(host=self.host, 
+        self.client = ModbusTlsClient(host=self.host,
                                       hostname = self.hostname,
                                       certfile = self.certfile,
                                       keyfile  = self.keyfile,
-                                      port=self.port, 
-                                      timeout=7, 
+                                      port=self.port,
+                                      timeout=7,
                                       retries=3)
         super().__init__(settings, protocolSettings=protocolSettings)
 

@@ -3,6 +3,7 @@
 ![Python 3.10](https://github.com/HotNoob/PythonProtocolGateway/actions/workflows/python-3.10.yml/badge.svg)
 ![Python 3.11](https://github.com/HotNoob/PythonProtocolGateway/actions/workflows/python-3.11.yml/badge.svg)
 ![Python 3.12](https://github.com/HotNoob/PythonProtocolGateway/actions/workflows/python-3.12.yml/badge.svg)
+![Python 3.13](https://github.com/HotNoob/PythonProtocolGateway/actions/workflows/python-3.13.yml/badge.svg)
 
 [![CodeQL](https://github.com/HotNoob/PythonProtocolGateway/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/HotNoob/PythonProtocolGateway/actions/workflows/github-code-scanning/codeql)
 
@@ -159,5 +160,5 @@ donations would be appreciated.
 ```(btc) bc1qh394vazcguedkw2rlklnuhapdq7qgpnnz9c3t0```
 
 ### Use Docker - untested
-- ```docker build -t protocol_gateway ```
+- ```docker build . -t protocol_gateway ```
 - ```docker run --device=/dev/ttyUSB0 protocol_gateway```

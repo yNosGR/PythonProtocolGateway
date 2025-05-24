@@ -19,35 +19,32 @@ if sys.version_info < (3, 9):
 
 
 import argparse
-
-import atexit
-import os
 import logging
+import os
 import sys
 import traceback
 from configparser import ConfigParser, NoOptionError
 
-from classes.protocol_settings import protocol_settings,Data_Type,registry_map_entry,Registry_Type,WriteMode
+from classes.protocol_settings import protocol_settings, registry_map_entry
 from classes.transports.transport_base import transport_base
-
 
 __logo = """
 
-██████╗ ██╗   ██╗████████╗██╗  ██╗ ██████╗ ███╗   ██╗                                                                                
-██╔══██╗╚██╗ ██╔╝╚══██╔══╝██║  ██║██╔═══██╗████╗  ██║                                                                                
-██████╔╝ ╚████╔╝    ██║   ███████║██║   ██║██╔██╗ ██║                                                                                
-██╔═══╝   ╚██╔╝     ██║   ██╔══██║██║   ██║██║╚██╗██║                                                                                
-██║        ██║      ██║   ██║  ██║╚██████╔╝██║ ╚████║                                                                                
-╚═╝        ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝                                                                                
-                                                                                                                                     
+██████╗ ██╗   ██╗████████╗██╗  ██╗ ██████╗ ███╗   ██╗
+██╔══██╗╚██╗ ██╔╝╚══██╔══╝██║  ██║██╔═══██╗████╗  ██║
+██████╔╝ ╚████╔╝    ██║   ███████║██║   ██║██╔██╗ ██║
+██╔═══╝   ╚██╔╝     ██║   ██╔══██║██║   ██║██║╚██╗██║
+██║        ██║      ██║   ██║  ██║╚██████╔╝██║ ╚████║
+╚═╝        ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
+
 ██████╗ ██████╗  ██████╗ ████████╗ ██████╗  ██████╗ ██████╗ ██╗          ██████╗  █████╗ ████████╗███████╗██╗    ██╗ █████╗ ██╗   ██╗
 ██╔══██╗██╔══██╗██╔═══██╗╚══██╔══╝██╔═══██╗██╔════╝██╔═══██╗██║         ██╔════╝ ██╔══██╗╚══██╔══╝██╔════╝██║    ██║██╔══██╗╚██╗ ██╔╝
-██████╔╝██████╔╝██║   ██║   ██║   ██║   ██║██║     ██║   ██║██║         ██║  ███╗███████║   ██║   █████╗  ██║ █╗ ██║███████║ ╚████╔╝ 
-██╔═══╝ ██╔══██╗██║   ██║   ██║   ██║   ██║██║     ██║   ██║██║         ██║   ██║██╔══██║   ██║   ██╔══╝  ██║███╗██║██╔══██║  ╚██╔╝  
-██║     ██║  ██║╚██████╔╝   ██║   ╚██████╔╝╚██████╗╚██████╔╝███████╗    ╚██████╔╝██║  ██║   ██║   ███████╗╚███╔███╔╝██║  ██║   ██║   
-╚═╝     ╚═╝  ╚═╝ ╚═════╝    ╚═╝    ╚═════╝  ╚═════╝ ╚═════╝ ╚══════╝     ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝   ╚═╝   
-                                                                                                                                     
-"""
+██████╔╝██████╔╝██║   ██║   ██║   ██║   ██║██║     ██║   ██║██║         ██║  ███╗███████║   ██║   █████╗  ██║ █╗ ██║███████║ ╚████╔╝
+██╔═══╝ ██╔══██╗██║   ██║   ██║   ██║   ██║██║     ██║   ██║██║         ██║   ██║██╔══██║   ██║   ██╔══╝  ██║███╗██║██╔══██║  ╚██╔╝
+██║     ██║  ██║╚██████╔╝   ██║   ╚██████╔╝╚██████╗╚██████╔╝███████╗    ╚██████╔╝██║  ██║   ██║   ███████╗╚███╔███╔╝██║  ██║   ██║
+╚═╝     ╚═╝  ╚═╝ ╚═════╝    ╚═╝    ╚═════╝  ╚═════╝ ╚═════╝ ╚══════╝     ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝   ╚═╝
+
+"""  # noqa: W291
 
 
 class CustomConfigParser(ConfigParser):
@@ -55,10 +52,10 @@ class CustomConfigParser(ConfigParser):
         if isinstance(option, list):
             fallback = None
 
-            if 'fallback' in kwargs: #override kwargs fallback, for manually handling here
-                fallback = kwargs['fallback']
-                kwargs['fallback'] = None
-                
+            if "fallback" in kwargs: #override kwargs fallback, for manually handling here
+                fallback = kwargs["fallback"]
+                kwargs["fallback"] = None
+
             for name in option:
                 value = super().get(section, name, *args, **kwargs)
                 if value:
@@ -67,14 +64,14 @@ class CustomConfigParser(ConfigParser):
             if not value:
                 value = fallback
 
-            if value == None:
+            if value is None:
                 raise NoOptionError(option[0], section)
         else:
             value = super().get(section, option, *args, **kwargs)
 
         if isinstance(value, int):
             return value
-        
+
         return value.strip() if value is not None else value
 
 class Protocol_Gateway:
@@ -83,7 +80,7 @@ class Protocol_Gateway:
     """
     __log = None
     # log level, available log levels are CRITICAL, FATAL, ERROR, WARNING, INFO, DEBUG
-    __log_level = 'DEBUG'
+    __log_level = "DEBUG"
 
     __running : bool = False
     ''' controls main loop'''
@@ -94,15 +91,15 @@ class Protocol_Gateway:
     config_file : str
 
     def __init__(self, config_file : str):
-        self.__log = logging.getLogger('invertermodbustomqqt_log')
+        self.__log = logging.getLogger("invertermodbustomqqt_log")
         handler = logging.StreamHandler(sys.stdout)
         #self.__log.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('[%(asctime)s]  {%(filename)s:%(lineno)d}  %(levelname)s - %(message)s')
+        formatter = logging.Formatter("[%(asctime)s]  {%(filename)s:%(lineno)d}  %(levelname)s - %(message)s")
         handler.setFormatter(formatter)
         self.__log.addHandler(handler)
 
-        self.config_file = os.path.dirname(os.path.realpath(__file__)) + '/growatt2mqtt.cfg'
-        newcfg = os.path.dirname(os.path.realpath(__file__)) + '/'+ config_file
+        self.config_file = os.path.dirname(os.path.realpath(__file__)) + "/growatt2mqtt.cfg"
+        newcfg = os.path.dirname(os.path.realpath(__file__)) + "/"+ config_file
         if os.path.isfile(newcfg):
             self.config_file = newcfg
 
@@ -117,34 +114,34 @@ class Protocol_Gateway:
         self.__settings.read(self.config_file)
 
         ##[general]
-        self.__log_level = self.__settings.get('general','log_level', fallback='INFO')
+        self.__log_level = self.__settings.get("general","log_level", fallback="INFO")
 
         log_level = getattr(logging, self.__log_level, logging.INFO)
         self.__log.setLevel(log_level)
         logging.basicConfig(level=log_level)
 
         for section in self.__settings.sections():
-            if section.startswith('transport'):
+            if section.startswith("transport"):
                 transport_cfg = self.__settings[section]
-                transport_type      = transport_cfg.get('transport', fallback="")
-                protocol_version    = transport_cfg.get('protocol_version', fallback="")
+                transport_type      = transport_cfg.get("transport", fallback="")
+                protocol_version    = transport_cfg.get("protocol_version", fallback="")
 
                 if not transport_type and not protocol_version:
-                    raise ValueError('Missing Transport / Protocol Version')
-                
-            
-                if not transport_type and protocol_version: #get transport from protocol settings... 
+                    raise ValueError("Missing Transport / Protocol Version")
+
+                if not transport_type and protocol_version: #get transport from protocol settings...  todo need to make a quick function instead of this
+
                     protocolSettings : protocol_settings = protocol_settings(protocol_version)
 
                     if not transport_type and not protocolSettings.transport:
-                        raise ValueError('Missing Transport')
-                    
+                        raise ValueError("Missing Transport")
+
                     if not transport_type:
                         transport_type = protocolSettings.transport
 
 
                 # Import the module
-                module = importlib.import_module('classes.transports.'+transport_type)
+                module = importlib.import_module("classes.transports."+transport_type)
                 # Get the class from the module
                 cls = getattr(module, transport_type)
                 transport : transport_base = cls(transport_cfg)
@@ -194,26 +191,26 @@ class Protocol_Gateway:
                         if not transport.connected:
                             transport.connect() #reconnect
                         else: #transport is connected
-                            
+
                             info = transport.read_data()
 
                             if not info:
                                 continue
-                            
+
                             #todo. broadcast option
                             if transport.bridge:
                                 for to_transport in self.__transports:
                                     if to_transport.transport_name == transport.bridge:
                                         to_transport.write_data(info, transport)
                                         break
-              
+
             except Exception as err:
                 traceback.print_exc()
                 self.__log.error(err)
 
-            time.sleep(7)
+            time.sleep(0.7) #change this in future. probably reduce to allow faster reads.
 
-   
+
 
 
 
@@ -230,13 +227,13 @@ def main():
 
 if __name__ == "__main__":
     # Create ArgumentParser object
-    parser = argparse.ArgumentParser(description='Python Protocol Gateway')
+    parser = argparse.ArgumentParser(description="Python Protocol Gateway")
 
     # Add arguments
-    parser.add_argument('--config', '-c', type=str, help='Specify Config File')
+    parser.add_argument("--config", "-c", type=str, help="Specify Config File")
 
     # Add a positional argument with default
-    parser.add_argument('positional_config', type=str, help='Specify Config File', nargs='?', default='config.cfg')
+    parser.add_argument("positional_config", type=str, help="Specify Config File", nargs="?", default="config.cfg")
 
     # Parse arguments
     args = parser.parse_args()
