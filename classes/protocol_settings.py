@@ -956,7 +956,13 @@ class protocol_settings:
             bit_size = Data_Type.getSize(entry.data_type)
             bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
             bit_index = entry.register_bit
-            value = (register >> bit_index) & bit_mask
+
+            if isinstance(register, bytes):
+                value = (int.from_bytes(register, byteorder=self.byteorder, signed=False) >> bit_index) & bit_mask
+            else:
+                value = (register >> bit_index) & bit_mask
+
+
         elif entry.data_type == Data_Type.HEX:
             value = register.hex() #convert bytes to hex
         elif entry.data_type == Data_Type.ASCII:
