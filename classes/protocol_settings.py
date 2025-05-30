@@ -917,6 +917,7 @@ class protocol_settings:
             else:
                 flags : list[str] = []
                 for i in range(start_bit, end_bit):  # Iterate over each bit position (0 to 15)
+                    val = register[byte]
                     # Check if the i-th bit is set
                     if (val >> i) & 1:
                         flags.append("1")
