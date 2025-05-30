@@ -877,6 +877,7 @@ class protocol_settings:
         elif entry.data_type == Data_Type.SHORT:
             value = int.from_bytes(register[:2], byteorder=self.byteorder, signed=True)
         elif entry.data_type == Data_Type._16BIT_FLAGS or entry.data_type == Data_Type._8BIT_FLAGS or entry.data_type == Data_Type._32BIT_FLAGS:
+            val = int.from_bytes(register, byteorder=self.byteorder, signed=False)
             #16 bit flags
             start_bit : int = 0
             end_bit : int = 16 #default 16 bit
@@ -917,7 +918,6 @@ class protocol_settings:
             else:
                 flags : list[str] = []
                 for i in range(start_bit, end_bit):  # Iterate over each bit position (0 to 15)
-                    val = register[i]
                     # Check if the i-th bit is set
                     if (val >> i) & 1:
                         flags.append("1")
