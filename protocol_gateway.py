@@ -76,12 +76,15 @@ class CustomConfigParser(ConfigParser):
         if isinstance(value, int):
             return value
 
+        if isinstance(value, float):
+            return value
+
         return value.strip() if value is not None else value
-    
+
     def getint(self, section, option, *args, **kwargs): #bypass fallback bug
         value = self.get(section, option, *args, **kwargs)
         return int(value) if value is not None else None
-    
+
     def getfloat(self, section, option, *args, **kwargs): #bypass fallback bug
         value = self.get(section, option, *args, **kwargs)
         return float(value) if value is not None else None
