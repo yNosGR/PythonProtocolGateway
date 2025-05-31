@@ -953,15 +953,18 @@ class protocol_settings:
                 # If positive, simply extract the value using the bit mask
                 value = (register >> bit_index) & bit_mask
 
-        elif entry.data_type.value > 200 or entry.data_type == Data_Type.BYTE: #bit types
+        elif entry.data_type == Data_Type.BYTE: #bit types
+            value = int.from_bytes(register[:1], byteorder=self.byteorder, signed=False)
+        elif entry.data_type.value > 200: #bit types
             bit_size = Data_Type.getSize(entry.data_type)
             bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
             bit_index = entry.register_bit
 
+
             if isinstance(register, bytes):
-                value = (int.from_bytes(register, byteorder=self.byteorder, signed=False) >> bit_index) & bit_mask
-            else:
-                value = (register >> bit_index) & bit_mask
+                register = int.from_bytes(register, byteorder=self.byteorder)
+                            
+            value = (register >> bit_index) & bit_mask
 
 
         elif entry.data_type == Data_Type.HEX:
