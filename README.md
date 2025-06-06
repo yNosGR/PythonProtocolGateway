@@ -162,6 +162,6 @@ donations / sponsoring this repo would be appreciated.
 
 ### Use Docker Image
 - ``` docker pull hotn00b/pythonprotocolgateway ``` 
-- ```docker run -v $(pwd)/config.cfg:/app/config.cfg --device=/dev/ttyUSB0 protocol_gateway```
+- ```docker run -v $(pwd)/config.cfg:/app/config.cfg --device=/dev/ttyUSB0 hotn00b/pythonprotocolgateway```
 See ![config.cfg.example](https://github.com/HotNoob/PythonProtocolGateway/blob/main/config.cfg.example)
 ![Docker Image Repo](https://hub.docker.com/r/hotn00b/pythonprotocolgateway)
