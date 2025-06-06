@@ -156,7 +156,7 @@ if you installed this when it was called growatt2mqtt-hotnoob or InverterModBusT
 this took me a while to make; and i had to make it because there werent any working solutions. 
 donations / sponsoring this repo would be appreciated.
 
-### Use Docker - untested
+### Use Docker
 - ```docker build . -t protocol_gateway ```
 - ```docker run --device=/dev/ttyUSB0 protocol_gateway```
 
