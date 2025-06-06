@@ -154,11 +154,14 @@ if you installed this when it was called growatt2mqtt-hotnoob or InverterModBusT
 
 ### donate
 this took me a while to make; and i had to make it because there werent any working solutions. 
-donations would be appreciated.
-![BitCoin Donation](https://github.com/HotNoob/growatt2mqtt-hotnoob/blob/main/images/donate_to_hotnoob.png?raw=true)
-
-```(btc) bc1qh394vazcguedkw2rlklnuhapdq7qgpnnz9c3t0```
+donations / sponsoring this repo would be appreciated.
 
 ### Use Docker - untested
 - ```docker build . -t protocol_gateway ```
 - ```docker run --device=/dev/ttyUSB0 protocol_gateway```
+
+### Use Docker Image
+- ``` docker pull hotn00b/pythonprotocolgateway ``` 
+- ```docker run -v $(pwd)/config.cfg:/app/config.cfg --device=/dev/ttyUSB0 protocol_gateway```
+See ![config.cfg.example](https://github.com/HotNoob/PythonProtocolGateway/blob/main/config.cfg.example)
+![Docker Image Repo](https://hub.docker.com/r/hotn00b/pythonprotocolgateway)
