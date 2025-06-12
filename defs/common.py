@@ -1,4 +1,5 @@
 import re
+import os
 
 import serial.tools.list_ports
 
@@ -46,6 +47,11 @@ def strtoint(val : str) -> int:
     return int(val)
 
 def get_usb_serial_port_info(port : str = "") -> str:
+
+    # If port is a symlink
+    if os.path.islink(port):
+        port = os.path.realpath(port)
+
     for p in serial.tools.list_ports.comports():
         if str(p.device).upper() == port.upper():
             return "["+hex(p.vid)+":"+hex(p.pid)+":"+str(p.serial_number)+":"+str(p.location)+"]"
@@ -53,6 +59,11 @@ def get_usb_serial_port_info(port : str = "") -> str:
     return ""
 
 def find_usb_serial_port(port : str =  "", vendor_id : str = "", product_id : str = "", serial_number : str = "", location : str = "") -> str:
+
+    # If port is a symlink
+    if os.path.islink(port):
+        port = os.path.realpath(port)
+
     if not port.startswith("["):
         return port
 
