@@ -24,13 +24,16 @@ class modbus_rtu(modbus_base):
     pymodbus_slave_arg = "unit"
 
     def __init__(self, settings : SectionProxy, protocolSettings : protocol_settings = None):
+        print("DEBUG: modbus_rtu.__init__ starting")
         super().__init__(settings, protocolSettings=protocolSettings)
 
         self.port = settings.get("port", "")
+        print(f"DEBUG: Port from settings: '{self.port}'")
         if not self.port:
             raise ValueError("Port is not set")
 
         self.port = find_usb_serial_port(self.port)
+        print(f"DEBUG: Port after find_usb_serial_port: '{self.port}'")
         if not self.port:
             raise ValueError("Port is not valid / not found")
 
@@ -40,20 +43,25 @@ class modbus_rtu(modbus_base):
             self.baudrate = strtoint(self.protocolSettings.settings["baud"])
 
         self.baudrate = settings.getint("baudrate", self.baudrate)
+        print(f"DEBUG: Baudrate: {self.baudrate}")
 
         address : int = settings.getint("address", 0)
         self.addresses = [address]
+        print(f"DEBUG: Address: {address}")
 
         # Get the signature of the __init__ method
         init_signature = inspect.signature(ModbusSerialClient.__init__)
 
         client_str = self.port+"("+str(self.baudrate)+")"
+        print(f"DEBUG: Client string: {client_str}")
 
         if client_str in modbus_base.clients:
+            print("DEBUG: Using existing client from cache")
             self.client = modbus_base.clients[client_str]
             # Set compatibility flag based on existing client
             self._set_compatibility_flag()
         else:
+            print("DEBUG: Creating new client")
             if "method" in init_signature.parameters:
                 self.client = ModbusSerialClient(method="rtu", port=self.port,
                                             baudrate=int(self.baudrate),
@@ -71,6 +79,9 @@ class modbus_rtu(modbus_base):
 
             #add to clients
             modbus_base.clients[client_str] = self.client
+            print("DEBUG: Client created and added to cache")
+        
+        print("DEBUG: modbus_rtu.__init__ completed")
 
     def _set_compatibility_flag(self):
         """Determine the correct parameter name for slave/unit based on pymodbus version"""
