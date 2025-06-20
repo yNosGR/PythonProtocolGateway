@@ -101,15 +101,34 @@ class influxdb_out(transport_base):
         # Prepare fields (the actual data values)
         fields = {}
         for key, value in data.items():
+            # Check if we should force float formatting based on protocol settings
+            should_force_float = False
+            
+            # Try to get registry entry from protocol settings to check unit_mod
+            if hasattr(from_transport, 'protocolSettings') and from_transport.protocolSettings:
+                # Check both input and holding registries
+                for registry_type in [Registry_Type.INPUT, Registry_Type.HOLDING]:
+                    registry_map = from_transport.protocolSettings.get_registry_map(registry_type)
+                    for entry in registry_map:
+                        if entry.variable_name == key:
+                            # If unit_mod is not 1.0, this value should be treated as float
+                            if entry.unit_mod != 1.0:
+                                should_force_float = True
+                                self._log.debug(f"Variable {key} has unit_mod {entry.unit_mod}, forcing float format")
+                            break
+                    if should_force_float:
+                        break
+            
             # Try to convert to numeric values for InfluxDB
             try:
                 # Try to convert to float first
                 float_val = float(value)
-                # If it's an integer, store as int
-                if float_val.is_integer():
-                    fields[key] = int(float_val)
-                else:
+                
+                # If it's an integer but should be forced to float, or if it's already a float
+                if should_force_float or not float_val.is_integer():
                     fields[key] = float_val
+                else:
+                    fields[key] = int(float_val)
             except (ValueError, TypeError):
                 # If conversion fails, store as string
                 fields[key] = str(value)
