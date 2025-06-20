@@ -24,9 +24,9 @@ class modbus_rtu(modbus_base):
     pymodbus_slave_arg = "unit"
 
     def __init__(self, settings : SectionProxy, protocolSettings : protocol_settings = None):
-        self._log.debug("modbus_rtu.__init__ starting")
         try:
             super().__init__(settings, protocolSettings=protocolSettings)
+            self._log.debug("modbus_rtu.__init__ starting")
             self._log.debug("super().__init__ completed")
 
             self.port = settings.get("port", "")
@@ -108,7 +108,10 @@ class modbus_rtu(modbus_base):
                 quit()
                 
         except Exception as e:
-            self._log.debug(f"Exception in modbus_rtu.__init__: {e}")
+            if hasattr(self, '_log') and self._log:
+                self._log.debug(f"Exception in modbus_rtu.__init__: {e}")
+            else:
+                print(f"Exception in modbus_rtu.__init__: {e}")
             import traceback
             traceback.print_exc()
             raise
