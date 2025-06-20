@@ -1,0 +1,24 @@
+#
+[influxdb_output]
+transport = influxdb_out
+host = localhost
+port = 8086
+database = solar
+username = 
+password = 
+measurement = device_data
+include_timestamp = true
+include_device_info = true
+batch_size = 100
+batch_timeout = 10.0
+log_level = INFO
+
+# Example bridge configuration
+[modbus_rtu_source]
+type = modbus_rtu
+port = /dev/ttyUSB0
+baudrate = 9600
+protocol_version = growatt_2020_v1.24
+device_serial_number = 123456789
+bridge = influxdb_output
+#
