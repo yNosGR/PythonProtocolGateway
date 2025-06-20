@@ -1,5 +1,6 @@
+#
 [influxdb_output]
-type = influxdb_out
+transport = influxdb_out
 host = localhost
 port = 8086
 database = solar
@@ -19,4 +20,5 @@ port = /dev/ttyUSB0
 baudrate = 9600
 protocol_version = growatt_2020_v1.24
 device_serial_number = 123456789
-bridge = influxdb_output 
+bridge = influxdb_output
+#
