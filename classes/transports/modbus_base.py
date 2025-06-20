@@ -56,8 +56,7 @@ class modbus_base(transport_base):
         self.analyze_protocol_enabled = settings.getboolean("analyze_protocol", fallback=self.analyze_protocol_enabled)
         self.analyze_protocol_save_load = settings.getboolean("analyze_protocol_save_load", fallback=self.analyze_protocol_save_load)
 
-
-        #get defaults from protocol settings
+        # get defaults from protocol settings
         if "send_input_register" in self.protocolSettings.settings:
             self.send_input_register = strtobool(self.protocolSettings.settings["send_input_register"])
 
@@ -67,17 +66,13 @@ class modbus_base(transport_base):
         if "batch_delay" in self.protocolSettings.settings:
             self.modbus_delay = float(self.protocolSettings.settings["batch_delay"])
 
-        #allow enable/disable of which registers to send
+        # allow enable/disable of which registers to send
         self.send_holding_register = settings.getboolean("send_holding_register", fallback=self.send_holding_register)
         self.send_input_register = settings.getboolean("send_input_register", fallback=self.send_input_register)
         self.modbus_delay = settings.getfloat(["batch_delay", "modbus_delay"], fallback=self.modbus_delay)
         self.modbus_delay_setting = self.modbus_delay
 
-
-        if self.analyze_protocol_enabled:
-            self.connect()
-            self.analyze_protocol()
-            quit()
+        # Note: Connection and analyze_protocol will be called after subclass initialization is complete
 
     def init_after_connect(self):
         #from transport_base settings
@@ -90,14 +85,23 @@ class modbus_base(transport_base):
             self.update_identifier()
 
     def connect(self):
-        if self.connected and self.first_connect:
-            self.first_connect = False
-            self.init_after_connect()
+        # Base class connect method - subclasses should override this
+        # to establish the actual hardware connection
+        pass
 
     def read_serial_number(self) -> str:
+        # First try to read "Serial Number" from input registers (for protocols like EG4 v58)
+        self._log.info("Looking for serial_number variable in input registers...")
+        serial_number = str(self.read_variable("Serial Number", Registry_Type.INPUT))
+        self._log.info("read SN from input registers: " + serial_number)
+        if serial_number and serial_number != "None":
+            return serial_number
+
+        # Then try holding registers (for other protocols)
+        self._log.info("Looking for serial_number variable in holding registers...")
         serial_number = str(self.read_variable("Serial Number", Registry_Type.HOLDING))
-        self._log.info("read SN: " +serial_number)
-        if serial_number:
+        self._log.info("read SN from holding registers: " + serial_number)
+        if serial_number and serial_number != "None":
             return serial_number
 
         sn2 = ""
@@ -121,8 +125,8 @@ class modbus_base(transport_base):
 
             time.sleep(self.modbus_delay*2) #sleep inbetween requests so modbus can rest
 
-        print(sn2)
-        print(sn3)
+        self._log.debug(f"Serial number sn2: {sn2}")
+        self._log.debug(f"Serial number sn3: {sn3}")
 
         if not re.search("[^a-zA-Z0-9_]", sn2) :
             serial_number = sn2
@@ -136,15 +140,27 @@ class modbus_base(transport_base):
 
         self._log.info("Validating Protocol for Writing")
         self.write_enabled = False
-        score_percent = self.validate_protocol(Registry_Type.HOLDING)
-        if(score_percent > 90):
-            self.write_enabled = True
-            self._log.warning("enable write - validation passed")
-        elif self.write_mode == TransportWriteMode.RELAXED:
-            self.write_enabled = True
-            self._log.warning("enable write - WARNING - RELAXED MODE")
-        else:
-            self._log.error("enable write FAILED - WRITE DISABLED")
+        
+        # Add a small delay to ensure device is ready, especially during initialization
+        time.sleep(self.modbus_delay * 2)
+        
+        try:
+            score_percent = self.validate_protocol(Registry_Type.HOLDING)
+            if(score_percent > 90):
+                self.write_enabled = True
+                self._log.warning("enable write - validation passed")
+            elif self.write_mode == TransportWriteMode.RELAXED:
+                self.write_enabled = True
+                self._log.warning("enable write - WARNING - RELAXED MODE")
+            else:
+                self._log.error("enable write FAILED - WRITE DISABLED")
+        except Exception as e:
+            self._log.error(f"enable write FAILED due to error: {str(e)}")
+            if self.write_mode == TransportWriteMode.RELAXED:
+                self.write_enabled = True
+                self._log.warning("enable write - WARNING - RELAXED MODE (due to validation error)")
+            else:
+                self._log.error("enable write FAILED - WRITE DISABLED")
 
 
 
@@ -267,8 +283,8 @@ class modbus_base(transport_base):
         else:
             #perform registry scan
             ##batch_size = 1, read registers one by one; if out of bound. it just returns error
-            input_registry = self.read_modbus_registers(start=0, end=max_input_register, batch_size=45, registry_type=Registry_Type.INPUT)
-            holding_registry = self.read_modbus_registers(start=0, end=max_holding_register, batch_size=45, registry_type=Registry_Type.HOLDING)
+            input_registry = self.read_modbus_registers(start=0, end=max_input_register, registry_type=Registry_Type.INPUT)
+            holding_registry = self.read_modbus_registers(start=0, end=max_holding_register, registry_type=Registry_Type.HOLDING)
 
             if self.analyze_protocol_save_load: #save results if enabled
                 with open(input_save_path, "w") as file:
@@ -278,14 +294,14 @@ class modbus_base(transport_base):
                     json.dump(holding_registry, file)
 
         #print results for debug
-        print("=== START INPUT REGISTER ===")
+        self._log.debug("=== START INPUT REGISTER ===")
         if input_registry:
-            print([(key, value) for key, value in input_registry.items()])
-        print("=== END INPUT REGISTER ===")
-        print("=== START HOLDING REGISTER ===")
+            self._log.debug([(key, value) for key, value in input_registry.items()])
+        self._log.debug("=== END INPUT REGISTER ===")
+        self._log.debug("=== START HOLDING REGISTER ===")
         if holding_registry:
-            print([(key, value) for key, value in holding_registry.items()])
-        print("=== END HOLDING REGISTER ===")
+            self._log.debug([(key, value) for key, value in holding_registry.items()])
+        self._log.debug("=== END HOLDING REGISTER ===")
 
         #very well possible the registers will be incomplete due to different hardware sizes
         #so dont assume they are set / complete
@@ -369,9 +385,9 @@ class modbus_base(transport_base):
 
         #print scores
         for name in sorted(protocol_scores, key=protocol_scores.get, reverse=True):
-            print("=== "+str(name)+" - "+str(protocol_scores[name])+" ===")
-            print("input register score: " + str(input_register_score[name]) + "; valid registers: "+str(input_valid_count[name])+" of " + str(len(protocols[name].get_registry_map(Registry_Type.INPUT))))
-            print("holding register score : " + str(holding_register_score[name]) + "; valid registers: "+str(holding_valid_count[name])+" of " + str(len(protocols[name].get_registry_map(Registry_Type.HOLDING))))
+            self._log.debug("=== "+str(name)+" - "+str(protocol_scores[name])+" ===")
+            self._log.debug("input register score: " + str(input_register_score[name]) + "; valid registers: "+str(input_valid_count[name])+" of " + str(len(protocols[name].get_registry_map(Registry_Type.INPUT))))
+            self._log.debug("holding register score : " + str(holding_register_score[name]) + "; valid registers: "+str(holding_valid_count[name])+" of " + str(len(protocols[name].get_registry_map(Registry_Type.HOLDING))))
 
 
     def write_variable(self, entry : registry_map_entry, value : str, registry_type : Registry_Type = Registry_Type.HOLDING):
@@ -504,8 +520,19 @@ class modbus_base(transport_base):
             results = self.protocolSettings.process_registery(registers, registry_map)
             return results[entry.variable_name]
 
-    def read_modbus_registers(self, ranges : list[tuple] = None, start : int = 0, end : int = None, batch_size : int = 45, registry_type : Registry_Type = Registry_Type.INPUT ) -> dict:
+    def read_modbus_registers(self, ranges : list[tuple] = None, start : int = 0, end : int = None, batch_size : int = None, registry_type : Registry_Type = Registry_Type.INPUT ) -> dict:
         ''' maybe move this to transport_base ?'''
+
+        # Get batch_size from protocol settings if not provided
+        if batch_size is None:
+            if hasattr(self, 'protocolSettings') and self.protocolSettings:
+                batch_size = self.protocolSettings.settings.get("batch_size", 45)
+                try:
+                    batch_size = int(batch_size)
+                except (ValueError, TypeError):
+                    batch_size = 45
+            else:
+                batch_size = 45
 
         if not ranges: #ranges is empty, use min max
             if start == 0 and end is None:
@@ -533,22 +560,24 @@ class modbus_base(transport_base):
             time.sleep(self.modbus_delay) #sleep for 1ms to give bus a rest #manual recommends 1s between commands
 
             isError = False
+            register = None  # Initialize register variable
             try:
                 register = self.read_registers(range[0], range[1], registry_type=registry_type)
 
             except ModbusIOException as e:
-                self._log.error("ModbusIOException : ", e.error_code)
-                if e.error_code == 4: #if no response; probably time out. retry with increased delay
-                    isError = True
-                else:
-                    isError = True #other erorrs. ie Failed to connect[ModbusSerialClient(rtu baud[9600])]
+                self._log.error("ModbusIOException: " + str(e))
+                # In pymodbus 3.7+, ModbusIOException doesn't have error_code attribute
+                # Treat all ModbusIOException as retryable errors
+                isError = True
 
 
-            if isinstance(register, bytes) or register.isError() or isError: #sometimes weird errors are handled incorrectly and response is a ascii error string
-                if isinstance(register, bytes):
+            if register is None or isinstance(register, bytes) or (hasattr(register, 'isError') and register.isError()) or isError: #sometimes weird errors are handled incorrectly and response is a ascii error string
+                if register is None:
+                    self._log.error("No response received from modbus device")
+                elif isinstance(register, bytes):
                     self._log.error(register.decode("utf-8"))
                 else:
-                    self._log.error(register.__str__)
+                    self._log.error(str(register))
                 self.modbus_delay += self.modbus_delay_increament #increase delay, error is likely due to modbus being busy
 
                 if self.modbus_delay > 60: #max delay. 60 seconds between requests should be way over kill if it happens
@@ -573,12 +602,13 @@ class modbus_base(transport_base):
             if retry < 0:
                 retry = 0
 
-
-            #combine registers into "registry"
-            i = -1
-            while(i := i + 1 ) < range[1]:
-                #print(str(i) + " => " + str(i+range[0]))
-                registry[i+range[0]] = register.registers[i]
+            # Only process registers if we have a valid response
+            if register is not None and hasattr(register, 'registers') and register.registers is not None:
+                #combine registers into "registry"
+                i = -1
+                while(i := i + 1 ) < range[1]:
+                    #print(str(i) + " => " + str(i+range[0]))
+                    registry[i+range[0]] = register.registers[i]
 
         return registry
 
