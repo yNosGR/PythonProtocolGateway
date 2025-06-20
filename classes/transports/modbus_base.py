@@ -75,7 +75,16 @@ class modbus_base(transport_base):
 
 
         if self.analyze_protocol_enabled:
-            self.connect()
+            # Ensure connection is established first
+            if not self.connected:
+                # Call the child class connect method to establish the actual connection
+                super().connect()
+            
+            # Now call init_after_connect to set up the transport properly
+            if self.first_connect:
+                self.first_connect = False
+                self.init_after_connect()
+            
             self.analyze_protocol()
             quit()
 
@@ -92,10 +101,9 @@ class modbus_base(transport_base):
     def connect(self):
         if self.connected and self.first_connect:
             self.first_connect = False
-            # Skip init_after_connect when analyze_protocol is enabled
-            # because validation should not happen during analyze_protocol initialization
-            if not self.analyze_protocol_enabled:
-                self.init_after_connect()
+            # Always call init_after_connect when connection is established
+            # This ensures proper setup even when analyze_protocol is enabled
+            self.init_after_connect()
 
     def read_serial_number(self) -> str:
         # First try to read "Serial Number" from input registers (for protocols like EG4 v58)
