@@ -136,8 +136,10 @@ class modbus_rtu(modbus_base):
         self.client.write_register(register, value, **kwargs) #function code 0x06 writes to holding register
 
     def connect(self):
+        print("DEBUG: modbus_rtu.connect() called")
         # Ensure client is initialized before trying to connect
         if not hasattr(self, 'client') or self.client is None:
+            print("DEBUG: Client not found, re-initializing...")
             # Re-initialize the client if it wasn't set properly
             client_str = self.port+"("+str(self.baudrate)+")"
             
@@ -165,5 +167,7 @@ class modbus_rtu(modbus_base):
             # Set compatibility flag
             self._set_compatibility_flag()
         
+        print(f"DEBUG: Attempting to connect to {self.port} at {self.baudrate} baud...")
         self.connected = self.client.connect()
+        print(f"DEBUG: Connection result: {self.connected}")
         super().connect()
