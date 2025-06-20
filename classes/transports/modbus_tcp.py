@@ -66,9 +66,9 @@ class modbus_tcp(modbus_base):
             kwargs["slave"] = kwargs.pop("unit")
 
         if registry_type == Registry_Type.INPUT:
-            return self.client.read_input_registers(start, count, **kwargs  )
+            return self.client.read_input_registers(start,count=count, **kwargs  )
         elif registry_type == Registry_Type.HOLDING:
-            return self.client.read_holding_registers(start, count, **kwargs)
+            return self.client.read_holding_registers(start,count=count, **kwargs)
 
     def connect(self):
         self.connected = self.client.connect()
