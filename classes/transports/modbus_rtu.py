@@ -44,9 +44,14 @@ class modbus_rtu(modbus_base):
         address : int = settings.getint("address", 0)
         self.addresses = [address]
 
-        # pymodbus compatability; unit was renamed to address
+        # pymodbus compatability; check what parameter name is used for slave/unit
         if "slave" in inspect.signature(ModbusSerialClient.read_holding_registers).parameters:
             self.pymodbus_slave_arg = "slave"
+        elif "unit" in inspect.signature(ModbusSerialClient.read_holding_registers).parameters:
+            self.pymodbus_slave_arg = "unit"
+        else:
+            # Newer pymodbus versions might not use either parameter
+            self.pymodbus_slave_arg = None
 
 
         # Get the signature of the __init__ method
@@ -75,22 +80,20 @@ class modbus_rtu(modbus_base):
 
     def read_registers(self, start, count=1, registry_type : Registry_Type = Registry_Type.INPUT, **kwargs):
 
-        if "unit" not in kwargs:
-            # Ensure addresses is initialized
-            if not hasattr(self, 'addresses') or not self.addresses:
-                # Try to get address from settings if not already set
-                if hasattr(self, 'settings'):
-                    address = self.settings.getint("address", 0)
-                    self.addresses = [address]
-                else:
-                    # Fallback to default address
-                    self.addresses = [1]
-            
-            kwargs = {"unit": int(self.addresses[0]), **kwargs}
-
-        #compatability
-        if self.pymodbus_slave_arg != "unit":
-            kwargs["slave"] = kwargs.pop("unit")
+        # Only add unit/slave parameter if the pymodbus version supports it
+        if self.pymodbus_slave_arg is not None:
+            if self.pymodbus_slave_arg not in kwargs:
+                # Ensure addresses is initialized
+                if not hasattr(self, 'addresses') or not self.addresses:
+                    # Try to get address from settings if not already set
+                    if hasattr(self, 'settings'):
+                        address = self.settings.getint("address", 0)
+                        self.addresses = [address]
+                    else:
+                        # Fallback to default address
+                        self.addresses = [1]
+                
+                kwargs[self.pymodbus_slave_arg] = int(self.addresses[0])
 
         if registry_type == Registry_Type.INPUT:
             return self.client.read_input_registers(address=start, count=count, **kwargs)
@@ -101,22 +104,20 @@ class modbus_rtu(modbus_base):
         if not self.write_enabled:
             return
 
-        if "unit" not in kwargs:
-            # Ensure addresses is initialized
-            if not hasattr(self, 'addresses') or not self.addresses:
-                # Try to get address from settings if not already set
-                if hasattr(self, 'settings'):
-                    address = self.settings.getint("address", 0)
-                    self.addresses = [address]
-                else:
-                    # Fallback to default address
-                    self.addresses = [1]
-            
-            kwargs = {"unit": self.addresses[0], **kwargs}
-
-        #compatability
-        if self.pymodbus_slave_arg != "unit":
-            kwargs["slave"] = kwargs.pop("unit")
+        # Only add unit/slave parameter if the pymodbus version supports it
+        if self.pymodbus_slave_arg is not None:
+            if self.pymodbus_slave_arg not in kwargs:
+                # Ensure addresses is initialized
+                if not hasattr(self, 'addresses') or not self.addresses:
+                    # Try to get address from settings if not already set
+                    if hasattr(self, 'settings'):
+                        address = self.settings.getint("address", 0)
+                        self.addresses = [address]
+                    else:
+                        # Fallback to default address
+                        self.addresses = [1]
+                
+                kwargs[self.pymodbus_slave_arg] = self.addresses[0]
 
         self.client.write_register(register, value, **kwargs) #function code 0x06 writes to holding register
 
