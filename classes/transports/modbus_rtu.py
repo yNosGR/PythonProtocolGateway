@@ -53,25 +53,24 @@ class modbus_rtu(modbus_base):
             self.client = modbus_base.clients[client_str]
             # Set compatibility flag based on existing client
             self._set_compatibility_flag()
-            return
-
-        if "method" in init_signature.parameters:
-            self.client = ModbusSerialClient(method="rtu", port=self.port,
-                                        baudrate=int(self.baudrate),
-                                        stopbits=1, parity="N", bytesize=8, timeout=2
-                                        )
         else:
-            self.client = ModbusSerialClient(
-                            port=self.port,
-                            baudrate=int(self.baudrate),
-                            stopbits=1, parity="N", bytesize=8, timeout=2
-                            )
+            if "method" in init_signature.parameters:
+                self.client = ModbusSerialClient(method="rtu", port=self.port,
+                                            baudrate=int(self.baudrate),
+                                            stopbits=1, parity="N", bytesize=8, timeout=2
+                                            )
+            else:
+                self.client = ModbusSerialClient(
+                                port=self.port,
+                                baudrate=int(self.baudrate),
+                                stopbits=1, parity="N", bytesize=8, timeout=2
+                                )
 
-        # Set compatibility flag based on created client
-        self._set_compatibility_flag()
+            # Set compatibility flag based on created client
+            self._set_compatibility_flag()
 
-        #add to clients
-        modbus_base.clients[client_str] = self.client
+            #add to clients
+            modbus_base.clients[client_str] = self.client
 
     def _set_compatibility_flag(self):
         """Determine the correct parameter name for slave/unit based on pymodbus version"""
