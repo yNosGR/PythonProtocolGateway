@@ -101,5 +101,31 @@ class modbus_rtu(modbus_base):
         self.client.write_register(register, value, **kwargs) #function code 0x06 writes to holding register
 
     def connect(self):
+        # Ensure client is initialized before trying to connect
+        if not hasattr(self, 'client') or self.client is None:
+            # Re-initialize the client if it wasn't set properly
+            client_str = self.port+"("+str(self.baudrate)+")"
+            
+            if client_str in modbus_base.clients:
+                self.client = modbus_base.clients[client_str]
+            else:
+                # Get the signature of the __init__ method
+                init_signature = inspect.signature(ModbusSerialClient.__init__)
+                
+                if "method" in init_signature.parameters:
+                    self.client = ModbusSerialClient(method="rtu", port=self.port,
+                                                baudrate=int(self.baudrate),
+                                                stopbits=1, parity="N", bytesize=8, timeout=2
+                                                )
+                else:
+                    self.client = ModbusSerialClient(
+                                    port=self.port,
+                                    baudrate=int(self.baudrate),
+                                    stopbits=1, parity="N", bytesize=8, timeout=2
+                                    )
+                
+                #add to clients
+                modbus_base.clients[client_str] = self.client
+        
         self.connected = self.client.connect()
         super().connect()
