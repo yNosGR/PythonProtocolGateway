@@ -73,7 +73,8 @@ class modbus_base(transport_base):
         self.modbus_delay_setting = self.modbus_delay
 
         # --- Always connect to the device first ---
-        self.connect()  # This will call the subclass connect and set self.connected
+        # Call the subclass connect method to establish hardware connection
+        super().connect()
         
         # --- Always call init_after_connect after connection ---
         if self.connected and self.first_connect:
@@ -96,11 +97,9 @@ class modbus_base(transport_base):
             self.update_identifier()
 
     def connect(self):
-        if self.connected and self.first_connect:
-            self.first_connect = False
-            # Always call init_after_connect when connection is established
-            # This ensures proper setup even when analyze_protocol is enabled
-            self.init_after_connect()
+        # Base class connect method - subclasses should override this
+        # to establish the actual hardware connection
+        pass
 
     def read_serial_number(self) -> str:
         # First try to read "Serial Number" from input registers (for protocols like EG4 v58)
