@@ -76,6 +76,16 @@ class modbus_rtu(modbus_base):
     def read_registers(self, start, count=1, registry_type : Registry_Type = Registry_Type.INPUT, **kwargs):
 
         if "unit" not in kwargs:
+            # Ensure addresses is initialized
+            if not hasattr(self, 'addresses') or not self.addresses:
+                # Try to get address from settings if not already set
+                if hasattr(self, 'settings'):
+                    address = self.settings.getint("address", 0)
+                    self.addresses = [address]
+                else:
+                    # Fallback to default address
+                    self.addresses = [1]
+            
             kwargs = {"unit": int(self.addresses[0]), **kwargs}
 
         #compatability
@@ -92,6 +102,16 @@ class modbus_rtu(modbus_base):
             return
 
         if "unit" not in kwargs:
+            # Ensure addresses is initialized
+            if not hasattr(self, 'addresses') or not self.addresses:
+                # Try to get address from settings if not already set
+                if hasattr(self, 'settings'):
+                    address = self.settings.getint("address", 0)
+                    self.addresses = [address]
+                else:
+                    # Fallback to default address
+                    self.addresses = [1]
+            
             kwargs = {"unit": self.addresses[0], **kwargs}
 
         #compatability
