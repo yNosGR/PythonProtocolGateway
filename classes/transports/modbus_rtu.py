@@ -91,6 +91,22 @@ class modbus_rtu(modbus_base):
                 print(f"DEBUG: Added client to cache: {client_str}")
             
             print("DEBUG: modbus_rtu.__init__ completed successfully")
+            
+            # Handle analyze_protocol after initialization is complete
+            if self.analyze_protocol_enabled:
+                print("DEBUG: analyze_protocol enabled, connecting and analyzing...")
+                # Connect to the device first
+                self.connect()
+                
+                # Call init_after_connect after connection
+                if self.connected and self.first_connect:
+                    self.first_connect = False
+                    self.init_after_connect()
+                
+                # Now run protocol analysis
+                self.analyze_protocol()
+                quit()
+                
         except Exception as e:
             print(f"DEBUG: Exception in modbus_rtu.__init__: {e}")
             import traceback
