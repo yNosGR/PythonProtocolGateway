@@ -587,11 +587,10 @@ class modbus_base(transport_base):
                 register = self.read_registers(range[0], range[1], registry_type=registry_type)
 
             except ModbusIOException as e:
-                self._log.error("ModbusIOException : ", e.error_code)
-                if e.error_code == 4: #if no response; probably time out. retry with increased delay
-                    isError = True
-                else:
-                    isError = True #other erorrs. ie Failed to connect[ModbusSerialClient(rtu baud[9600])]
+                self._log.error("ModbusIOException: " + str(e))
+                # In pymodbus 3.7+, ModbusIOException doesn't have error_code attribute
+                # Treat all ModbusIOException as retryable errors
+                isError = True
 
 
             if isinstance(register, bytes) or register.isError() or isError: #sometimes weird errors are handled incorrectly and response is a ascii error string
