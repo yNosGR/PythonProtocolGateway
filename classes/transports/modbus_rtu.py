@@ -39,7 +39,11 @@ class modbus_rtu(modbus_base):
         if "baud" in self.protocolSettings.settings:
             self.baudrate = strtoint(self.protocolSettings.settings["baud"])
 
-        self.baudrate = settings.getint("baudrate", self.baudrate)
+        # Check for baud rate in config settings (look for both 'baud' and 'baudrate')
+        if "baud" in settings:
+            self.baudrate = settings.getint("baud")
+        elif "baudrate" in settings:
+            self.baudrate = settings.getint("baudrate")
 
         address : int = settings.getint("address", 0)
         self.addresses = [address]
