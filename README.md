@@ -58,7 +58,7 @@ solark_v1.1 = SolarArk 8/12K Inverters - Untested
 hdhk_16ch_ac_module = some chinese current monitoring device :P
 srne_2021_v1.96 = SRNE inverters 2021+ (tested at ASF48100S200-H, ok-ish for HF2430U60-100 )
 
-eg4_v58 = eg4 inverters ( EG4-6000XP ) - confirmed working
+eg4_v58 = eg4 inverters ( EG4-6000XP, EG4-18K ) - confirmed working
 eg4_3000ehv_v1 = eg4 inverters ( EG4_3000EHV )
 ```
 
@@ -154,11 +154,16 @@ if you installed this when it was called growatt2mqtt-hotnoob or InverterModBusT
 
 ### donate
 this took me a while to make; and i had to make it because there werent any working solutions. 
-donations would be appreciated.
-![BitCoin Donation](https://github.com/HotNoob/growatt2mqtt-hotnoob/blob/main/images/donate_to_hotnoob.png?raw=true)
+donations / sponsoring this repo would be appreciated.
 
-```(btc) bc1qh394vazcguedkw2rlklnuhapdq7qgpnnz9c3t0```
-
-### Use Docker - untested
+### Use Docker
 - ```docker build . -t protocol_gateway ```
 - ```docker run --device=/dev/ttyUSB0 protocol_gateway```
+
+### Use Docker Image
+- ``` docker pull hotn00b/pythonprotocolgateway ``` 
+- ```docker run -v $(pwd)/config.cfg:/app/config.cfg --device=/dev/ttyUSB0 hotn00b/pythonprotocolgateway```
+
+See [config.cfg.example](https://github.com/HotNoob/PythonProtocolGateway/blob/main/config.cfg.example)
+
+[Docker Image Repo](https://hub.docker.com/r/hotn00b/pythonprotocolgateway)
