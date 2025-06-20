@@ -56,8 +56,7 @@ class modbus_base(transport_base):
         self.analyze_protocol_enabled = settings.getboolean("analyze_protocol", fallback=self.analyze_protocol_enabled)
         self.analyze_protocol_save_load = settings.getboolean("analyze_protocol_save_load", fallback=self.analyze_protocol_save_load)
 
-
-        #get defaults from protocol settings
+        # get defaults from protocol settings
         if "send_input_register" in self.protocolSettings.settings:
             self.send_input_register = strtobool(self.protocolSettings.settings["send_input_register"])
 
@@ -67,24 +66,22 @@ class modbus_base(transport_base):
         if "batch_delay" in self.protocolSettings.settings:
             self.modbus_delay = float(self.protocolSettings.settings["batch_delay"])
 
-        #allow enable/disable of which registers to send
+        # allow enable/disable of which registers to send
         self.send_holding_register = settings.getboolean("send_holding_register", fallback=self.send_holding_register)
         self.send_input_register = settings.getboolean("send_input_register", fallback=self.send_input_register)
         self.modbus_delay = settings.getfloat(["batch_delay", "modbus_delay"], fallback=self.modbus_delay)
         self.modbus_delay_setting = self.modbus_delay
 
+        # --- Always connect to the device first ---
+        self.connect()  # This will call the subclass connect and set self.connected
+        
+        # --- Always call init_after_connect after connection ---
+        if self.connected and self.first_connect:
+            self.first_connect = False
+            self.init_after_connect()
 
+        # --- If analyze_protocol is enabled, analyze after connection ---
         if self.analyze_protocol_enabled:
-            # Ensure connection is established first
-            if not self.connected:
-                # Call the child class connect method to establish the actual connection
-                super().connect()
-            
-            # Now call init_after_connect to set up the transport properly
-            if self.first_connect:
-                self.first_connect = False
-                self.init_after_connect()
-            
             self.analyze_protocol()
             quit()
 
