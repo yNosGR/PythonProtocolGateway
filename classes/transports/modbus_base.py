@@ -203,6 +203,25 @@ class modbus_base(transport_base):
 
             info.update(new_info)
 
+        # Check for serial number variables and promote to device_serial_number
+        if info:
+            # Look for common serial number variable names
+            serial_variable_names = [
+                "serial_number", "serialnumber", "serialno", "sn", 
+                "device_serial_number", "device_serial", "serial"
+            ]
+            
+            for key, value in info.items():
+                key_lower = key.lower()
+                if any(serial_name in key_lower for serial_name in serial_variable_names):
+                    if value and value != "None" and str(value).strip():
+                        # Found a valid serial number, promote it
+                        if self.device_serial_number != str(value):
+                            self._log.info(f"Promoting parsed serial number: {value} (from variable: {key})")
+                            self.device_serial_number = str(value)
+                            self.update_identifier()
+                        break
+
         if not info:
             self._log.info("Register is Empty; transport busy?")
 
