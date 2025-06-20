@@ -92,7 +92,10 @@ class modbus_base(transport_base):
     def connect(self):
         if self.connected and self.first_connect:
             self.first_connect = False
-            self.init_after_connect()
+            # Skip init_after_connect when analyze_protocol is enabled
+            # because validation should not happen during analyze_protocol initialization
+            if not self.analyze_protocol_enabled:
+                self.init_after_connect()
 
     def read_serial_number(self) -> str:
         # First try to read "Serial Number" from input registers (for protocols like EG4 v58)
