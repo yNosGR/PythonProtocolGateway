@@ -256,20 +256,31 @@ class modbus_base(transport_base):
             print(file)
             protocol_names.append(file)
 
-        max_input_register : int = 0
-        max_holding_register : int = 0
+        # Use the configured protocol's register ranges instead of maximum from all protocols
+        # This prevents trying to read non-existent registers from other protocols
+        if hasattr(self, 'protocolSettings') and self.protocolSettings:
+            max_input_register = self.protocolSettings.registry_map_size[Registry_Type.INPUT]
+            max_holding_register = self.protocolSettings.registry_map_size[Registry_Type.HOLDING]
+            print(f"Using configured protocol register ranges: input={max_input_register}, holding={max_holding_register}")
+            
+            # Use the configured protocol for analysis
+            protocols[self.protocolSettings.name] = self.protocolSettings
+        else:
+            # Fallback to calculating max from all protocols (original behavior)
+            max_input_register : int = 0
+            max_holding_register : int = 0
 
-        for name in protocol_names:
-            protocols[name] = protocol_settings(name)
+            for name in protocol_names:
+                protocols[name] = protocol_settings(name)
 
-            if protocols[name].registry_map_size[Registry_Type.INPUT] > max_input_register:
-                max_input_register = protocols[name].registry_map_size[Registry_Type.INPUT]
+                if protocols[name].registry_map_size[Registry_Type.INPUT] > max_input_register:
+                    max_input_register = protocols[name].registry_map_size[Registry_Type.INPUT]
 
-            if protocols[name].registry_map_size[Registry_Type.HOLDING] > max_holding_register:
-                max_holding_register = protocols[name].registry_map_size[Registry_Type.HOLDING]
+                if protocols[name].registry_map_size[Registry_Type.HOLDING] > max_holding_register:
+                    max_holding_register = protocols[name].registry_map_size[Registry_Type.HOLDING]
 
-        print("max input register: ", max_input_register)
-        print("max holding register: ", max_holding_register)
+            print("max input register: ", max_input_register)
+            print("max holding register: ", max_holding_register)
 
         self.modbus_delay = self.modbus_delay #decrease delay because can probably get away with it due to lots of small reads
         print("read INPUT Registers: ")
