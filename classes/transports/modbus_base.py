@@ -95,9 +95,18 @@ class modbus_base(transport_base):
             self.init_after_connect()
 
     def read_serial_number(self) -> str:
+        # First try to read "Serial Number" from input registers (for protocols like EG4 v58)
+        self._log.info("Looking for serial_number variable in input registers...")
+        serial_number = str(self.read_variable("Serial Number", Registry_Type.INPUT))
+        self._log.info("read SN from input registers: " + serial_number)
+        if serial_number and serial_number != "None":
+            return serial_number
+
+        # Then try holding registers (for other protocols)
+        self._log.info("Looking for serial_number variable in holding registers...")
         serial_number = str(self.read_variable("Serial Number", Registry_Type.HOLDING))
-        self._log.info("read SN: " +serial_number)
-        if serial_number:
+        self._log.info("read SN from holding registers: " + serial_number)
+        if serial_number and serial_number != "None":
             return serial_number
 
         sn2 = ""
@@ -267,8 +276,8 @@ class modbus_base(transport_base):
         else:
             #perform registry scan
             ##batch_size = 1, read registers one by one; if out of bound. it just returns error
-            input_registry = self.read_modbus_registers(start=0, end=max_input_register, batch_size=45, registry_type=Registry_Type.INPUT)
-            holding_registry = self.read_modbus_registers(start=0, end=max_holding_register, batch_size=45, registry_type=Registry_Type.HOLDING)
+            input_registry = self.read_modbus_registers(start=0, end=max_input_register, registry_type=Registry_Type.INPUT)
+            holding_registry = self.read_modbus_registers(start=0, end=max_holding_register, registry_type=Registry_Type.HOLDING)
 
             if self.analyze_protocol_save_load: #save results if enabled
                 with open(input_save_path, "w") as file:
@@ -497,15 +506,56 @@ class modbus_base(transport_base):
                 start = entry.register
                 end = entry.register
             else:
-                start = entry.register
+                start = min(entry.concatenate_registers)
                 end = max(entry.concatenate_registers)
 
             registers = self.read_modbus_registers(start=start, end=end, registry_type=registry_type)
-            results = self.protocolSettings.process_registery(registers, registry_map)
-            return results[entry.variable_name]
+            
+            # Special handling for concatenated ASCII variables (like serial numbers)
+            if entry.concatenate and entry.data_type == Data_Type.ASCII:
+                concatenated_value = ""
+                
+                # For serial numbers, we need to extract 8-bit ASCII characters from 16-bit registers
+                # Each register contains two ASCII characters (low byte and high byte)
+                for reg in entry.concatenate_registers:
+                    if reg in registers:
+                        reg_value = registers[reg]
+                        # Extract low byte (bits 0-7) and high byte (bits 8-15)
+                        low_byte = reg_value & 0xFF
+                        high_byte = (reg_value >> 8) & 0xFF
+                        
+                        # Convert each byte to ASCII character
+                        low_char = chr(low_byte)
+                        high_char = chr(high_byte)
+                        
+                        concatenated_value += low_char + high_char
+                    else:
+                        self._log.warning(f"Register {reg} not found in registry")
+                
+                result = concatenated_value.replace("\x00", " ").strip()
+                return result
+            
+            # Only process the specific entry, not the entire registry map
+            results = self.protocolSettings.process_registery(registers, [entry])
+            result = results.get(entry.variable_name)
+            return result
+        else:
+            self._log.warning(f"Entry not found for variable: {variable_name}")
+            return None
 
-    def read_modbus_registers(self, ranges : list[tuple] = None, start : int = 0, end : int = None, batch_size : int = 45, registry_type : Registry_Type = Registry_Type.INPUT ) -> dict:
+    def read_modbus_registers(self, ranges : list[tuple] = None, start : int = 0, end : int = None, batch_size : int = None, registry_type : Registry_Type = Registry_Type.INPUT ) -> dict:
         ''' maybe move this to transport_base ?'''
+
+        # Get batch_size from protocol settings if not provided
+        if batch_size is None:
+            if hasattr(self, 'protocolSettings') and self.protocolSettings:
+                batch_size = self.protocolSettings.settings.get("batch_size", 45)
+                try:
+                    batch_size = int(batch_size)
+                except (ValueError, TypeError):
+                    batch_size = 45
+            else:
+                batch_size = 45
 
         if not ranges: #ranges is empty, use min max
             if start == 0 and end is None:

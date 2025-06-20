@@ -128,7 +128,7 @@ Grid Hz,,15,Fac,0.01Hz,0-65535,Utility grid frequency,,,,,,,,,,,,
 ,8bit,118,SN_6__serial number,,[0-9a-zA-Z],,,,,,,,,,,,,
 ,8bit,118.b8,SN_7__serial number,,[0-9a-zA-Z],,,,,,,,,,,,,
 ,8bit,119,SN_8__serial number,,[0-9a-zA-Z],,,,,,,,,,,,,
-,8bit,119.b8,SN_9__serial number,,[0-9a-zA-Z],,,,,,,,,,,,,
+Serial Number,ASCII,115~119,SN_0__Year,,[0-9a-zA-Z],The serial number is a ten-digit ASCII code For example: The serial number is AB12345678 SN[0]=0x41(A) : : : : SN[9]=0x38(8),,,,,,,,,,,,
 ,,120,VBusP,0.1V,,,Half BUS voltage,Half BUS voltage,Half BUS voltage,Half BUS voltage,Half BUS voltage,Half BUS voltage,Half BUS voltage,Half BUS voltage,Half BUS voltage,Half BUS voltage,Half BUS voltage,Half BUS voltage
 ,,121,GenVolt,0.1V,,Generator voltage Voltage of generator for three phase: R phase,,,,,,,,,,,,
 ,,122,GenFreq,0.01Hz,,Generator frequency,,,,,,,,,,,,

@@ -1,0 +1,43 @@
+[general]
+log_level = INFO
+
+[transport.modbus_input]
+# Modbus input transport - reads data from device
+protocol_version = v0.14
+address = 1
+port = /dev/ttyUSB0
+baudrate = 9600
+bridge = transport.json_output
+read_interval = 10
+
+manufacturer = TestDevice
+model = Test Model
+serial_number = TEST123
+
+[transport.json_output]
+# JSON output transport - writes data to stdout
+transport = json_out
+output_file = stdout
+pretty_print = true
+include_timestamp = true
+include_device_info = true
+
+# Alternative configurations (uncomment to use):
+
+# [transport.json_file]
+# # JSON output to file
+# transport = json_out
+# output_file = /var/log/inverter_data.json
+# pretty_print = false
+# append_mode = true
+# include_timestamp = true
+# include_device_info = false
+
+# [transport.json_compact]
+# # Compact JSON output
+# transport = json_out
+# output_file = /tmp/compact_data.json
+# pretty_print = false
+# append_mode = false
+# include_timestamp = true
+# include_device_info = false 
