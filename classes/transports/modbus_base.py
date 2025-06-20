@@ -268,7 +268,7 @@ class modbus_base(transport_base):
             print(f"Using configured protocol register ranges: input={max_input_register}, holding={max_holding_register}")
             
             # Use the configured protocol for analysis
-            protocols[self.protocolSettings.name] = self.protocolSettings
+            protocols[self.protocolSettings.protocol] = self.protocolSettings
         else:
             # Fallback to calculating max from all protocols (original behavior)
             max_input_register : int = 0
