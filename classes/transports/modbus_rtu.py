@@ -44,16 +44,6 @@ class modbus_rtu(modbus_base):
         address : int = settings.getint("address", 0)
         self.addresses = [address]
 
-        # pymodbus compatability; check what parameter name is used for slave/unit
-        if "slave" in inspect.signature(ModbusSerialClient.read_holding_registers).parameters:
-            self.pymodbus_slave_arg = "slave"
-        elif "unit" in inspect.signature(ModbusSerialClient.read_holding_registers).parameters:
-            self.pymodbus_slave_arg = "unit"
-        else:
-            # Newer pymodbus versions might not use either parameter
-            self.pymodbus_slave_arg = None
-
-
         # Get the signature of the __init__ method
         init_signature = inspect.signature(ModbusSerialClient.__init__)
 
@@ -61,6 +51,8 @@ class modbus_rtu(modbus_base):
 
         if client_str in modbus_base.clients:
             self.client = modbus_base.clients[client_str]
+            # Set compatibility flag based on existing client
+            self._set_compatibility_flag()
             return
 
         if "method" in init_signature.parameters:
@@ -75,8 +67,31 @@ class modbus_rtu(modbus_base):
                             stopbits=1, parity="N", bytesize=8, timeout=2
                             )
 
+        # Set compatibility flag based on created client
+        self._set_compatibility_flag()
+
         #add to clients
         modbus_base.clients[client_str] = self.client
+
+    def _set_compatibility_flag(self):
+        """Determine the correct parameter name for slave/unit based on pymodbus version"""
+        self.pymodbus_slave_arg = None
+        
+        try:
+            # For pymodbus 3.7+, we don't need unit/slave parameter
+            import pymodbus
+            version = pymodbus.__version__
+            
+            # pymodbus 3.7+ doesn't need slave/unit parameter for most operations
+            if version.startswith('3.'):
+                self.pymodbus_slave_arg = None
+            else:
+                # Fallback for any other versions - assume newer API
+                self.pymodbus_slave_arg = None
+                
+        except (ImportError, AttributeError):
+            # If we can't determine version, assume newer API (3.7+)
+            self.pymodbus_slave_arg = None
 
     def read_registers(self, start, count=1, registry_type : Registry_Type = Registry_Type.INPUT, **kwargs):
 
@@ -147,6 +162,9 @@ class modbus_rtu(modbus_base):
                 
                 #add to clients
                 modbus_base.clients[client_str] = self.client
+            
+            # Set compatibility flag
+            self._set_compatibility_flag()
         
         self.connected = self.client.connect()
         super().connect()
