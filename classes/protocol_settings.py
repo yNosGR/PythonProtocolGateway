@@ -626,7 +626,7 @@ class protocol_settings:
                                 concatenate_registers.append(i)
 
             if concatenate_registers:
-                r = range(1)  # Only create one entry for concatenated variables
+                r = range(len(concatenate_registers))
             else:
                 r = range(1)
 
