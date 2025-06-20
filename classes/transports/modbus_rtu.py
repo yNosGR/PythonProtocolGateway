@@ -42,8 +42,12 @@ class modbus_rtu(modbus_base):
         # Check for baud rate in config settings (look for both 'baud' and 'baudrate')
         if "baud" in settings:
             self.baudrate = settings.getint("baud")
+            print(f"DEBUG: Using baud rate from config 'baud': {self.baudrate}")
         elif "baudrate" in settings:
             self.baudrate = settings.getint("baudrate")
+            print(f"DEBUG: Using baud rate from config 'baudrate': {self.baudrate}")
+        else:
+            print(f"DEBUG: Using default baud rate: {self.baudrate}")
 
         address : int = settings.getint("address", 0)
         self.addresses = [address]
@@ -52,12 +56,16 @@ class modbus_rtu(modbus_base):
         init_signature = inspect.signature(ModbusSerialClient.__init__)
 
         client_str = self.port+"("+str(self.baudrate)+")"
+        print(f"DEBUG: Client cache key: {client_str}")
+        print(f"DEBUG: Existing clients in cache: {list(modbus_base.clients.keys())}")
 
         if client_str in modbus_base.clients:
+            print(f"DEBUG: Using existing client from cache: {client_str}")
             self.client = modbus_base.clients[client_str]
             # Set compatibility flag based on existing client
             self._set_compatibility_flag()
         else:
+            print(f"DEBUG: Creating new client with baud rate: {self.baudrate}")
             if "method" in init_signature.parameters:
                 self.client = ModbusSerialClient(method="rtu", port=self.port,
                                             baudrate=int(self.baudrate),
@@ -75,6 +83,7 @@ class modbus_rtu(modbus_base):
 
             #add to clients
             modbus_base.clients[client_str] = self.client
+            print(f"DEBUG: Added client to cache: {client_str}")
 
     def _set_compatibility_flag(self):
         """Determine the correct parameter name for slave/unit based on pymodbus version"""
