@@ -145,15 +145,27 @@ class modbus_base(transport_base):
 
         self._log.info("Validating Protocol for Writing")
         self.write_enabled = False
-        score_percent = self.validate_protocol(Registry_Type.HOLDING)
-        if(score_percent > 90):
-            self.write_enabled = True
-            self._log.warning("enable write - validation passed")
-        elif self.write_mode == TransportWriteMode.RELAXED:
-            self.write_enabled = True
-            self._log.warning("enable write - WARNING - RELAXED MODE")
-        else:
-            self._log.error("enable write FAILED - WRITE DISABLED")
+        
+        # Add a small delay to ensure device is ready, especially during initialization
+        time.sleep(self.modbus_delay * 2)
+        
+        try:
+            score_percent = self.validate_protocol(Registry_Type.HOLDING)
+            if(score_percent > 90):
+                self.write_enabled = True
+                self._log.warning("enable write - validation passed")
+            elif self.write_mode == TransportWriteMode.RELAXED:
+                self.write_enabled = True
+                self._log.warning("enable write - WARNING - RELAXED MODE")
+            else:
+                self._log.error("enable write FAILED - WRITE DISABLED")
+        except Exception as e:
+            self._log.error(f"enable write FAILED due to error: {str(e)}")
+            if self.write_mode == TransportWriteMode.RELAXED:
+                self.write_enabled = True
+                self._log.warning("enable write - WARNING - RELAXED MODE (due to validation error)")
+            else:
+                self._log.error("enable write FAILED - WRITE DISABLED")
 
 
 
@@ -583,6 +595,7 @@ class modbus_base(transport_base):
             time.sleep(self.modbus_delay) #sleep for 1ms to give bus a rest #manual recommends 1s between commands
 
             isError = False
+            register = None  # Initialize register variable
             try:
                 register = self.read_registers(range[0], range[1], registry_type=registry_type)
 
@@ -593,11 +606,13 @@ class modbus_base(transport_base):
                 isError = True
 
 
-            if isinstance(register, bytes) or register.isError() or isError: #sometimes weird errors are handled incorrectly and response is a ascii error string
-                if isinstance(register, bytes):
+            if register is None or isinstance(register, bytes) or (hasattr(register, 'isError') and register.isError()) or isError: #sometimes weird errors are handled incorrectly and response is a ascii error string
+                if register is None:
+                    self._log.error("No response received from modbus device")
+                elif isinstance(register, bytes):
                     self._log.error(register.decode("utf-8"))
                 else:
-                    self._log.error(register.__str__)
+                    self._log.error(str(register))
                 self.modbus_delay += self.modbus_delay_increament #increase delay, error is likely due to modbus being busy
 
                 if self.modbus_delay > 60: #max delay. 60 seconds between requests should be way over kill if it happens
@@ -622,12 +637,13 @@ class modbus_base(transport_base):
             if retry < 0:
                 retry = 0
 
-
-            #combine registers into "registry"
-            i = -1
-            while(i := i + 1 ) < range[1]:
-                #print(str(i) + " => " + str(i+range[0]))
-                registry[i+range[0]] = register.registers[i]
+            # Only process registers if we have a valid response
+            if register is not None and hasattr(register, 'registers') and register.registers is not None:
+                #combine registers into "registry"
+                i = -1
+                while(i := i + 1 ) < range[1]:
+                    #print(str(i) + " => " + str(i+range[0]))
+                    registry[i+range[0]] = register.registers[i]
 
         return registry
 
