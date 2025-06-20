@@ -72,17 +72,17 @@ class modbus_base(transport_base):
         self.modbus_delay = settings.getfloat(["batch_delay", "modbus_delay"], fallback=self.modbus_delay)
         self.modbus_delay_setting = self.modbus_delay
 
-        # --- Always connect to the device first ---
-        # Call the subclass connect method to establish hardware connection
-        super().connect()
-        
-        # --- Always call init_after_connect after connection ---
-        if self.connected and self.first_connect:
-            self.first_connect = False
-            self.init_after_connect()
-
-        # --- If analyze_protocol is enabled, analyze after connection ---
+        # --- If analyze_protocol is enabled, connect and analyze after subclass setup ---
         if self.analyze_protocol_enabled:
+            # Connect to the device first
+            self.connect()
+            
+            # Call init_after_connect after connection
+            if self.connected and self.first_connect:
+                self.first_connect = False
+                self.init_after_connect()
+            
+            # Now run protocol analysis
             self.analyze_protocol()
             quit()
 
