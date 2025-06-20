@@ -125,8 +125,8 @@ class modbus_base(transport_base):
 
             time.sleep(self.modbus_delay*2) #sleep inbetween requests so modbus can rest
 
-        print(sn2)
-        print(sn3)
+        self._log.debug(f"Serial number sn2: {sn2}")
+        self._log.debug(f"Serial number sn3: {sn3}")
 
         if not re.search("[^a-zA-Z0-9_]", sn2) :
             serial_number = sn2
@@ -253,7 +253,7 @@ class modbus_base(transport_base):
         if hasattr(self, 'protocolSettings') and self.protocolSettings:
             max_input_register = self.protocolSettings.registry_map_size[Registry_Type.INPUT]
             max_holding_register = self.protocolSettings.registry_map_size[Registry_Type.HOLDING]
-            print(f"Using configured protocol register ranges: input={max_input_register}, holding={max_holding_register}")
+            self._log.debug(f"Using configured protocol register ranges: input={max_input_register}, holding={max_holding_register}")
             
             # Use the configured protocol for analysis
             protocols[self.protocolSettings.protocol] = self.protocolSettings
@@ -271,11 +271,11 @@ class modbus_base(transport_base):
                 if protocols[name].registry_map_size[Registry_Type.HOLDING] > max_holding_register:
                     max_holding_register = protocols[name].registry_map_size[Registry_Type.HOLDING]
 
-            print("max input register: ", max_input_register)
-            print("max holding register: ", max_holding_register)
+            self._log.debug(f"max input register: {max_input_register}")
+            self._log.debug(f"max holding register: {max_holding_register}")
 
         self.modbus_delay = self.modbus_delay #decrease delay because can probably get away with it due to lots of small reads
-        print("read INPUT Registers: ")
+        self._log.debug("read INPUT Registers: ")
 
         input_save_path = "input_registry.json"
         holding_save_path = "holding_registry.json"
@@ -305,14 +305,14 @@ class modbus_base(transport_base):
                     json.dump(holding_registry, file)
 
         #print results for debug
-        print("=== START INPUT REGISTER ===")
+        self._log.debug("=== START INPUT REGISTER ===")
         if input_registry:
-            print([(key, value) for key, value in input_registry.items()])
-        print("=== END INPUT REGISTER ===")
-        print("=== START HOLDING REGISTER ===")
+            self._log.debug([(key, value) for key, value in input_registry.items()])
+        self._log.debug("=== END INPUT REGISTER ===")
+        self._log.debug("=== START HOLDING REGISTER ===")
         if holding_registry:
-            print([(key, value) for key, value in holding_registry.items()])
-        print("=== END HOLDING REGISTER ===")
+            self._log.debug([(key, value) for key, value in holding_registry.items()])
+        self._log.debug("=== END HOLDING REGISTER ===")
 
         #very well possible the registers will be incomplete due to different hardware sizes
         #so dont assume they are set / complete
@@ -396,9 +396,9 @@ class modbus_base(transport_base):
 
         #print scores
         for name in sorted(protocol_scores, key=protocol_scores.get, reverse=True):
-            print("=== "+str(name)+" - "+str(protocol_scores[name])+" ===")
-            print("input register score: " + str(input_register_score[name]) + "; valid registers: "+str(input_valid_count[name])+" of " + str(len(protocols[name].get_registry_map(Registry_Type.INPUT))))
-            print("holding register score : " + str(holding_register_score[name]) + "; valid registers: "+str(holding_valid_count[name])+" of " + str(len(protocols[name].get_registry_map(Registry_Type.HOLDING))))
+            self._log.debug("=== "+str(name)+" - "+str(protocol_scores[name])+" ===")
+            self._log.debug("input register score: " + str(input_register_score[name]) + "; valid registers: "+str(input_valid_count[name])+" of " + str(len(protocols[name].get_registry_map(Registry_Type.INPUT))))
+            self._log.debug("holding register score : " + str(holding_register_score[name]) + "; valid registers: "+str(holding_valid_count[name])+" of " + str(len(protocols[name].get_registry_map(Registry_Type.HOLDING))))
 
 
     def write_variable(self, entry : registry_map_entry, value : str, registry_type : Registry_Type = Registry_Type.HOLDING):

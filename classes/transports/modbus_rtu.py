@@ -24,18 +24,18 @@ class modbus_rtu(modbus_base):
     pymodbus_slave_arg = "unit"
 
     def __init__(self, settings : SectionProxy, protocolSettings : protocol_settings = None):
-        print("DEBUG: modbus_rtu.__init__ starting")
+        self._log.debug("modbus_rtu.__init__ starting")
         try:
             super().__init__(settings, protocolSettings=protocolSettings)
-            print("DEBUG: super().__init__ completed")
+            self._log.debug("super().__init__ completed")
 
             self.port = settings.get("port", "")
-            print(f"DEBUG: Port from settings: '{self.port}'")
+            self._log.debug(f"Port from settings: '{self.port}'")
             if not self.port:
                 raise ValueError("Port is not set")
 
             self.port = find_usb_serial_port(self.port)
-            print(f"DEBUG: Port after find_usb_serial_port: '{self.port}'")
+            self._log.debug(f"Port after find_usb_serial_port: '{self.port}'")
             if not self.port:
                 raise ValueError("Port is not valid / not found")
 
@@ -47,12 +47,12 @@ class modbus_rtu(modbus_base):
             # Check for baud rate in config settings (look for both 'baud' and 'baudrate')
             if "baud" in settings:
                 self.baudrate = settings.getint("baud")
-                print(f"DEBUG: Using baud rate from config 'baud': {self.baudrate}")
+                self._log.debug(f"Using baud rate from config 'baud': {self.baudrate}")
             elif "baudrate" in settings:
                 self.baudrate = settings.getint("baudrate")
-                print(f"DEBUG: Using baud rate from config 'baudrate': {self.baudrate}")
+                self._log.debug(f"Using baud rate from config 'baudrate': {self.baudrate}")
             else:
-                print(f"DEBUG: Using default baud rate: {self.baudrate}")
+                self._log.debug(f"Using default baud rate: {self.baudrate}")
 
             address : int = settings.getint("address", 0)
             self.addresses = [address]
@@ -61,16 +61,16 @@ class modbus_rtu(modbus_base):
             init_signature = inspect.signature(ModbusSerialClient.__init__)
 
             client_str = self.port+"("+str(self.baudrate)+")"
-            print(f"DEBUG: Client cache key: {client_str}")
-            print(f"DEBUG: Existing clients in cache: {list(modbus_base.clients.keys())}")
+            self._log.debug(f"Client cache key: {client_str}")
+            self._log.debug(f"Existing clients in cache: {list(modbus_base.clients.keys())}")
 
             if client_str in modbus_base.clients:
-                print(f"DEBUG: Using existing client from cache: {client_str}")
+                self._log.debug(f"Using existing client from cache: {client_str}")
                 self.client = modbus_base.clients[client_str]
                 # Set compatibility flag based on existing client
                 self._set_compatibility_flag()
             else:
-                print(f"DEBUG: Creating new client with baud rate: {self.baudrate}")
+                self._log.debug(f"Creating new client with baud rate: {self.baudrate}")
                 if "method" in init_signature.parameters:
                     self.client = ModbusSerialClient(method="rtu", port=self.port,
                                                 baudrate=int(self.baudrate),
@@ -88,13 +88,13 @@ class modbus_rtu(modbus_base):
 
                 #add to clients
                 modbus_base.clients[client_str] = self.client
-                print(f"DEBUG: Added client to cache: {client_str}")
+                self._log.debug(f"Added client to cache: {client_str}")
             
-            print("DEBUG: modbus_rtu.__init__ completed successfully")
+            self._log.debug("modbus_rtu.__init__ completed successfully")
             
             # Handle analyze_protocol after initialization is complete
             if self.analyze_protocol_enabled:
-                print("DEBUG: analyze_protocol enabled, connecting and analyzing...")
+                self._log.debug("analyze_protocol enabled, connecting and analyzing...")
                 # Connect to the device first
                 self.connect()
                 
@@ -108,7 +108,7 @@ class modbus_rtu(modbus_base):
                 quit()
                 
         except Exception as e:
-            print(f"DEBUG: Exception in modbus_rtu.__init__: {e}")
+            self._log.debug(f"Exception in modbus_rtu.__init__: {e}")
             import traceback
             traceback.print_exc()
             raise
@@ -177,10 +177,10 @@ class modbus_rtu(modbus_base):
         self.client.write_register(register, value, **kwargs) #function code 0x06 writes to holding register
 
     def connect(self):
-        print("DEBUG: modbus_rtu.connect() called")
+        self._log.debug("modbus_rtu.connect() called")
         # Ensure client is initialized before trying to connect
         if not hasattr(self, 'client') or self.client is None:
-            print("DEBUG: Client not found, re-initializing...")
+            self._log.debug("Client not found, re-initializing...")
             # Re-initialize the client if it wasn't set properly
             client_str = self.port+"("+str(self.baudrate)+")"
             
@@ -208,7 +208,7 @@ class modbus_rtu(modbus_base):
             # Set compatibility flag
             self._set_compatibility_flag()
         
-        print(f"DEBUG: Attempting to connect to {self.port} at {self.baudrate} baud...")
+        self._log.debug(f"Attempting to connect to {self.port} at {self.baudrate} baud...")
         self.connected = self.client.connect()
-        print(f"DEBUG: Connection result: {self.connected}")
+        self._log.debug(f"Connection result: {self.connected}")
         super().connect()
