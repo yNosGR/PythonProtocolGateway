@@ -207,7 +207,7 @@ class modbus_base(transport_base):
         if info:
             # Look for common serial number variable names
             serial_variable_names = [
-                "serial_number", "serialnumber", "serialno", "sn", 
+                "serial_number", "serialnumber", "serialno", 
                 "device_serial_number", "device_serial", "serial"
             ]
             
