@@ -231,17 +231,11 @@ class Protocol_Gateway:
 
 
 
-def main():
+def main(args=None):
     """
     main method
     """
-    print(__logo)
 
-    ppg = Protocol_Gateway(args.config)
-    ppg.run()
-
-
-if __name__ == "__main__":
     # Create ArgumentParser object
     parser = argparse.ArgumentParser(description="Python Protocol Gateway")
 
@@ -257,4 +251,11 @@ if __name__ == "__main__":
     # If '--config' is provided, use it; otherwise, fall back to the positional or default.
     args.config = args.config if args.config else args.positional_config
 
+    print(__logo)
+
+    ppg = Protocol_Gateway(args.config)
+    ppg.run()
+
+
+if __name__ == "__main__":
     main()

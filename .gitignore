@@ -31,4 +31,5 @@ holding_registry.json
 
 #ignore pypi / pyproject.toml output 
 dist/*
+build/*
 python_protocol_gateway.egg-info/*

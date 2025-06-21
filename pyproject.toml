@@ -16,6 +16,10 @@ authors = [{ name = "HotNoob", email = "hotnoob@hotnoob.com" }]
 requires-python = ">=3.9"
 dynamic = ["dependencies", "optional-dependencies"]
 
+[project.scripts]
+protocol-gateway = "protocol_gateway:main"
+ppg = "protocol_gateway:main"
+
 [tool.setuptools]
 py-modules = ["protocol_gateway"]
 license-files = ["LICENSE"]
