@@ -85,9 +85,9 @@ class modbus_base(transport_base):
             self.update_identifier()
 
     def connect(self):
-        # Base class connect method - subclasses should override this
-        # to establish the actual hardware connection
-        pass
+        if self.connected and self.first_connect:
+            self.first_connect = False
+            self.init_after_connect()
 
     def read_serial_number(self) -> str:
         # First try to read "Serial Number" from input registers (for protocols like EG4 v58)
