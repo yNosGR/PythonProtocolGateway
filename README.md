@@ -5,6 +5,7 @@
 ![Python 3.12](https://github.com/HotNoob/PythonProtocolGateway/actions/workflows/python-3.12.yml/badge.svg)
 ![Python 3.13](https://github.com/HotNoob/PythonProtocolGateway/actions/workflows/python-3.13.yml/badge.svg)
 
+[![PyPI version](https://img.shields.io/pypi/v/python-protocol-gateway.svg)](https://pypi.org/project/python-protocol-gateway/)
 [![CodeQL](https://github.com/HotNoob/PythonProtocolGateway/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/HotNoob/PythonProtocolGateway/actions/workflows/github-code-scanning/codeql)
 
 For advanced configuration help, please checkout the documentation :)
