@@ -111,6 +111,9 @@ once installed; the device should show up on home assistant under mqtt
 more docs on setting up mqtt here: https://www.home-assistant.io/integrations/mqtt
 i probably might have missed something. ha is new to me.
 
+#### connect mqtt on home assistant with external mqtt broker
+[![HowTo Connect External MQTT Broker To HomeAssistant](https://img.youtube.com/vi/sP2gYLYQat8/0.jpg)](https://www.youtube.com/watch?v=sP2gYLYQat8)
+
 ### general update procedure
 update files and restart script / service
 ```
