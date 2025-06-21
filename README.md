@@ -151,10 +151,6 @@ As i dive deeper into solar monitoring and general automation, i've come to the 
 
 So... don't mind me as i may add other devices such as battery bms' and... i have a home energy monitor on the way! so i'll be adding that when it arrives.
 
-### Rebranding Again... last time.
-if you installed this when it was called growatt2mqtt-hotnoob or InverterModBusToMQTT, you'll need to reinstall if you want to update. 
-
-
 ### donate
 this took me a while to make; and i had to make it because there werent any working solutions. 
 donations / sponsoring this repo would be appreciated.
