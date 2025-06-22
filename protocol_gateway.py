@@ -23,10 +23,14 @@ import logging
 import os
 import sys
 import traceback
+import multiprocessing
 from configparser import ConfigParser, NoOptionError
 
 from classes.protocol_settings import protocol_settings, registry_map_entry
 from classes.transports.transport_base import transport_base
+
+# Global queue for inter-process communication
+bridge_queue = None
 
 __logo = """
 
@@ -88,6 +92,126 @@ class CustomConfigParser(ConfigParser):
     def getfloat(self, section, option, *args, **kwargs): #bypass fallback bug
         value = self.get(section, option, *args, **kwargs)
         return float(value) if value is not None else None
+
+
+class SingleTransportGateway:
+    """
+    Gateway class for running a single transport in its own process
+    """
+    __log = None
+    __running = False
+    __transport = None
+    config_file = ""
+    __bridge_queue = None
+
+    def __init__(self, config_file: str, transport_name: str, bridge_queue=None):
+        self.config_file = config_file
+        self.__bridge_queue = bridge_queue
+        
+        # Set up logging for this process
+        self.__log = logging.getLogger(f"single_transport_{transport_name}")
+        handler = logging.StreamHandler(sys.stdout)
+        formatter = logging.Formatter("[%(asctime)s]  {%(filename)s:%(lineno)d}  %(levelname)s - %(message)s")
+        handler.setFormatter(formatter)
+        self.__log.addHandler(handler)
+        self.__log.setLevel(logging.INFO)
+        
+        self.__log.info(f"Initializing single transport gateway for {transport_name}")
+        
+        # Load configuration
+        self.__settings = CustomConfigParser()
+        self.__settings.read(self.config_file)
+        
+        # Find and initialize the specific transport
+        if transport_name in self.__settings.sections():
+            transport_cfg = self.__settings[transport_name]
+            transport_type = transport_cfg.get("transport", fallback="")
+            protocol_version = transport_cfg.get("protocol_version", fallback="")
+
+            if not transport_type and not protocol_version:
+                raise ValueError("Missing Transport / Protocol Version")
+
+            if not transport_type and protocol_version:
+                protocolSettings = protocol_settings(protocol_version)
+                if not transport_type and not protocolSettings.transport:
+                    raise ValueError("Missing Transport")
+                if not transport_type:
+                    transport_type = protocolSettings.transport
+
+            # Import the module
+            module = importlib.import_module("classes.transports." + transport_type)
+            # Get the class from the module
+            cls = getattr(module, transport_type)
+            self.__transport = cls(transport_cfg)
+            
+            self.__log.info(f"Created transport: {self.__transport.type}:{self.__transport.transport_name}")
+            
+            # Connect the transport
+            self.__log.info(f"Connecting to {self.__transport.type}:{self.__transport.transport_name}...")
+            self.__transport.connect()
+            
+        else:
+            raise ValueError(f"Transport section '{transport_name}' not found in config")
+
+    def handle_bridge_message(self, message):
+        """
+        Handle incoming bridge messages from other processes
+        """
+        try:
+            if message['target_transport'] == self.__transport.transport_name:
+                self.__log.debug(f"Received bridge message for {self.__transport.transport_name}: {message['data']}")
+                # Write data to this transport
+                self.__transport.write_data(message['data'], None)
+        except Exception as err:
+            self.__log.error(f"Error handling bridge message: {err}")
+
+    def run(self):
+        """
+        Run the single transport
+        """
+        self.__running = True
+        self.__log.info(f"Starting single transport: {self.__transport.transport_name}")
+
+        while self.__running:
+            try:
+                # Check for bridge messages
+                if self.__bridge_queue:
+                    try:
+                        while not self.__bridge_queue.empty():
+                            message = self.__bridge_queue.get_nowait()
+                            self.handle_bridge_message(message)
+                    except:
+                        pass  # Queue is empty or other error
+
+                now = time.time()
+                if self.__transport.read_interval > 0 and now - self.__transport.last_read_time > self.__transport.read_interval:
+                    self.__transport.last_read_time = now
+                    
+                    if not self.__transport.connected:
+                        self.__transport.connect()
+                    else:
+                        info = self.__transport.read_data()
+                        
+                        if info:
+                            self.__log.debug(f"Read data from {self.__transport.transport_name}: {len(info)} items")
+                            
+                            # Handle bridging if configured
+                            if self.__transport.bridge and self.__bridge_queue:
+                                self.__log.debug(f"Sending bridge message from {self.__transport.transport_name} to {self.__transport.bridge}")
+                                bridge_message = {
+                                    'source_transport': self.__transport.transport_name,
+                                    'target_transport': self.__transport.bridge,
+                                    'data': info
+                                }
+                                self.__bridge_queue.put(bridge_message)
+                        else:
+                            self.__log.debug(f"No data read from {self.__transport.transport_name}")
+
+            except Exception as err:
+                self.__log.error(f"Error in transport {self.__transport.transport_name}: {err}")
+                traceback.print_exc()
+
+            time.sleep(0.7)
 
 
 class Protocol_Gateway:
@@ -187,11 +311,33 @@ class Protocol_Gateway:
                     to_transport.write_data({entry.variable_name : data}, transport)
                     break
 
+    def run_single_transport(self, transport_name: str, config_file: str, bridge_queue=None):
+        """
+        Run a single transport in its own process
+        """
+        try:
+            # Create a new gateway instance for this transport
+            single_gateway = SingleTransportGateway(config_file, transport_name, bridge_queue)
+            single_gateway.run()
+        except Exception as err:
+            print(f"Error in transport {transport_name}: {err}")
+            traceback.print_exc()
+
     def run(self):
         """
         run method, starts ModBus connection and mqtt connection
         """
+        if len(self.__transports) <= 1:
+            # Use single-threaded approach for 1 or fewer transports
+            self.__run_single_threaded()
+        else:
+            # Use multiprocessing approach for multiple transports
+            self.__run_multiprocess()
 
+    def __run_single_threaded(self):
+        """
+        Original single-threaded implementation
+        """
         self.__running = True
 
         if False:
@@ -225,6 +371,87 @@ class Protocol_Gateway:
                 self.__log.error(err)
 
             time.sleep(0.7) #change this in future. probably reduce to allow faster reads.
+
+    def __run_multiprocess(self):
+        """
+        Multiprocessing implementation for multiple transports
+        """
+        self.__log.info(f"Starting multiprocessing mode with {len(self.__transports)} transports")
+        
+        # Check for bridging configuration
+        has_bridging = any(transport.bridge for transport in self.__transports)
+        if has_bridging:
+            self.__log.info("Bridging detected - enabling inter-process communication")
+        else:
+            self.__log.info("No bridging configured - transports will run independently")
+        
+        # Create a shared queue for inter-process communication
+        bridge_queue = multiprocessing.Queue() if has_bridging else None
+        
+        # Create processes for each transport
+        processes = []
+        for transport in self.__transports:
+            process = multiprocessing.Process(
+                target=self.run_single_transport,
+                args=(transport.transport_name, self.config_file, bridge_queue),
+                name=f"transport_{transport.transport_name}"
+            )
+            process.start()
+            processes.append(process)
+            self.__log.info(f"Started process for {transport.transport_name} (PID: {process.pid})")
+        
+        # Monitor processes and handle cleanup
+        try:
+            while any(process.is_alive() for process in processes):
+                # Check if any process has died unexpectedly
+                for i, process in enumerate(processes):
+                    if not process.is_alive() and process.exitcode != 0:
+                        transport_name = self.__transports[i].transport_name
+                        self.__log.error(f"Process for {transport_name} died with exit code {process.exitcode}")
+                        
+                        # Restart the process
+                        self.__log.info(f"Restarting process for {transport_name}")
+                        new_process = multiprocessing.Process(
+                            target=self.run_single_transport,
+                            args=(transport_name, self.config_file, bridge_queue),
+                            name=f"transport_{transport_name}"
+                        )
+                        new_process.start()
+                        processes[i] = new_process
+                        self.__log.info(f"Restarted process for {transport_name} (PID: {new_process.pid})")
+                
+                time.sleep(5)  # Check every 5 seconds
+                
+        except KeyboardInterrupt:
+            self.__log.info("Received interrupt signal, terminating processes...")
+            for process in processes:
+                if process.is_alive():
+                    process.terminate()
+                    process.join(timeout=5)
+                    if process.is_alive():
+                        process.kill()
+                        process.join(timeout=2)
+            
+            # Clean up the queue
+            if bridge_queue:
+                try:
+                    while not bridge_queue.empty():
+                        bridge_queue.get_nowait()
+                except:
+                    pass
+            
+            self.__log.info("All processes terminated")
+        except Exception as err:
+            self.__log.error(f"Error in multiprocessing mode: {err}")
+            traceback.print_exc()
+            
+            # Clean up processes on error
+            for process in processes:
+                if process.is_alive():
+                    process.terminate()
+                    process.join(timeout=5)
+                    if process.is_alive():
+                        process.kill()
 
 
 
