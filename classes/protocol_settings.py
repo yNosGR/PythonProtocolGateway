@@ -188,6 +188,7 @@ class registry_map_entry:
     register_bit : int
     register_byte : int
     ''' byte offset for canbus ect... '''
+
     variable_name : str
     documented_name : str
     unit : str
@@ -207,6 +208,9 @@ class registry_map_entry:
     data_type : Data_Type = Data_Type.USHORT
     data_type_size : int = -1
     ''' for non-fixed size types like ASCII'''
+
+    data_byteorder : str = ''
+    ''' entry specific byte order little | big | '' '''
 
     read_command : bytes = None
     ''' for transports/protocols that require sending a command ontop of "register" '''
@@ -513,16 +517,30 @@ class protocol_settings:
 
             #region data type
             data_type = Data_Type.USHORT
-
             data_type_len : int = -1
+            data_byteorder : str = ''
             #optional row, only needed for non-default data types
             if "data type" in row and row["data type"]:
+                data_type_str : str = ''
+
                 matches = data_type_regex.search(row["data type"])
                 if matches:
                     data_type_len = int(matches.group("length"))
-                    data_type = Data_Type.fromString(matches.group("datatype"))
+                    data_type_str = matches.group("datatype")
                 else:
-                    data_type = Data_Type.fromString(row["data type"])
+                    data_type_str = row["data type"]
+
+                #check if datatype specifies byteorder 
+                if data_type_str.upper().endswith("_LE"):
+                    data_byteorder = "little"
+                    data_type_str = data_type_str[:-3]
+                elif data_type_str.upper().endswith("_BE"):
+                    data_byteorder = "big"
+                    data_type_str = data_type_str[:-3]
+
+
+                data_type = Data_Type.fromString(data_type_str)
+
 
 
             if "values" not in row:
@@ -659,6 +677,7 @@ class protocol_settings:
                                             unit_mod= unit_multiplier,
                                             data_type= data_type,
                                             data_type_size = data_type_len,
+                                            data_byteorder = data_byteorder,
                                             concatenate = concatenate,
                                             concatenate_registers = concatenate_registers,
                                             values=values,
@@ -858,6 +877,10 @@ class protocol_settings:
     def process_register_bytes(self, registry : dict[int,bytes], entry : registry_map_entry):
         ''' process bytes into data'''
 
+        byte_order : str = self.byteorder
+        if entry.data_byteorder: #allow map entry to override byteorder
+            byte_order = entry.data_byteorder
+
         if isinstance(registry[entry.register], tuple):
             register = registry[entry.register][0] #can bus uses tuple for timestamp
         else:
@@ -870,14 +893,15 @@ class protocol_settings:
             register = register[:entry.data_type_size]
 
         if entry.data_type == Data_Type.UINT:
-            value = int.from_bytes(register[:4], byteorder=self.byteorder, signed=False)
+            value = int.from_bytes(register[:4], byteorder=byte_order, signed=False)
         elif entry.data_type == Data_Type.INT:
-            value = int.from_bytes(register[:4], byteorder=self.byteorder, signed=True)
+            value = int.from_bytes(register[:4], byteorder=byte_order, signed=True)
         elif entry.data_type == Data_Type.USHORT:
-            value = int.from_bytes(register[:2], byteorder=self.byteorder, signed=False)
+            value = int.from_bytes(register[:2], byteorder=byte_order, signed=False)
         elif entry.data_type == Data_Type.SHORT:
-            value = int.from_bytes(register[:2], byteorder=self.byteorder, signed=True)
+            value = int.from_bytes(register[:2], byteorder=byte_order, signed=True)
         elif entry.data_type == Data_Type._16BIT_FLAGS or entry.data_type == Data_Type._8BIT_FLAGS or entry.data_type == Data_Type._32BIT_FLAGS:
+            val = int.from_bytes(register, byteorder=byte_order, signed=False)
             #16 bit flags
             start_bit : int = 0
             end_bit : int = 16 #default 16 bit
@@ -953,11 +977,20 @@ class protocol_settings:
                 # If positive, simply extract the value using the bit mask
                 value = (register >> bit_index) & bit_mask
 
-        elif entry.data_type.value > 200 or entry.data_type == Data_Type.BYTE: #bit types
+        elif entry.data_type == Data_Type.BYTE: #bit types
+            value = int.from_bytes(register[:1], byteorder=byte_order, signed=False)
+        elif entry.data_type.value > 200: #bit types
             bit_size = Data_Type.getSize(entry.data_type)
             bit_mask = (1 << bit_size) - 1  # Create a mask for extracting X bits
             bit_index = entry.register_bit
+
+
+            if isinstance(register, bytes):
+                register = int.from_bytes(register, byteorder=byte_order)
+                            
             value = (register >> bit_index) & bit_mask
+
+
         elif entry.data_type == Data_Type.HEX:
             value = register.hex() #convert bytes to hex
         elif entry.data_type == Data_Type.ASCII:
@@ -987,6 +1020,11 @@ class protocol_settings:
 
     def process_register_ushort(self, registry : dict[int, int], entry : registry_map_entry ):
         ''' process ushort type registry into data'''
+
+        byte_order : str = self.byteorder
+        if entry.data_byteorder:
+            byte_order = entry.data_byteorder
+
         if entry.data_type == Data_Type.UINT: #read uint
             if entry.register + 1 not in registry:
                 return
@@ -1075,10 +1113,10 @@ class protocol_settings:
                 bit_index = entry.register_bit
                 value = (registry[entry.register] >> bit_index) & bit_mask
         elif entry.data_type == Data_Type.HEX:
-                value = registry[entry.register].to_bytes((16 + 7) // 8, byteorder=self.byteorder) #convert to ushort to bytes
+                value = registry[entry.register].to_bytes((16 + 7) // 8, byteorder=byte_order) #convert to ushort to bytes
                 value = value.hex() #convert bytes to hex
         elif entry.data_type == Data_Type.ASCII:
-            value = registry[entry.register].to_bytes((16 + 7) // 8, byteorder=self.byteorder) #convert to ushort to bytes
+            value = registry[entry.register].to_bytes((16 + 7) // 8, byteorder=byte_order) #convert to ushort to bytes
             try:
                 value = value.decode("utf-8") #convert bytes to ascii
             except UnicodeDecodeError as e:

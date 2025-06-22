@@ -1,0 +1,2 @@
+variable name;data type;register;documented name;length;writeable;unit;values;note;
+;USHORT;15;debug;2byte;R;10mA;;Positive: charging Negative: discharging;

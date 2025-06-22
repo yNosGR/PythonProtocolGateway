@@ -11,7 +11,7 @@ variable name,data type,register,documented name,description,writable,values,uni
 ,16BIT_FLAGS,x312,Protection Flags,,,"{""b15"": ""OTD (Over Temperature Discharge) protection"", ""b14"": ""OTC (Over Temperature Charge) protection"", ""b13"": ""UTD (Under Temperature Discharge) protection"", ""b12"": ""UTC (Under Temperature Charge) protection"", ""b11"": ""System error"", ""b10"": ""Delta V Fail"", ""b7"": ""DisCharge over current"", ""b6"": ""Charge over current"", ""b5"": ""SCD (Short Circuit Discharge) protection"", ""b4"": ""Cell over voltage"", ""b3"": ""Cell under voltage"", ""b2"": ""Module over voltage"", ""b1"": ""Module under voltage"", ""b0"": ""Soft start fail""}",,
 ,16BIT_FLAGS,X312.2,Alarm Flags,,,"{""b7"": ""DisCharge over current"", ""b6"": ""Charge over current"", ""b5"": ""Cell over voltage"", ""b4"": ""Cell under voltage"", ""b3"": ""Module over voltage"", ""b2"": ""Module under voltage"", ""b1"": """", ""b0"": """", ""b15"": ""OTD (Over Temperature Discharge) protection"", ""b14"": ""OTC (Over Temperature Charge) protection"", ""b13"": ""UTD (Under Temperature Discharge) protection"", ""b12"": ""UTC (Under Temperature Charge) protection"", ""b11"": ""Delta V Fail"", ""b10"": ""Pack before turn off"", ""b9"": ""Internal communication fail"", ""b8"": """"}",,
 ,,,,,,,,
-,SHORT,x313,Average module voltage of system ,,,,0.01V,
+Battery Voltage,SHORT,x313,Average module voltage of system ,,,,0.01V,
 ,SHORT,X313.2,Total current of system,,,,0.1A,
 ,SHORT,X313.4,Maximum cell temperature,,,,0.1A,
 ,BYTE,X313.6,Average State of Charge of System,,,,%,

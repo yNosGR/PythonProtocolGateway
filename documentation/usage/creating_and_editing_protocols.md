@@ -35,7 +35,21 @@ Defines the expected data type for the register / map entry
 | 32BIT_FLAGS | four bytes split into 32 bit flags. see 16BIT_FLAGS
 | #bit | A unsigned number comprised of # of bits. for example, 3bit is a 3 bit positive number (0 to 7). 
 | ASCII | ascii text representation of data.
-| ASCII.# | for protocols with an undefined "registry" size, the length can be specified. ie: ASCII.7 will return a 7 character long string. 
+| ASCII.# | for protocols with an undefined "registry" size, the length can be specified. ie: ASCII.7 will return a 7 character long string.
+| HEX | hex text representation of data.
+
+### data type byte order
+in the case of protocols with inconsistent byte order implementations. 
+
+#### big endian
+a suffix of "_BE" can be added to a data type to ensure the entry is read with a big endian byte order
+ie: ASCII_BE
+
+#### little endian
+a suffix of "_LE" can be added to a data type to ensure the entry is read with a little endian byte order
+ie: ASCII_LE
+
+
 
 ### register
 Register defines the location or for other protocols the main command / id. 

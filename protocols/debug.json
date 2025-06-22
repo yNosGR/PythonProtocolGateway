@@ -1,0 +1,4 @@
+{
+    "reader" : "pace",
+    "batch_size": 1
+}
