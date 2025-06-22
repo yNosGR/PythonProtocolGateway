@@ -155,15 +155,40 @@ class SingleTransportGateway:
 
     def handle_bridge_message(self, message):
         """
-        Handle incoming bridge messages from other processes
+        Handle bridge messages from other transports
         """
         try:
-            if message['target_transport'] == self.__transport.transport_name:
-                self.__log.debug(f"Received bridge message for {self.__transport.transport_name}: {message['data']}")
-                # Write data to this transport
-                self.__transport.write_data(message['data'], None)
+            source_transport = message.get('source_transport')
+            target_transport = message.get('target_transport')
+            data = message.get('data')
+            source_transport_info = message.get('source_transport_info', {})
+            
+            # Check if this transport is the target
+            if target_transport == self.__transport.transport_name:
+                self.__log.debug(f"Received bridge message from {source_transport} with {len(data)} items")
+                
+                # Forward the data to this transport
+                if hasattr(self.__transport, 'write_data'):
+                    # Create a mock transport object with the source transport info
+                    class MockSourceTransport:
+                        def __init__(self, info):
+                            self.transport_name = info.get('transport_name', '')
+                            self.device_identifier = info.get('device_identifier', '')
+                            self.device_name = info.get('device_name', '')
+                            self.device_manufacturer = info.get('device_manufacturer', '')
+                            self.device_model = info.get('device_model', '')
+                            self.device_serial_number = info.get('device_serial_number', '')
+                    
+                    source_transport_obj = MockSourceTransport(source_transport_info)
+                    
+                    # Call write_data with the correct parameters
+                    self.__transport.write_data(data, source_transport_obj)
+                else:
+                    self.__log.warning(f"Transport {self.__transport.transport_name} does not support write_data")
+                    
         except Exception as err:
             self.__log.error(f"Error handling bridge message: {err}")
+            traceback.print_exc()
 
     def run(self):
         """
@@ -172,46 +197,78 @@ class SingleTransportGateway:
         self.__running = True
         self.__log.info(f"Starting single transport: {self.__transport.transport_name}")
 
-        while self.__running:
-            try:
-                # Check for bridge messages
-                if self.__bridge_queue:
-                    try:
-                        while not self.__bridge_queue.empty():
-                            message = self.__bridge_queue.get_nowait()
-                            self.handle_bridge_message(message)
-                    except:
-                        pass  # Queue is empty or other error
-
-                now = time.time()
-                if self.__transport.read_interval > 0 and now - self.__transport.last_read_time > self.__transport.read_interval:
-                    self.__transport.last_read_time = now
+        # Check if this is an output transport (no read_interval)
+        is_output_transport = (self.__transport.read_interval <= 0)
+        
+        if is_output_transport:
+            self.__log.info(f"Running output transport: {self.__transport.transport_name}")
+            # For output transports, just handle bridge messages
+            while self.__running:
+                try:
+                    # Check for bridge messages
+                    if self.__bridge_queue:
+                        try:
+                            while not self.__bridge_queue.empty():
+                                message = self.__bridge_queue.get_nowait()
+                                self.handle_bridge_message(message)
+                        except:
+                            pass  # Queue is empty or other error
                     
-                    if not self.__transport.connected:
-                        self.__transport.connect()
-                    else:
-                        info = self.__transport.read_data()
+                    time.sleep(0.1)  # Short sleep for output transports
+                    
+                except Exception as err:
+                    self.__log.error(f"Error in output transport {self.__transport.transport_name}: {err}")
+                    traceback.print_exc()
+        else:
+            # For input transports, handle both reading and bridging
+            while self.__running:
+                try:
+                    # Check for bridge messages
+                    if self.__bridge_queue:
+                        try:
+                            while not self.__bridge_queue.empty():
+                                message = self.__bridge_queue.get_nowait()
+                                self.handle_bridge_message(message)
+                        except:
+                            pass  # Queue is empty or other error
+
+                    now = time.time()
+                    if self.__transport.read_interval > 0 and now - self.__transport.last_read_time > self.__transport.read_interval:
+                        self.__transport.last_read_time = now
                         
-                        if info:
-                            self.__log.debug(f"Read data from {self.__transport.transport_name}: {len(info)} items")
-                            
-                            # Handle bridging if configured
-                            if self.__transport.bridge and self.__bridge_queue:
-                                self.__log.debug(f"Sending bridge message from {self.__transport.transport_name} to {self.__transport.bridge}")
-                                bridge_message = {
-                                    'source_transport': self.__transport.transport_name,
-                                    'target_transport': self.__transport.bridge,
-                                    'data': info
-                                }
-                                self.__bridge_queue.put(bridge_message)
+                        if not self.__transport.connected:
+                            self.__transport.connect()
                         else:
-                            self.__log.debug(f"No data read from {self.__transport.transport_name}")
+                            info = self.__transport.read_data()
+                            
+                            if info:
+                                self.__log.debug(f"Read data from {self.__transport.transport_name}: {len(info)} items")
+                                
+                                # Handle bridging if configured
+                                if self.__transport.bridge and self.__bridge_queue:
+                                    self.__log.debug(f"Sending bridge message from {self.__transport.transport_name} to {self.__transport.bridge}")
+                                    bridge_message = {
+                                        'source_transport': self.__transport.transport_name,
+                                        'target_transport': self.__transport.bridge,
+                                        'data': info,
+                                        'source_transport_info': {
+                                            'transport_name': self.__transport.transport_name,
+                                            'device_identifier': getattr(self.__transport, 'device_identifier', ''),
+                                            'device_name': getattr(self.__transport, 'device_name', ''),
+                                            'device_manufacturer': getattr(self.__transport, 'device_manufacturer', ''),
+                                            'device_model': getattr(self.__transport, 'device_model', ''),
+                                            'device_serial_number': getattr(self.__transport, 'device_serial_number', '')
+                                        }
+                                    }
+                                    self.__bridge_queue.put(bridge_message)
+                            else:
+                                self.__log.debug(f"No data read from {self.__transport.transport_name}")
 
-            except Exception as err:
-                self.__log.error(f"Error in transport {self.__transport.transport_name}: {err}")
-                traceback.print_exc()
+                except Exception as err:
+                    self.__log.error(f"Error in transport {self.__transport.transport_name}: {err}")
+                    traceback.print_exc()
 
-            time.sleep(0.7)
+                time.sleep(0.7)
 
 
 class Protocol_Gateway:
@@ -261,11 +318,12 @@ class Protocol_Gateway:
         logging.basicConfig(level=log_level)
 
         for section in self.__settings.sections():
-            if section.startswith("transport"):
-                transport_cfg = self.__settings[section]
-                transport_type      = transport_cfg.get("transport", fallback="")
-                protocol_version    = transport_cfg.get("protocol_version", fallback="")
+            transport_cfg = self.__settings[section]
+            transport_type      = transport_cfg.get("transport", fallback="")
+            protocol_version    = transport_cfg.get("protocol_version", fallback="")
 
+            # Process sections that either start with "transport" OR have a transport field
+            if section.startswith("transport") or transport_type:
                 if not transport_type and not protocol_version:
                     raise ValueError("Missing Transport / Protocol Version")
 
@@ -378,6 +436,12 @@ class Protocol_Gateway:
         """
         self.__log.info(f"Starting multiprocessing mode with {len(self.__transports)} transports")
         
+        # Separate input and output transports
+        input_transports = [t for t in self.__transports if t.read_interval > 0]
+        output_transports = [t for t in self.__transports if t.read_interval <= 0]
+        
+        self.__log.info(f"Input transports: {len(input_transports)}, Output transports: {len(output_transports)}")
+        
         # Check for bridging configuration
         has_bridging = any(transport.bridge for transport in self.__transports)
         if has_bridging:
@@ -400,17 +464,16 @@ class Protocol_Gateway:
             processes.append(process)
             self.__log.info(f"Started process for {transport.transport_name} (PID: {process.pid})")
         
-        # Monitor processes and handle cleanup
+        # Monitor processes
         try:
-            while any(process.is_alive() for process in processes):
-                # Check if any process has died unexpectedly
+            while True:
+                # Check if any process has died
                 for i, process in enumerate(processes):
-                    if not process.is_alive() and process.exitcode != 0:
+                    if not process.is_alive():
                         transport_name = self.__transports[i].transport_name
-                        self.__log.error(f"Process for {transport_name} died with exit code {process.exitcode}")
+                        self.__log.warning(f"Process for {transport_name} died, restarting...")
                         
                         # Restart the process
-                        self.__log.info(f"Restarting process for {transport_name}")
                         new_process = multiprocessing.Process(
                             target=self.run_single_transport,
                             args=(transport_name, self.config_file, bridge_queue),
@@ -423,35 +486,13 @@ class Protocol_Gateway:
                 time.sleep(5)  # Check every 5 seconds
                 
         except KeyboardInterrupt:
-            self.__log.info("Received interrupt signal, terminating processes...")
+            self.__log.info("Shutting down multiprocessing mode...")
             for process in processes:
+                process.terminate()
+                process.join(timeout=5)
                 if process.is_alive():
-                    process.terminate()
-                    process.join(timeout=5)
-                    if process.is_alive():
-                        process.kill()
-                        process.join(timeout=2)
-            
-            # Clean up the queue
-            if bridge_queue:
-                try:
-                    while not bridge_queue.empty():
-                        bridge_queue.get_nowait()
-                except:
-                    pass
-            
+                    process.kill()
             self.__log.info("All processes terminated")
-        except Exception as err:
-            self.__log.error(f"Error in multiprocessing mode: {err}")
-            traceback.print_exc()
-            
-            # Clean up processes on error
-            for process in processes:
-                if process.is_alive():
-                    process.terminate()
-                    process.join(timeout=5)
-                    if process.is_alive():
-                        process.kill()
 
 
 
