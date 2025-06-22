@@ -224,7 +224,7 @@ class Protocol_Gateway:
                 traceback.print_exc()
                 self.__log.error(err)
 
-            time.sleep(0.7) #change this in future. probably reduce to allow faster reads.
+            time.sleep(0.07) #change this in future. probably reduce to allow faster reads.
 
 
 
