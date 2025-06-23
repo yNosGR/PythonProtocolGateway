@@ -265,7 +265,7 @@ class protocol_settings:
     _log : logging.Logger = None
 
 
-    def __init__(self, protocol : str, transport_settings : "SectionProxy" = None, settings_dir : str = "protocols"):
+    def __init__(self, protocol : str, transport_settings : "SectionProxy" = None, settings_dir : str = "protocols", unique_id : str = None):
 
         #apply log level to logger
         self._log_level = getattr(logging, logging.getLevelName(logging.getLogger().getEffectiveLevel()), logging.INFO)
@@ -275,6 +275,7 @@ class protocol_settings:
         self.protocol = protocol
         self.settings_dir = settings_dir
         self.transport_settings = transport_settings
+        self.unique_id = unique_id  # Store unique identifier for this instance
 
         #load variable mask
         self.variable_mask = []
