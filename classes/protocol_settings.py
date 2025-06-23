@@ -529,7 +529,7 @@ class protocol_settings:
                 else:
                     data_type_str = row["data type"]
 
-                #check if datatype specifies byteorder 
+                #check if datatype specifies byteorder
                 if data_type_str.upper().endswith("_LE"):
                     data_byteorder = "little"
                     data_type_str = data_type_str[:-3]
@@ -986,7 +986,7 @@ class protocol_settings:
 
             if isinstance(register, bytes):
                 register = int.from_bytes(register, byteorder=byte_order)
-                            
+
             value = (register >> bit_index) & bit_mask
 
 
@@ -1096,7 +1096,7 @@ class protocol_settings:
             else:
                 flags : list[str] = []
                 if end_bit > 0:
-                    end : int = 16 if end_bit >= 16 else end_bit    
+                    end : int = 16 if end_bit >= 16 else end_bit
                     for i in range(start_bit, end):  # Iterate over each bit position (0 to 15)
                         # Check if the i-th bit is set
                         if (val >> i) & 1:

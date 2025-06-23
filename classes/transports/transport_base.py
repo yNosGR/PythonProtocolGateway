@@ -1,5 +1,5 @@
-from enum import Enum
 import logging
+from enum import Enum
 from typing import TYPE_CHECKING, Callable
 
 from classes.protocol_settings import (
@@ -62,7 +62,7 @@ class transport_base:
     device_model : str = "hotnoob"
     device_identifier : str = "hotnoob"
     bridge : str = ""
-    
+
     write_enabled : bool = False
     ''' deprecated -- use / move to write_mode'''
     write_mode : TransportWriteMode = None

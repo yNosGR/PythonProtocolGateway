@@ -140,10 +140,10 @@ class modbus_base(transport_base):
 
         self._log.info("Validating Protocol for Writing")
         self.write_enabled = False
-        
+
         # Add a small delay to ensure device is ready, especially during initialization
         time.sleep(self.modbus_delay * 2)
-        
+
         try:
             score_percent = self.validate_protocol(Registry_Type.HOLDING)
             if(score_percent > 90):
