@@ -2,7 +2,6 @@ import sys
 from configparser import SectionProxy
 from typing import TextIO
 import time
-import logging
 
 from defs.common import strtobool
 
@@ -22,7 +21,6 @@ class influxdb_out(transport_base):
     include_device_info: bool = True
     batch_size: int = 100
     batch_timeout: float = 10.0
-    force_float: bool = True  # Force all numeric fields to be floats to avoid InfluxDB type conflicts
     
     client = None
     batch_points = []
@@ -39,7 +37,6 @@ class influxdb_out(transport_base):
         self.include_device_info = strtobool(settings.get("include_device_info", fallback=self.include_device_info))
         self.batch_size = settings.getint("batch_size", fallback=self.batch_size)
         self.batch_timeout = settings.getfloat("batch_timeout", fallback=self.batch_timeout)
-        self.force_float = strtobool(settings.get("force_float", fallback=self.force_float))
         
         self.write_enabled = True  # InfluxDB output is always write-enabled
         super().__init__(settings)
@@ -106,7 +103,6 @@ class influxdb_out(transport_base):
         for key, value in data.items():
             # Check if we should force float formatting based on protocol settings
             should_force_float = False
-            unit_mod_found = None
             
             # Try to get registry entry from protocol settings to check unit_mod
             if hasattr(from_transport, 'protocolSettings') and from_transport.protocolSettings:
@@ -114,9 +110,7 @@ class influxdb_out(transport_base):
                 for registry_type in [Registry_Type.INPUT, Registry_Type.HOLDING]:
                     registry_map = from_transport.protocolSettings.get_registry_map(registry_type)
                     for entry in registry_map:
-                        # Match by variable_name (which is lowercase)
-                        if entry.variable_name.lower() == key.lower():
-                            unit_mod_found = entry.unit_mod
+                        if entry.variable_name == key:
                             # If unit_mod is not 1.0, this value should be treated as float
                             if entry.unit_mod != 1.0:
                                 should_force_float = True
@@ -130,28 +124,14 @@ class influxdb_out(transport_base):
                 # Try to convert to float first
                 float_val = float(value)
                 
-                # Always use float for InfluxDB to avoid type conflicts
-                # InfluxDB is strict about field types - once a field is created as integer,
-                # it must always be integer. Using float avoids this issue.
-                if self.force_float:
+                # If it's an integer but should be forced to float, or if it's already a float
+                if should_force_float or not float_val.is_integer():
                     fields[key] = float_val
                 else:
-                    # Only use integer if it's actually an integer and we're not forcing floats
-                    if float_val.is_integer():
-                        fields[key] = int(float_val)
-                    else:
-                        fields[key] = float_val
-                
-                # Log data type conversion for debugging
-                if self._log.isEnabledFor(logging.DEBUG):
-                    original_type = type(value).__name__
-                    final_type = type(fields[key]).__name__
-                    self._log.debug(f"Field {key}: {value} ({original_type}) -> {fields[key]} ({final_type}) [unit_mod: {unit_mod_found}]")
-                
+                    fields[key] = int(float_val)
             except (ValueError, TypeError):
                 # If conversion fails, store as string
                 fields[key] = str(value)
-                self._log.debug(f"Field {key}: {value} -> string (conversion failed)")
         
         # Create InfluxDB point
         point = {
