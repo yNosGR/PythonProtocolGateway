@@ -137,11 +137,12 @@ class Protocol_Gateway:
         logging.basicConfig(level=log_level)
 
         for section in self.__settings.sections():
-            if section.startswith("transport"):
-                transport_cfg = self.__settings[section]
-                transport_type      = transport_cfg.get("transport", fallback="")
-                protocol_version    = transport_cfg.get("protocol_version", fallback="")
+            transport_cfg = self.__settings[section]
+            transport_type      = transport_cfg.get("transport", fallback="")
+            protocol_version    = transport_cfg.get("protocol_version", fallback="")
 
+            # Process sections that either start with "transport" OR have a transport field
+            if section.startswith("transport") or transport_type:
                 if not transport_type and not protocol_version:
                     raise ValueError("Missing Transport / Protocol Version")
 
