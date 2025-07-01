@@ -178,6 +178,8 @@ class SingleTransportGateway:
                             self.device_manufacturer = info.get('device_manufacturer', '')
                             self.device_model = info.get('device_model', '')
                             self.device_serial_number = info.get('device_serial_number', '')
+                            # Add protocolSettings attribute to avoid AttributeError
+                            self.protocolSettings = None
                     
                     source_transport_obj = MockSourceTransport(source_transport_info)
                     
