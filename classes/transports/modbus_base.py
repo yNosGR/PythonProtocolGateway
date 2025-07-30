@@ -412,6 +412,14 @@ class modbus_base(transport_base):
                     value = key
                     break
 
+        #handle codes ( current_value )
+        if entry.variable_name+"_codes" in self.protocolSettings.codes:
+            codes = self.protocolSettings.codes[entry.variable_name+"_codes"]
+            for key, val in codes.items():
+                if val == current_value: #convert "string" to key value
+                    current_value = key
+                    break
+
         if not self.write_mode == TransportWriteMode.UNSAFE:
             if not self.protocolSettings.validate_registry_entry(entry, current_value):
                 return self._log.error(f"WRITE_ERROR: Invalid value in register '{current_value}'. Unsafe to write")
