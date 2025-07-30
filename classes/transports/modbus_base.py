@@ -403,22 +403,11 @@ class modbus_base(transport_base):
         #current_registers = self.read_modbus_registers(start=entry.register, end=entry.register, registry_type=registry_type)
         #current_value = current_registers[entry.register]
         current_value = info[entry.variable_name]
+        
 
         #handle codes
-        if entry.variable_name+"_codes" in self.protocolSettings.codes:
-            codes = self.protocolSettings.codes[entry.variable_name+"_codes"]
-            for key, val in codes.items():
-                if val.lower() == value: #convert "string" to key value
-                    value = key
-                    break
-
-        #handle codes ( current_value )
-        if entry.variable_name+"_codes" in self.protocolSettings.codes:
-            codes = self.protocolSettings.codes[entry.variable_name+"_codes"]
-            for key, val in codes.items():
-                if val == current_value: #convert "string" to key value
-                    current_value = key
-                    break
+        value = self.protocolSettings.get_code_by_value(entry, value, fallback=value)
+        current_value = self.protocolSettings.get_code_by_value(entry, current_value, fallback=current_value)
 
         if not self.write_mode == TransportWriteMode.UNSAFE:
             if not self.protocolSettings.validate_registry_entry(entry, current_value):
