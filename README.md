@@ -69,11 +69,11 @@ solark_v1.1 = SolarArk 8/12K Inverters
 For a complete list of protocols, explore:
 [/Protocols](/protocols)
 
-more details on these protocols can be found in the documentation:
-[/Documentation](/documentation)
-
-For a more complete list of tested devices & protocols
+For a more complete list of tested devices & protocols:
 [Tested Devices & Protocols](documentation/usage/devices_and_protocols.csv)
+
+more advanced details can be found in the documentation:
+[/Documentation](/documentation)
 
 ### run as script
 ```
