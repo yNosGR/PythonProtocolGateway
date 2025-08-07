@@ -31,7 +31,7 @@ Alternatively, connect a usb adapter to your rs485 / can port with appropriate w
 
 ### install as homeassistant add-on
 checkout:
-https://github.com/felipecrs/python-protocol-gateway-hass-addon/tree/master
+[PPG HASS Addon](https://github.com/HotNoob/python-protocol-gateway-hass-addon/tree/master)
 
 ### install requirements
 ```
@@ -120,8 +120,8 @@ once installed; the device should show up on home assistant under mqtt
 
 ```Settings -> Devices & Services -> MQTT ```
 
-more docs on setting up mqtt here: https://www.home-assistant.io/integrations/mqtt
-i probably might have missed something. ha is new to me.
+more docs on setting up mqtt here: 
+https://www.home-assistant.io/integrations/mqtt
 
 #### connect mqtt on home assistant with external mqtt broker
 [HowTo Connect External MQTT Broker To HomeAssistant](https://www.youtube.com/watch?v=sP2gYLYQat8)
@@ -132,8 +132,6 @@ update files and restart script / service
 git pull
 systemctl restart protocol_gateway.service
 ```
-
-**if you installed this when it was called growatt2mqtt-hotnoob or invertermodbustomqtt, you'll need to reinstall if you want to update. **
 
 ### Unknown Status MQTT Home Assistant 
 If all values appear as "Unknown"
