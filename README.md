@@ -9,7 +9,8 @@
 [![CodeQL](https://github.com/HotNoob/PythonProtocolGateway/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/HotNoob/PythonProtocolGateway/actions/workflows/github-code-scanning/codeql)
 
 For advanced configuration help, please checkout the documentation :)
-https://github.com/HotNoob/PythonProtocolGateway/tree/main/documentation
+
+[/documentation](/documentation)
 
 # Python Protocol Gateway
 
@@ -18,8 +19,9 @@ Configuration is handled via a small config files.
 In the long run, Python Protocol Gateway will become a general purpose protocol gateway to translate between more than just modbus and mqtt. 
 
 For specific device installation instructions please checkout the documentation:
-Growatt, EG4, Sigineer, SOK, PACE-BMS
-https://github.com/HotNoob/PythonProtocolGateway/tree/main/documentation
+Growatt, EG4, Sigineer, SOK, PACE-BMS, Sigineer, ect...
+
+[/documentation/devices](/documentation/devices)
 
 # General Installation
 Connect the USB port on the inverter into your computer / device. This port is essentially modbus usb adapter.
@@ -173,6 +175,6 @@ donations / sponsoring this repo would be appreciated.
 - ``` docker pull hotn00b/pythonprotocolgateway ``` 
 - ```docker run -v $(pwd)/config.cfg:/app/config.cfg --device=/dev/ttyUSB0 hotn00b/pythonprotocolgateway```
 
-See [config.cfg.example](https://github.com/HotNoob/PythonProtocolGateway/blob/main/config.cfg.example)
+See [config.cfg.example](/config.cfg.example)
 
 [Docker Image Repo](https://hub.docker.com/r/hotn00b/pythonprotocolgateway)
