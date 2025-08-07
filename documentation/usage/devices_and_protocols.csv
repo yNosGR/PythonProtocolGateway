@@ -1,0 +1,2 @@
+Brand,Model,Protocol,Transport,ReadMe
+Growatt,SPF 12000T DVM-US MPV,V0.14,ModBus,https://github.com/HotNoob/PythonProtocolGateway/blob/main/documentation/devices/Growatt.md
