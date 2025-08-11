@@ -1,15 +1,14 @@
-import sys
-import os
-import json
-import pickle
-from configparser import SectionProxy
-from typing import TextIO
-import time
 import logging
+import os
+import pickle
+import time
+from configparser import SectionProxy
+
+from influxdb import InfluxDBClient
 
 from defs.common import strtobool
 
-from ..protocol_settings import Registry_Type, WriteMode, registry_map_entry
+from ..protocol_settings import Registry_Type
 from .transport_base import transport_base
 
 
@@ -205,7 +204,6 @@ class influxdb_out(transport_base):
         self._log.info("influxdb_out connect")
         
         try:
-            from influxdb import InfluxDBClient
             
             # Create InfluxDB client with timeout settings
             self.client = InfluxDBClient(
