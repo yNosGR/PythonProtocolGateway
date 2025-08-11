@@ -53,7 +53,7 @@ class json_out(transport_base):
             return
 
         self._log.info(f"write data from [{from_transport.transport_name}] to json_out transport")
-        self._log.info(data)
+        self._log.debug(data)
 
         # Prepare the JSON output structure
         output_data = {}
