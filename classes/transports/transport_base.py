@@ -1,5 +1,5 @@
-from enum import Enum
 import logging
+from enum import Enum
 from typing import TYPE_CHECKING, Callable
 
 from classes.protocol_settings import (
@@ -62,7 +62,7 @@ class transport_base:
     device_model : str = "hotnoob"
     device_identifier : str = "hotnoob"
     bridge : str = ""
-    
+
     write_enabled : bool = False
     ''' deprecated -- use / move to write_mode'''
     write_mode : TransportWriteMode = None
@@ -98,7 +98,7 @@ class transport_base:
             self.device_name = settings.get(["device_name", "name"], fallback=self.device_manufacturer+"_"+self.device_serial_number)
             self.bridge = settings.get("bridge", self.bridge)
             self.read_interval = settings.getfloat("read_interval", self.read_interval)
-            self.max_precision = settings.getint(["max_precision", "precision"], self.max_precision)
+            self.max_precision = settings.getint(["max_precision", "precision"], fallback=self.max_precision)
             if "write_enabled" in settings or "enable_write" in settings:
                 self.write_enabled = settings.getboolean(["write_enabled", "enable_write"], self.write_enabled)
 
@@ -110,7 +110,7 @@ class transport_base:
 
             #load a protocol_settings class for every transport; required for adv features. ie, variable timing.
             #must load after settings
-            self.protocol_version = settings.get("protocol_version")
+            self.protocol_version = settings.get("protocol_version", fallback='')
             if self.protocol_version:
                 self.protocolSettings = protocol_settings(self.protocol_version, transport_settings=settings)
 

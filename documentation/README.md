@@ -32,6 +32,7 @@ This README file contains an index of all files in the documentation directory.
 
 - [modbus_rtu_to_modbus_tcp.md](usage/configuration_examples/modbus_rtu_to_modbus_tcp.md) -  ModBus RTU to ModBus TCP
 - [modbus_rtu_to_mqtt.md](usage/configuration_examples/modbus_rtu_to_mqtt.md) -  ModBus RTU to MQTT
+- [influxdb_example.md](usage/configuration_examples/influxdb_example.md) -  ModBus RTU to InfluxDB
 
 **3rdparty**
 

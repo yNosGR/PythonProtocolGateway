@@ -27,6 +27,7 @@ from configparser import ConfigParser, NoOptionError
 
 from classes.protocol_settings import protocol_settings, registry_map_entry
 from classes.transports.transport_base import transport_base
+from defs.common import strtobool
 
 __logo = """
 
@@ -49,30 +50,56 @@ __logo = """
 
 class CustomConfigParser(ConfigParser):
     def get(self, section, option, *args, **kwargs):
+        fallback = None
+
+        if "fallback" in kwargs: #override kwargs fallback, for manually handling here
+            fallback = kwargs["fallback"]
+            kwargs["fallback"] = None
+
         if isinstance(option, list):
-            fallback = None
-
-            if "fallback" in kwargs: #override kwargs fallback, for manually handling here
-                fallback = kwargs["fallback"]
-                kwargs["fallback"] = None
-
             for name in option:
-                value = super().get(section, name, *args, **kwargs)
+                try:
+                    value = super().get(section, name, *args, **kwargs)
+                except NoOptionError:
+                    value = None
+
                 if value:
                     break
-
-            if not value:
-                value = fallback
-
-            if value is None:
-                raise NoOptionError(option[0], section)
         else:
-            value = super().get(section, option, *args, **kwargs)
+            try:
+                value = super().get(section, option, *args, **kwargs)
+            except NoOptionError:
+                value = None
+
+        if not value: #apply fallback
+            value = fallback
+
+        if value is None:
+            if isinstance(option, list):
+                raise NoOptionError(option[0], section)
+            else:
+                raise NoOptionError(option, section)
 
         if isinstance(value, int):
             return value
 
+        if isinstance(value, float):
+            return value
+
         return value.strip() if value is not None else value
+
+    def getint(self, section, option, *args, **kwargs): #bypass fallback bug
+        value = self.get(section, option, *args, **kwargs)
+        return int(value) if value is not None else None
+
+    def getfloat(self, section, option, *args, **kwargs): #bypass fallback bug
+        value = self.get(section, option, *args, **kwargs)
+        return float(value) if value is not None else None
+    
+    def getboolean(self, section, option, *args, **kwargs): #bypass fallback bug
+        value = self.get(section, option, *args, **kwargs)
+        return strtobool(value)
+
 
 class Protocol_Gateway:
     """
@@ -121,11 +148,12 @@ class Protocol_Gateway:
         logging.basicConfig(level=log_level)
 
         for section in self.__settings.sections():
-            if section.startswith("transport"):
-                transport_cfg = self.__settings[section]
-                transport_type      = transport_cfg.get("transport", fallback="")
-                protocol_version    = transport_cfg.get("protocol_version", fallback="")
+            transport_cfg = self.__settings[section]
+            transport_type      = transport_cfg.get("transport", fallback="")
+            protocol_version    = transport_cfg.get("protocol_version", fallback="")
 
+            # Process sections that either start with "transport" OR have a transport field
+            if section.startswith("transport") or transport_type:
                 if not transport_type and not protocol_version:
                     raise ValueError("Missing Transport / Protocol Version")
 
@@ -208,24 +236,18 @@ class Protocol_Gateway:
                 traceback.print_exc()
                 self.__log.error(err)
 
-            time.sleep(0.7) #change this in future. probably reduce to allow faster reads.
+            time.sleep(0.07) #change this in future. probably reduce to allow faster reads.
 
 
 
 
 
 
-def main():
+def main(args=None):
     """
     main method
     """
-    print(__logo)
 
-    ppg = Protocol_Gateway(args.config)
-    ppg.run()
-
-
-if __name__ == "__main__":
     # Create ArgumentParser object
     parser = argparse.ArgumentParser(description="Python Protocol Gateway")
 
@@ -241,4 +263,11 @@ if __name__ == "__main__":
     # If '--config' is provided, use it; otherwise, fall back to the positional or default.
     args.config = args.config if args.config else args.positional_config
 
+    print(__logo)
+
+    ppg = Protocol_Gateway(args.config)
+    ppg.run()
+
+
+if __name__ == "__main__":
     main()

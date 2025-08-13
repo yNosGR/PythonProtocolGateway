@@ -37,10 +37,20 @@ For ambigious sensitive protocols/transports such as ModBus, a safety mechanism 
 
 In order to write, the configuration csv file must be at least 90% verifiable. Alternatively a manual verification method will be implemented in the future. This mainly entails that the current values in the writeable register ( probably holding ), be within the value range specified in the csv. 
 
-Finally, to enable writing for a transport:
-```
-write_enabled = true
-```
+
+#### Write Safety Modes
+``` write = false ```
+default value; writting is disabled
+
+``` write = true ```
+default "write" behaviour; includes all validations / safties.
+
+```write = relaxed ``` ( dangerous - make sure you have the right protocol )
+ skips the initial ( score % ) / bulk validation
+
+``` write = unsafe ``` ( very dangerous )
+skips all write safties. 
+
 
 Finally, to write, "read" data on any bridged transport. In most cases this will likely be MQTT. 
 
@@ -158,6 +168,212 @@ the writable topics are given a prefix of "/write/"
 
 ## MQTT Write
 by default mqtt writes data from the bridged transport. 
+
+# JSON Output
+```
+###required
+transport = json_out
+```
+
+```
+###optional
+output_file = stdout
+pretty_print = true
+append_mode = false
+include_timestamp = true
+include_device_info = true
+```
+
+## JSON Output Configuration
+
+### output_file
+Specifies the output destination. Use `stdout` for console output or provide a file path.
+```
+output_file = stdout
+output_file = /var/log/inverter_data.json
+```
+
+### pretty_print
+Whether to format JSON with indentation for readability.
+```
+pretty_print = true
+```
+
+### append_mode
+Whether to append to file instead of overwriting. Useful for log files.
+```
+append_mode = false
+```
+
+### include_timestamp
+Whether to include Unix timestamp in the JSON output.
+```
+include_timestamp = true
+```
+
+### include_device_info
+Whether to include device metadata (identifier, name, manufacturer, etc.) in the JSON output.
+```
+include_device_info = true
+```
+
+## JSON Output Format
+
+The JSON output includes the following structure:
+
+```json
+{
+  "device": {
+    "identifier": "device_serial",
+    "name": "Device Name",
+    "manufacturer": "Manufacturer",
+    "model": "Model",
+    "serial_number": "Serial Number",
+    "transport": "transport_name"
+  },
+  "timestamp": 1703123456.789,
+  "data": {
+    "variable_name": "value",
+    "another_variable": "another_value"
+  }
+}
+```
+
+## JSON Output Use Cases
+
+1. **Debugging**: Output data to console for real-time monitoring
+2. **Logging**: Write data to log files for historical analysis
+3. **Integration**: Feed data to other systems that consume JSON
+4. **Data Collection**: Collect data for analysis or backup purposes
+
+# InfluxDB Output
+```
+###required
+transport = influxdb_out
+host = 
+port = 
+database = 
+```
+
+```
+###optional
+username = 
+password = 
+measurement = device_data
+include_timestamp = true
+include_device_info = true
+batch_size = 100
+batch_timeout = 10.0
+```
+
+## InfluxDB Output Configuration
+
+### host
+InfluxDB server hostname or IP address.
+```
+host = localhost
+host = 192.168.1.100
+```
+
+### port
+InfluxDB server port (default: 8086).
+```
+port = 8086
+```
+
+### database
+Database name. Will be created automatically if it doesn't exist.
+```
+database = solar
+database = inverter_data
+```
+
+### username
+Username for authentication (optional).
+```
+username = admin
+```
+
+### password
+Password for authentication (optional).
+```
+password = your_password
+```
+
+### measurement
+InfluxDB measurement name for storing data points.
+```
+measurement = device_data
+measurement = inverter_metrics
+```
+
+### include_timestamp
+Whether to include timestamp in data points.
+```
+include_timestamp = true
+```
+
+### include_device_info
+Whether to include device metadata as InfluxDB tags.
+```
+include_device_info = true
+```
+
+### batch_size
+Number of data points to batch before writing to InfluxDB.
+```
+batch_size = 100
+```
+
+### batch_timeout
+Maximum time (seconds) to wait before flushing batch.
+```
+batch_timeout = 10.0
+```
+
+## InfluxDB Data Structure
+
+The InfluxDB output creates data points with the following structure:
+
+### Tags (if `include_device_info = true`)
+- `device_identifier`: Device serial number (lowercase)
+- `device_name`: Device name
+- `device_manufacturer`: Device manufacturer
+- `device_model`: Device model
+- `device_serial_number`: Device serial number
+- `transport`: Source transport name
+
+### Fields
+All device data values are stored as fields. The transport automatically converts:
+- Numeric strings to integers or floats
+- Non-numeric strings remain as strings
+
+### Time
+- Uses current timestamp in nanoseconds (if `include_timestamp = true`)
+- Can be disabled for custom timestamp handling
+
+## InfluxDB Output Use Cases
+
+1. **Time-Series Data Storage**: Store historical device data for analysis
+2. **Grafana Integration**: Visualize data with Grafana dashboards
+3. **Data Analytics**: Perform time-series analysis and trending
+4. **Monitoring**: Set up alerts and monitoring based on data thresholds
+
+## Example InfluxDB Queries
+
+```sql
+-- Show all measurements
+SHOW MEASUREMENTS
+
+-- Query recent data
+SELECT * FROM device_data WHERE time > now() - 1h
+
+-- Query specific device
+SELECT * FROM device_data WHERE device_identifier = '123456789'
+
+-- Aggregate data
+SELECT mean(value) FROM device_data WHERE field_name = 'battery_voltage' GROUP BY time(5m)
+```
 
 # ModBus_RTU
 ```

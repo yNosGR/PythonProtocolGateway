@@ -38,7 +38,7 @@ class modbus_rtu(modbus_base):
 
         if "baud" in self.protocolSettings.settings:
             self.baudrate = strtoint(self.protocolSettings.settings["baud"])
-
+        #todo better baud/baudrate alias handling
         self.baudrate = settings.getint("baudrate", self.baudrate)
 
         address : int = settings.getint("address", 0)
@@ -57,6 +57,8 @@ class modbus_rtu(modbus_base):
         if client_str in modbus_base.clients:
             self.client = modbus_base.clients[client_str]
             return
+
+            self._log.debug(f"Creating new client with baud rate: {self.baudrate}")
 
         if "method" in init_signature.parameters:
             self.client = ModbusSerialClient(method="rtu", port=self.port,
@@ -102,4 +104,5 @@ class modbus_rtu(modbus_base):
 
     def connect(self):
         self.connected = self.client.connect()
+        self._log.debug(f"Modbus rtu connected: {self.connected}")
         super().connect()
