@@ -1,0 +1,4 @@
+variable name,data type,register,documented name,unit,values,writable,note
+,ASCII,2~6,Serial Number,,,,
+,ASCII,7~9,Firmware Version,,,,
+,1bit,229.b4,Smart Load 1 Grid On ,,,,uncertain of accuracy

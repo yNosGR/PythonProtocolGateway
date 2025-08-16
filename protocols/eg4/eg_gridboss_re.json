@@ -1,0 +1,6 @@
+{
+    "transport" : "modbus_rtu",
+    "baud" : 19200,
+    "batch_size" : 40,
+    "note" : "the base of this is from https://github.com/galets/eg4-modbus-monitor/tree/master / https://raw.githubusercontent.com/galets/eg4-modbus-monitor/refs/heads/master/src/registers-gridboss.yaml"
+}
