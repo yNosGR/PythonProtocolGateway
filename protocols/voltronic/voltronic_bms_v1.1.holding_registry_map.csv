@@ -75,8 +75,8 @@ variable name,data type,register,documented_name,description,writable,values,uni
 ,,79,Discharging_OC_alarm,,RW,,A,
 ,,80,Discharging_OC_protection,,RW,,A,
 ,,81,Discharging_OC_protection_delay_time,,RW,1~255,0.1S,
-,,82,Discharging_OC-2_protection,,RW,,A,
-,,83,Discharging_OC-2_protection_delay_time,,RW,1~255,0.025S,
+,,82,Discharging_OC2_protection,,RW,,A,
+,,83,Discharging_OC2_protection_delay_time,,RW,1~255,0.025S,
 ,SHORT,84,Charging_OT_alarm,,RW,,0.1?,
 ,SHORT,85,Charging_OT_protection,,RW,,0.1?,
 ,SHORT,86,Charging_OT_release_protection,,RW,,0.1?,
@@ -100,14 +100,14 @@ variable name,data type,register,documented_name,description,writable,values,uni
 ,SHORT,104,Environment_UT_release_protection,,RW,,0.1?,
 ,,105,Balance_start_cell_voltage,,RW,,mV,
 ,,106,Balance_start_delta_voltage,,RW,,mV,
-,,107,Pack_full-charge_voltage,,RW,,mV,
-,,108,Pack_full-charge_current,,RW,,mA,
+,,107,Pack_full_charge_voltage,,RW,,mV,
+,,108,Pack_full_charge_current,,RW,,mA,
 ,,109,Cell_sleep_voltage,,RW,,mV,
 ,,110,Cell_sleep_delay_time,,RW,,min,
 ,,111,Short_circuit_protect_delay_time,,RW,,25uS,Max 500uS
 ,,112,SOC_alarm_threshold,,RW,0~100,,
-,,113,Charging_OC-2_protection,,RW,,A,
-,,114,Charging_OC-2_protection_delay_time,,RW,1~255,0.025S,
+,,113,Charging_OC2_protection,,RW,,A,
+,,114,Charging_OC2_protection_delay_time,,RW,1~255,0.025S,
 ,ASCII,0150~0159,Version_information,,RW,,,
 ,ASCII,0160~0169,Model_SN,,RW,,,BMS Manufacturer
 ,ASCII,0170~0179,PACK_SN,,RW,,,PACK Manufacturer
@@ -159,4 +159,4 @@ variable name,data type,register,documented_name,description,writable,values,uni
 ,,230,Battery_cycle_counts,,R,Cyc.,,
 ,,231,Warning_flag,,R,Hex,,See description-1
 ,,232,Protection_flag,,R,Hex,,See description-2
-,,233,Status/Fault_flag,,R,Hex,,See description-3
+,,233,Status_Fault_flag,,R,Hex,,See description-3

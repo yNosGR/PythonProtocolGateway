@@ -1,7 +1,7 @@
 variable name;data type;writable;register;documented name;description;values;unit;notes
 ;;;0;version;Version number (628 - representing V6.2.8);600~700;;
-;;;1;channel a-h current;Current A-H (01-08) channel range - unsigned number (value 40, representing 40A);40~120;;
-;;;2;channel i-p current;Current I-P (09-16) channel range, unsigned number (value 40, representing 40A);40~120;;
+;;;1;channel a to h current;Current A-H (01-08) channel range - unsigned number (value 40, representing 40A);40~120;;
+;;;2;channel i to p current;Current I-P (09-16) channel range, unsigned number (value 40, representing 40A);40~120;;
 ;byte;WD;3;address;Low byte is setThe standby address (01H-FFH)  00 is the broadcast address.;1~255;;
 ;4bit;WD;3.b8;buad rate; the high byte has a low four-bit baud rate (0-8);"{""0"": ""9600"", ""1"": ""1200"", ""2"": ""2400"", ""3"": ""4800"", ""4"": ""9600"", ""5"": ""19200"", ""6"": ""38400"", ""7"": ""57600"", ""8"": ""115200""}";;
 ;4bit;WD;3.b12;check bit; and the high byte has a high four-bit check bit (0-3).;"{""0"" : ""N, 8, 1"", ""1"" : ""E, 8, 1"", ""2"" : ""O, 8, 1"", ""3"": ""N, 8, 2""}";;
