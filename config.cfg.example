@@ -27,6 +27,7 @@ bridge = transport.1
 # Device identity (for MQTT topic structure or HA discovery)
 manufacturer = HDHK
 model = HDHK 16CH AC
+name = HDHK 1
 # Optional; auto-detect if omitted
 serial_number = HDHK777
 

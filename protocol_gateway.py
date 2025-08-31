@@ -126,7 +126,12 @@ class Protocol_Gateway:
         self.__log.addHandler(handler)
 
         self.config_file = os.path.dirname(os.path.realpath(__file__)) + "/growatt2mqtt.cfg"
-        newcfg = os.path.dirname(os.path.realpath(__file__)) + "/"+ config_file
+        if config_file:
+            if os.path.isabs(config_file):
+                newcfg = config_file
+            else:
+                newcfg = os.path.dirname(os.path.realpath(__file__)) + "/" + config_file
+
         if os.path.isfile(newcfg):
             self.config_file = newcfg
 
