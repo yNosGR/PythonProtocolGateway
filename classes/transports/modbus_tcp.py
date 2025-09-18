@@ -32,7 +32,7 @@ class modbus_tcp(modbus_base):
         if "slave" in inspect.signature(ModbusTcpClient.read_holding_registers).parameters:
             self.pymodbus_slave_arg = "slave"
 
-        client_str = self.host+"("+str(self.port)+")"
+        client_str = self.host+"-tcp-"+str(self.port)
         #check if client is already initialied
         if client_str in modbus_base.clients:
             self.client = modbus_base.clients[client_str]

@@ -13,15 +13,25 @@ class modbus_udp(transport_base):
     client : ModbusUdpClient
 
     def __init__(self, settings : SectionProxy, protocolSettings : protocol_settings = None):
+        super().__init__(settings, protocolSettings=protocolSettings)
+
         self.host = settings.get("host", "")
         if not self.host:
             raise ValueError("Host is not set")
 
         self.port = settings.getint("port", self.port)
 
-        self.client = ModbusUdpClient(host=self.host, port=self.port, timeout=7, retries=3)
+        client_str = self.host+"-udp-"+str(self.port)
+        #check if client is already initialied
+        if client_str in modbus_base.clients:
+            self.client = modbus_base.clients[client_str]
+            return
 
-        super().__init__(settings, protocolSettings=protocolSettings)
+        self.client = ModbusUdpClient(host=self.host, port=self.port, timeout=7, retries=3)
+        
+        #add to clients
+        modbus_base.clients[client_str] = self.client
+
 
     def read_registers(self, start, count=1, registry_type : Registry_Type = Registry_Type.INPUT, **kwargs):
         if registry_type == Registry_Type.INPUT:
