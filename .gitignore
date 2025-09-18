@@ -33,3 +33,6 @@ holding_registry.json
 dist/*
 build/*
 python_protocol_gateway.egg-info/*
+
+#ignore inflxudb files
+inflxudb_backlog/*
