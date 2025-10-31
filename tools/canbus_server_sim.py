@@ -9,7 +9,8 @@ from pathlib import Path
 
 
 
-VCAN_IFACE = 'vcan0'
+VCAN_IFACE : str = 'vcan0'
+VCAN_BUSTYPE : str = 'socketcan'
 vcan_messages = []
 
 
@@ -25,7 +26,9 @@ def load_candump_file(filepath):
                 continue
 
             try:
-                can_id_str, data_str = line.split('#')
+                can_data = line.split(' ')[-1]
+
+                can_id_str, data_str = can_data.split('#')
                 can_id = int(can_id_str, 16)
                 data = bytes.fromhex(data_str)
 
@@ -42,7 +45,7 @@ def load_candump_file(filepath):
 
 
 def emulate_device():
-    bus = can.interface.Bus(channel='vcan0', bustype='socketcan')
+    bus = can.interface.Bus(channel=VCAN_IFACE, interface=VCAN_BUSTYPE)
 
     while True:
         for msg in vcan_messages:
@@ -53,7 +56,7 @@ def emulate_device():
                 print("Message NOT sent")
             time.sleep(1)  # Send message every 1 second
 
-def setup_vcan(interface=VCAN_IFACE):
+def setup_vcan(interface=VCAN_IFACE) -> bool:
     try:
         # Load vcan kernel module
         subprocess.run(['sudo', 'modprobe', 'vcan'], check=True)
@@ -65,8 +68,11 @@ def setup_vcan(interface=VCAN_IFACE):
         subprocess.run(['sudo', 'ip', 'link', 'set', 'up', interface], check=True)
 
         print(f"Virtual CAN interface {interface} is ready.")
+        return True
     except subprocess.CalledProcessError as e:
         print(f"Failed to set up {interface}: {e}")
+    
+    return False
 
 
 def cleanup_vcan(interface=VCAN_IFACE):
@@ -84,7 +90,17 @@ signal.signal(signal.SIGINT, lambda sig, frame: sys.exit(0))
 
 
 if __name__ == "__main__":
-    setup_vcan()
-    vcan_messages = load_candump_file("candump.txt")
+
+    filename = "candump.txt"
+    if len(sys.argv) > 1:
+        filename = sys.argv[1]
+    else:
+        print("Usage: python canbus_server_sim.py <candump_file>")
+        print("Using default 'candump.txt' file.")
+
+    if not setup_vcan():
+        VCAN_BUSTYPE = 'virtual'
+
+    vcan_messages = load_candump_file(filename)
     emulate_device()
 

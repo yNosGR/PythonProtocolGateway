@@ -1,0 +1,2 @@
+variable name,data type,register,documented name,description,writable,values,unit,note
+,USHORT,x311,Battery charge voltage ,,,41~63,0.1V,

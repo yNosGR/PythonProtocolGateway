@@ -36,3 +36,6 @@ python_protocol_gateway.egg-info/*
 
 #ignore inflxudb files
 inflxudb_backlog/*
+
+#ignore dumps for dev
+tools/dumps/*
