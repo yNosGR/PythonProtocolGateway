@@ -1,6 +1,6 @@
 variable name,data type,register,documented name,description,writable,values,unit,note
-,16BIT_FLAGS ,x359,Protection,,,,,
-,16BIT_FLAGS ,x359.2,Alarm,,,,,
+,16BIT_FLAGS ,x359,Protection,,,"{""b1"": ""cell or module over voltage"", ""b2"": ""cell or module under voltage"", ""b3"": ""cell over temperature"", ""b4"": ""cell under temperature"", ""b7"": ""discharge over current"", ""b8"": ""charge over current"", ""b11"": ""system error""}",,
+,16BIT_FLAGS ,x359.2,Alarm,,,"{""b1"": ""cell or module high voltage"", ""b2"": ""cell or module low voltage"", ""b3"": ""cell high temperature"", ""b4"": ""cell low temperature"", ""b7"": ""discharge high current"", ""b8"": ""charge high current"", ""b11"": ""Internal communication fail""}",,
 ,BYTE,x359.4,Module Numbers,,,,,
 ,BYTE,x359.5,P,,,,,
 ,BYTE,x359.6,N,,,,,
