@@ -70,7 +70,8 @@ class mqtt(transport_base):
         password = settings.get("pass", fallback="")
 
         if not username:
-            raise ValueError("User is not set")
+            warnings.warn("MQTT Username is empty", RuntimeWarning)
+
 
         if not password:
             warnings.warn("MQTT Password is empty", RuntimeWarning)
@@ -82,7 +83,8 @@ class mqtt(transport_base):
         else:
             self.client = MQTTClient()
 
-        self.client.username_pw_set(username=username, password=password)
+        if username:
+            self.client.username_pw_set(username=username, password=password)
 
         self.client.on_connect = self.on_connect
         self.client.on_message = self.client_on_message
