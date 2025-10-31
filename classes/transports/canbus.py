@@ -127,9 +127,9 @@ class canbus(transport_base):
             return state == "up"
 
     def start_loop(self):
-        self.read_bus(self.bus)
+        self.read_bus()
 
-    def read_bus(self, bus : can.BusABC):
+    def read_bus(self):
         ''' read canbus asynco and store results in cache'''
         msg = None #fix scope bug
 

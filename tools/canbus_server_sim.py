@@ -45,7 +45,7 @@ def load_candump_file(filepath):
 
 
 def emulate_device():
-    bus = can.interface.Bus(channel=VCAN_IFACE, interface=VCAN_BUSTYPE)
+    bus = can.interface.Bus(channel=VCAN_IFACE, interface=VCAN_BUSTYPE, bitrate=500000)
 
     while True:
         for msg in vcan_messages:
