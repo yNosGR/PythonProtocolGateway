@@ -15,3 +15,4 @@ SOK,48v100ah,pace_bms_v1.3 ,ModBus,https://github.com/HotNoob/PythonProtocolGate
 SolArk,Untested,solark_v1.1 ,ModBus,
 SRNE,ASF48100S200-H ,srne_v3.9,ModBus,
 SRNE,HF2430U60-100 ,srne_v3.9,ModBus,
+Next Power,Victor NM-Eco-6.2KW Plus,next_power_victor_nm_re,CanBus,https://github.com/HotNoob/PythonProtocolGateway/issues/113
